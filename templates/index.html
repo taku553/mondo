@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!--文字エンコーディング-->
+    <meta charset="UTF-8">
+    <!--webページが画面幅に合わせて表示-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--ページタイトル-->
+    <title>クイズアプリ</title>
+    <!--cssにリンク-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!--フォントリンク-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&display=swap" rel="stylesheet">
+    <!--ページのURL-->
+    <a href="index.html"></a>
+
+    <!--フォントの宣言-->
+    <style>
+        @font-face {
+            font-family: 'GenSekiGothic JP H';
+            src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'HOT-Gyoshokk-R';
+            src: url("{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}") format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+
+</head>
+<body>
+    <main class="main">
+        <div class="q_container">
+            <!--クイズタイトル-->
+            <div class="q_title">
+                <span class="qt1_furigana">ながれじゃく</span>
+                <h1 class="q_title1">流れ鵲</h1>
+            </div>
+            <!--クイズの概要-->
+            <div class="q_explain">
+
+                <div class="rounded_border">
+                    <p class="q_ex">歴史の流れに焦点を当てる選択式クイズ。歴史全体の流れを知り、理解を深めましょう。</p>
+                </div>
+                <!--クイズの遊び方&注意点-->
+                <div class="how_to">
+                    <!--ポップアップを表示するためのボタン-->
+                    <button id="howto_button">
+                        <span class="how_to_f">遊び方</span>
+                    </button>
+                </div>
+
+                <!--スタートボタン-->
+                <div class="start_b">
+                    <button id="start_b_f">
+                        <span class="start_b_location">スタート</span>
+                    </button>
+
+                </div>
+            </div>
+
+        <!--ポップアップコンテンツ-->
+        <!--ポップアップを作るためのコンテナをdivタグで作る-->
+        <div id="popup" class="popup">
+            <!--ポップアップウィンドウ-->
+            <div class="popup_window">
+                <!--ポップアップのタイトル-->
+                <span class="popup_how_to">遊び方</span>
+                <!--ポップアップを閉じる「バツボタン」を乗算記号を使って表示-->
+                <span class="close"><img src="{{ url_for('static', filename='fonts/close/Close.svg') }}" alt="close" class="close_f" /></span>
+                <!--ウィンドウ内のコンテンツ-->
+                <div class="popup_contents">
+                    <!--スライド-->
+                    <div class="slide active">
+                        <ul class="howto_t">
+                            <li class="ht_t_style">歴史の流れに焦点を当てた選択式クイズです。</li>
+                            <li class="ht_t_style">一問に対し、計四つ選択肢が表示されるので、当てはまるものを選択してください。
+                                「決定ボタン」で選択肢をアクティブにし、「次へ」ボタンを押すと次の問題へ進みます。
+                            </li>
+                            <li class="ht_t_style">選択は決定ボタンで自由に変えることができます。
+                                一度選んで、違うかもしれないと思ったら、焦らず選択肢を変えてください。
+                                「次へ」ボタンを押すと次の問題へ移り、前の問題の選択肢を変えることはできないので注意してください。
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="slide">
+                        <ul class="howto_t">
+                            <li class="ht_t_style">問題は計十問。全問終了後、結果画面に移ります。
+                                何問正解できたかチェックしてみてください。</li>
+                            <li class="ht_t_style">名称の表記は、基本、英語による一般的な発音に基づいて表記しています。
+                                過去に習った表記と異なる場合もあるかもしれませんが、内容そのものに違いはありません。
+                                </li>
+                            <li class="ht_t_style">最後まで諦めずに解いてみてください。</li>
+                        </ul>
+                    </div>
+                    <div class="slide">
+                        <ul class="howto_t">
+                            <li class="ht_t_style">クイズ画面中にページをリロードすると、未解答だった問題がそのまま表示されます。クイズを最初からやり直したい場合は画面下の「ホームに戻る」ボタンを押してください。</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Navigation -->
+                        <div class="navigation">
+                            <span class="prev"><img src="{{ url_for('static', filename='fonts/arrow/slider_arrow.svg') }}" alt="Previous" class="arrow-left" /></span>
+                            <span class="next"><img src="{{ url_for('static', filename='fonts/arrow/slider_arrow.svg') }}" alt="Next" class="arrow-right" /></span>
+
+                            <div class="dots">
+                                <span class="dot active"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                        </div>
+                </div>
+                      
+
+            </div>
+        </div>
+        
+    </main>
+    
+    <!-- 外部JavaScriptファイルをリンク -->
+    <!--jquery-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <!--jquery easing-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js" integrity="sha512-0QbL0ph8Tc8g5bLhfVzSqxe9GERORsKhIn1IrpxDAgUsbBGz/V7iSav2zzW325XGd1OMLdL4UiqRJj702IeqnQ==" crossorigin="anonymous"></script>
+    <!--自作-->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+
+</body>
+</html>

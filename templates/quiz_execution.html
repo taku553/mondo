@@ -1,0 +1,56 @@
+<!--問題画面のhtml-->
+<!DOCTYPE html>
+<html>
+<head>
+    <!--文字エンコーディング-->
+    <meta charset="UTF-8">
+    <!--webページが画面幅に合わせて表示-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--ページタイトル-->
+    <title>遷移後のクイズ画面</title>
+    <!--cssにリンク-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!--ページのURL-->
+    <a href="quiz_execution.html"></a>
+    <style>
+        @font-face {
+            font-family: 'GenSekiGothic JP H';
+            src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <!--クイズのコンテナ-->
+        <section>
+            <div class="q_e_container">
+                <heading class="num" id="current-question-number">第1問</heading>
+                <!--問題文-->
+                <div id="question"></div>
+                <!-- 選択肢のコンテナ -->
+                <div id="choices_container">
+                    <!-- 選択肢はjavascriptで動的に作成。クラス名は"choice"。 -->
+                </div>
+                <!--「次へ」ボタン-->
+                <button id="next-button">次へ</button>
+            </div>
+        </section>
+        <!--遷移ボタンのコンテナ-->
+        <section>
+            <div class="q_window_transition">
+                <h4 class="q_window_restart_f">クイズやり直すにはこちら</h4>
+                <button id="q_window_restart_b">やり直す</button>
+                <h4 class="q_window_home_f">ホームへ戻るにはこちら</h4>
+                <button id="q_window_home_b">ホームへ戻る</button>
+            </div>
+        </section>
+    </main>
+
+
+     <!-- 外部JavaScriptファイルをリンク -->
+     <!--自作-->
+     <script src="{{ url_for('static', filename='quiz_exe.js') }}"></script>
+</body>
+</html>

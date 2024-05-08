@@ -1,0 +1,638 @@
+/*フォントの設定*/
+.shippori-mincho-b1-semibold {
+  font-family: "Shippori Mincho B1", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+
+/*メイン画面のスタイリング*/
+
+
+/*メイン画面を囲むコンテナの設定*/
+.main{
+    margin: 0 auto; /* 外側の余白 */
+    width: 100%; /*メインコンテナの横幅を画面サイズと等しく*/
+    height: 100%; /*メインコンテナの縦幅を画面サイズと等しく*/
+    background-color: coral;
+}
+
+/*クイズ部分全体の設定*/
+.q_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around; /* 各要素が均等なスペースで配置されるようにします */
+    align-items: center; /* 水平方向の中央揃え */
+    width: 80%; /*クイズ部分全体の幅を画面幅の70%に*/
+    max-width: 1000px;
+    margin: 0 auto; /*クイズ部分全体を中央に配置*/
+    background-color: khaki;
+}
+
+/*タイトルとスタートボタン要素の高さ*/
+.q_title, .start_b {
+    flex: 1; /* flex-grow, flex-shrink, flex-basis のショートハンドで、要素が等しい高さを持つようにします */
+  }
+
+/*スタート画面のスタイリング*/
+
+/*タイトル文字の枠*/
+.q_title {
+    width: 100%;
+    position: relative;
+    text-align: center;
+    background-color: yellowgreen;
+}
+
+/*タイトルの振り仮名*/
+span.qt1_furigana {
+  display: block;
+  font-family: "Shippori Mincho B1", serif;
+  font-weight: normal;
+  font-size: calc(0.1em + 1vw);
+  letter-spacing: calc(0.01em + 0.5vw);
+  background-color: yellow;
+}
+
+/*タイトル文字の枠に対する位置とデザイン*/
+.q_title1{
+    width: 100%;
+    position: relative;
+    margin: 0 auto;
+    font-size: calc(0.8em + 2vw);
+    font-family: "Shippori Mincho B1", serif;
+    font-style: normal;
+    letter-spacing: calc(0.3em + 1vw);
+    background-color: aqua;
+}
+
+
+/*説明枠*/
+.q_explain{
+    width: 100%;
+    height: 60%;
+    align-self: center; /* この要素だけ水平方向の中央揃えを行います */
+}
+
+/*黒枠の角丸長方形*/
+.rounded_border {
+    border: 0.3vw solid black; /* 黒色の直線の罫線 */
+    border-radius: calc(2px + 1vw);    /* 角の丸み */
+    margin: calc(0.8em + 1vw) 0;       /* 外側の余白 */
+    padding: calc(0.4em + 1vw) calc(0.2em + 1vw);           /* 内側の余白 */
+    background-color: #ffff;   /*枠内の背景色*/
+}
+
+/*説明文のスタイル*/
+.q_ex{
+    margin: 0 auto;
+    font-family: osaka, sans-serif;
+    font-size: calc(0.5em + 1vw);
+}
+
+/*遊び方ボタンのコンテナ*/
+.how_to{
+    display: flex; /* フレックスコンテナに設定 */
+    justify-content: center; /* 水平方向の中央揃え */
+    align-items: center; /* 垂直方向の中央揃え */
+    width: 60%;
+    height: 100%;
+    margin: 20px auto 0 auto;
+    background-color: blueviolet;
+}
+
+/*遊び方ボタンの枠*/
+#howto_button{
+    border: 0.3vw solid black; /* 黒色の直線の罫線 */
+    border-radius: 1.5vw;     /* 角の丸み */
+    padding: 1.5vw 10vw;      /* 内側の余白 */
+    margin: 0 auto;         /* 外側の余白 */
+    background-color: #ffff;   /*枠内の背景色*/
+    cursor: pointer;   /* ホバー時にポインタカーソルを表示 */
+}
+
+/*遊び方ボタンのフォント*/
+.how_to_f{
+    display: inline-block;
+    font-family: 'GenSekiGothic JP H', sans-serif;
+    font-size: calc(0.6em + 1vw);
+    background-color: aqua;
+}
+
+/* ポップアップ画面のスタイリング */
+/*ポップアップのコンテナ*/
+.popup {
+    display: none;  /*ボタンを押すまでは非表示*/
+    position: fixed;  /*コンテナをビューポートに対して固定位置に配置*/
+    z-index: 1;  /*コンテナをページ上の要素から前面に表示する。z-indexはページ上の要素の積み重ね順序を制御する*/
+    left: 0;  /*コンテナの水平位置をビューポートの左端に配置*/
+    top: 0;  /*コンテナの垂直位置をビューポートの上端に配置*/
+    width: 100%;  /*コンテナの幅をビューポート全体まで*/
+    height: 100%;  /*コンテナの高さをビューポート全体まで*/
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);  /*ボタンを押した時の背景の画面全体を黒の半透明にする*/
+}
+
+/* ポップアップウィンドウ */
+.popup_window {
+    background-color: #ffff;
+    margin: 10% auto;
+    border: none;
+    width: 90%;
+    height: 70%;
+    min-width: 100px;
+    max-width: 1000px;
+    min-height: 80px;
+    max-height: 800px;
+    position: relative;
+}
+
+/*ポップアップウィンドウ内の「遊び方」*/
+.popup_how_to{
+        position: absolute; /* 要素の位置を絶対位置に設定 */
+        top: 10px; /* 上端からの距離を0に設定 */
+        left: 0;
+        right: 0;
+        text-align: center;
+        /*margin: 0 auto;*/ /* 左右のマージンを自動で均等に設定して中央に配置 */
+        /*transform: translateX(-50%);*/  /* 横方向の中央揃えのための調整 
+        /* その他のスタイルは維持 */
+        font-size: calc(1.3em + 1vw);
+        font-weight: 900;
+        background-color: #ffde59;
+}
+
+/* 閉じるボタンのスタイリング */
+.close img{
+    position: absolute;
+    top: 20px;
+    left: 90%;
+    right: 0;
+    width: calc(20px + 1vw);
+    height: calc(20px + 1vw);
+    text-align: center;
+    color: #aaa;
+    font-size: calc(1em + 1vw);
+    font-weight: bold;
+    background-color: chartreuse;
+}
+
+/*閉じるボタンをホバーした時のスタイリング*/
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+/*ウィンドウ内の黒枠*/
+.popup_contents{
+    position: relative; /* ポップアップウィンドウ内で相対位置付けします */
+    /*長方形の左上隅をポップアップウィンドウの中心に配置します。*/
+    top: 50%;  /*ポップアップウィンドウの左上隅を起点に、長方形枠の左上端をウェイドウ高さの半分だけ移動。*/
+    left: 50%;  /*ポップアップウィンドウの左上隅を起点に、長方形枠の左上端をウェイドウ幅の半分だけ移動。*/
+    transform: translate(-50%, -50%); /* これで長方形が中央に配置されます */
+    width: calc(100% - 40px); /* ポップアップより小さいサイズに調整します */
+    height: calc(100% - 150px); /* ポップアップより小さいサイズに調整します */
+    border: 0.3vw solid black; /* 黒色の直線の罫線 */
+    border-radius: 8px;     /* 角の丸み */
+    padding: 10px; /* 追加または更新 */
+    margin: 0 auto; /* 必要に応じて追加または更新 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/*スライダー*/  
+/* Additional CSS */
+.slide {
+    display: none; /* Hide slides by default */
+    position: absolute;
+    width: 95%;
+    top: 0;
+    left: 0;
+    margin: auto;
+    padding-top: 10px;
+    padding-left: 15px;
+    background-color: green;
+  }
+  
+  .slide.active {
+    display: block; /* Show active slide */
+    z-index: 1;
+  }
+
+  
+  ul.howto_t {
+    list-style-position: outside;
+    width: auto;
+    height: 100%;
+    margin: 10px 6px 0 15px;
+    padding: 0;
+    font-family: osaka, sans-serif;
+    font-size: calc(0.8em + 1vw);
+}
+
+li.ht_t_style{
+    margin: 0;
+    padding: 0 0 15px 0;
+    font-size: calc(0.6em + 1vw);
+    letter-spacing: calc(1px + 0.1vw);
+}
+
+@media (min-width: 1000px){
+    li.ht_t_style{
+        font-size: 20px;
+    }
+}
+
+
+  .navigation {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: 90%;
+    position: absolute;
+    left: 0;
+    background-color: yellow;
+  }
+  
+  .arrow-left {
+    transform: rotate(180deg); /* 左向き矢印用に180度回転させる */
+  }
+  
+  /*.arrow-right {
+     右向き矢印用のスタイルはそのままで良い 
+  } */ 
+  
+  .prev img,
+  .next img {
+    width: calc(1em + 1vw);
+    height: auto;
+    cursor: pointer;
+  }
+
+  .prev{
+    position: absolute;
+    left: 15%;
+  }
+
+  .next{
+    position: absolute;
+    right: 15%;
+  }
+  
+  .dots {
+    display: flex;
+    margin-bottom: calc(0.4em + 1vw);
+  }
+  
+  .dot {
+    width: calc(10px + 0.6vw);
+    height: calc(10px + 0.6vw);
+    margin: 0 calc(4px + 1vw);
+    background-color: #dcdcdc;
+    border-radius: 50%;
+    display: block;
+    cursor: pointer;
+  }
+  
+  .dot.active {
+    background-color: black;
+  }
+  
+
+/*スタートボタンのコンテナ*/
+.start_b{
+    display: flex; /* フレックスコンテナに設定 */
+    justify-content: center; /* 水平方向の中央揃え */
+    align-items: center; /* 垂直方向の中央揃え */
+    width: 100%;
+    height: 100%;
+    margin: 20px auto 0 auto;
+    background-color: yellowgreen;
+}
+
+/* スタートボタン枠と文字 */
+#start_b_f{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(9em + 13vw);
+    height: 10%;
+    font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
+    font-family: 'GenSekiGothic JP H', sans-serif;
+    background-color: #ffde59; /* 黄色の背景 */
+    border: none;
+    padding: 2vw; /* レスポンシブなパディング */
+    border-radius: 1.5vw;
+    cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
+}
+
+
+
+/*------------クイズ出題画面のスタイリング:quiz_execution.html--------------*/
+
+/*クイズのコンテナ*/
+.q_e_container{
+  width: 100vw;
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background-color: beige;
+}
+
+/*設問数*/
+.num{
+  width: auto;
+  height: auto;
+  margin: 5% auto 4% 10%;
+  padding: 0;
+  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-size: calc(0.9em + 1vw);
+  background-color: blueviolet;
+}
+
+/*問題文*/
+#question{
+  width: calc(80% + 1vw);
+  margin: 0 auto 2% auto;
+  height: auto;
+  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-size: calc(0.8em + 1vw);
+  background-color: yellow;
+}
+/*グリッドのコンテンアを中央に配置*/
+#choices_container {
+    display: flex; /* フレックスボックスを最初に設定しコンテナを画面の中央に配置 */
+    flex-wrap: wrap;
+    gap: 20px;
+    width: calc(80% + 1vw);
+    min-height: 100px;
+    height: auto;
+    margin: 0 auto;
+    padding: 0;
+    background-color: orange; /*フレックスボックスがどのように適用されたのか見る*/ 
+  }
+
+/*ボタン機能付き角丸長方形のスタイリング*/
+.choice {
+  z-index: 1;
+  flex: 1 1 calc(40% - 20px);
+  height: auto;
+  margin: 0;
+  padding: calc(0.5em + 1vw);
+  border-radius: 10px;
+  border: 2px solid black; /* 枠線設定 */
+  font-family: 'ヒラギノ明朝 ProN', 'Hiragino Mincho ProN', sans-serif;
+  font-size: calc(0.8em + 1vw);
+  color: black;
+}
+
+/*アクティブ化した選択肢ボタンの色変更*/
+.choice.active{
+  background-color: black;
+  color: #fff;
+}
+
+/*ポップアップのモーダル*/
+.backdrop{
+  z-index: 1;  /*コンテナをページ上の要素から前面に表示する。z-indexはページ上の要素の積み重ね順序を制御する*/
+  position: fixed;  /*コンテナをビューポートに対して固定位置に配置*/
+  left: 0;  /*コンテナの水平位置をビューポートの左端に配置*/
+  top: 0;  /*コンテナの垂直位置をビューポートの上端に配置*/
+  width: 100%;  /*コンテナの幅をビューポート全体まで*/
+  height: 100%;  /*コンテナの高さをビューポート全体まで*/
+  background-color: rgba(0,0,0,0.5);  /*ボタンを押した時の背景の画面全体を黒の半透明にする*/
+}
+
+.popup_window_q{
+  z-index: 2;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 10% auto;
+  border: none;
+  width: 80%;
+  height: 60%;
+  min-width: 100px;
+  max-width: 1000px;
+  min-height: 80px;
+  max-height: 800px;
+  position: fixed;
+  background-color: #fff;
+}
+
+/*ポップアップ内のテキスト*/
+.popup-choice-text{
+  width: 85%;
+  margin: 5% auto;
+  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-size: calc(0.9em + 1vw);
+}
+
+/*決定ボタン*/
+#confirm-button{
+  align-self: center;
+  width: calc(9em + 1vw);
+  border: none;
+  border-radius: 8px;
+  margin: 0 auto 2em auto; /* 外側の余白 */
+  padding: 0.6em 0;
+  cursor: pointer;   /* ホバー時にポインタカーソルを表示 */
+  background-color: #eb0e0e;
+}
+
+/*決定ボタンのテキスト*/
+.confirm-b-f{
+  text-align: center;
+  font-size: calc(1em + 0.7vw);
+  font-family: 'osaka', sans-serif;
+  color: #fff;
+}
+
+
+/* 選択肢をアクティブにする決定ボタン */
+#submit-button{
+  width: 80%;
+  height: 5%;
+  margin: 20px  auto 0 auto;
+  padding: 0;
+}
+
+/*次へボタン*/
+#next-button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30%;
+  margin: 20px auto 0 auto;
+  font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+  background-color: #ffde59; /* 黄色の背景 */
+  border: none;
+  padding: 2.5vw 2vw; /* レスポンシブなパディング */
+  border-radius: 1.5vw;
+  cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
+}
+
+/*遷移ボタンのコンテナ*/
+.q_window_transition{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/*再挑戦ボタンを示すテキスト*/
+.q_window_restart_f{
+  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+}
+/*再挑戦ボタンのスタイリング*/
+#q_window_restart_b{
+  width: calc(9em + 13vw);
+  height: 10%;
+  font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+  background-color: #ffde59; /* 黄色の背景 */
+  border: none;
+  padding: 3vw; /* レスポンシブなパディング */
+  border-radius: 1.5vw;
+  cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
+}
+
+/*ホームへ戻るボタンを示すテキスト*/
+.q_window_home_f{
+  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+  margin-top: 3em;
+}
+/*ホームへ戻るボタンのスタイリング*/
+#q_window_home_b{
+  width: calc(9em + 13vw);
+  height: 10%;
+  font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+  background-color: #ffde59; /* 黄色の背景 */
+  border: none;
+  padding: 3vw; /* レスポンシブなパディング */
+  border-radius: 1.5vw;
+  cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
+}
+
+/*------------結果画面のスタイリング:result.html--------------*/
+
+/*「結果」見出しのスタイリング*/
+.result_f{
+  text-align: center;
+  font-size: calc(1.5em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+}
+
+/*正答数テキストのスタイリング*/
+#correct-answers{
+  text-align: center;
+  font-size: calc(1em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+}
+
+/*解説文のスタイリング*/
+
+/*タイトル*/
+.explanation_title{
+  text-align: center;
+  font-family: 'osaka', sans-serif;
+  font-size: calc(1.3em + 1vw);
+  margin-bottom: 5%;
+  background-color: aqua;
+}
+
+/*全体を囲むコンテナ*/
+#explanations{
+  width: auto;
+  height: auto;
+  background-color: yellowgreen;
+}
+
+/*それぞれの解説ブロック*/
+.question-and-explanation {
+  margin-bottom: calc(2em + 1vw);
+}
+
+/*問題番号*/
+.question-number{
+  width: calc(85% + 1vw);
+  margin: 0 auto 3% auto;
+  font-family: 'osaka', sans-serif;
+  font-size: calc(1em + 1vw);
+  background-color: pink;
+}
+
+/*問題文*/
+.question_t {
+  width: calc(85% + 1vw);
+  margin: 0 auto 5% auto;
+  height: auto;
+  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-size: calc(0.8em + 1vw);
+  background-color: yellow;
+}
+
+/*解説文*/
+.explanation {
+  width: calc(85% + 1vw);
+  margin: 0 auto;
+  height: auto;
+  font-family:'osaka', serif;
+  font-size: calc(0.8em + 1vw);
+  background-color: orange;
+}
+
+
+/*遷移ボタンのコンテナ*/
+.transition{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/*再挑戦ボタンを示すテキスト*/
+.restart_f{
+  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+}
+/*再挑戦ボタンのスタイリング*/
+#restart_b{
+  width: calc(9em + 13vw);
+  height: 10%;
+  font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+  background-color: #ffde59; /* 黄色の背景 */
+  border: none;
+  padding: 3vw; /* レスポンシブなパディング */
+  border-radius: 1.5vw;
+  cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
+}
+
+/*ホームへ戻るボタンを示すテキスト*/
+.home_f{
+  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+  margin-top: 3em;
+}
+/*ホームへ戻るボタンのスタイリング*/
+#home_b{
+  width: calc(9em + 13vw);
+  height: 10%;
+  font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: 'GenSekiGothic JP H', sans-serif;
+  background-color: #ffde59; /* 黄色の背景 */
+  border: none;
+  padding: 3vw; /* レスポンシブなパディング */
+  border-radius: 1.5vw;
+  cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
+}

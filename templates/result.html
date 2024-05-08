@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--文字エンコーディング-->
+    <meta charset="UTF-8">
+    <!--webページが画面幅に合わせて表示-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--ページタイトル-->
+    <title>結果画面</title>
+    <!--cssにリンク-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!--ページのURL-->
+    <a href="result.html"></a>
+    
+    <!--フォントの宣言-->
+    <style>
+        @font-face {
+            font-family: 'GenSekiGothic JP H';
+            src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'HOT-Gyoshokk-R';
+            src: url("{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}") format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    
+</head>
+<body>
+    <h1 class="result_f">結果</h1>
+    <!-- Flaskから渡された正答数と総問題数を表示 -->
+    <div id="correct-answers">
+        <p>{{ total }}問中、{{ correct }}問正解</p>
+    </div>
+    <div id="explanations">
+        <h3 class="explanation_title">解説</h3>
+        {% for q in answered_questions %}
+        <div class="question-and-explanation">
+            <!-- 問題番号を表示 -->
+            <div class="question-number">
+                第{{ loop.index }}問
+            </div>
+            
+            <p class="question_t">Q. {{ q.text }}</p>
+            <p class="explanation">A. {{ q.explanation }}</p>
+        </div>
+        {% endfor %}
+      </div>
+
+    <div class="transition">
+        <h4 class="restart_f">クイズへの再挑戦はこちら</h4>
+        <button id="restart_b">もう一度挑戦する</button>
+        <h4 class="home_f">ホームへ戻るにはこちら</h4>
+        <button id="home_b">ホームへ戻る</button>
+    </div>
+    
+
+    <script src="{{ url_for('static', filename='result.js') }}"></script>
+</body>
+</html>
