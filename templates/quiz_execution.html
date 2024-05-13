@@ -1,15 +1,17 @@
 <!--問題画面のhtml-->
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <!--文字エンコーディング-->
     <meta charset="UTF-8">
     <!--webページが画面幅に合わせて表示-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!--ページタイトル-->
-    <title>遷移後のクイズ画面</title>
+    <title>クイズ</title>
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- フォントをプリロード -->
+    <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
     <!--ページのURL-->
     <a href="quiz_execution.html"></a>
     <style>
@@ -18,6 +20,7 @@
             src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
             font-weight: normal;
             font-style: normal;
+            font-display: swap; /* フォールバックフォントで即表示し、利用可能になればスワップ */
         }
     </style>
 </head>

@@ -1,4 +1,4 @@
-/// quiz_exe.js
+// quiz_exe.js
 
 // アクティブな選択肢を保持する変数（グローバルスコープで宣言）
 let choiceId = null;
@@ -6,6 +6,8 @@ let choiceId = null;
 totalQuestionsの値をsubmitAnswer関数の外部から取得した後にtotal_questionsを保存し、
 submitAnswer関数で使用させるのが目的 */
 let totalQuestions;
+// ページロード時に一度だけ要素を取得してグローバル変数に保存
+let nextButton;
     // --------- 各種関数 ---------
 
 // 非同期処理を開始する前にロード状態を表す
@@ -29,10 +31,47 @@ function setDisabledState(choiceElement, isDisabled) {
     }
 }
 
+/*質問画面表示のタイミングでDOMコンテンツを読み込むイベントリスナー
+質問idを取得する関数"getAndDisplayQuestion()"と、「次へ」ボタン要素の取得、および
+ボタンクリック時に解答データを送信する関数"setupNextButtonListener();"をそれぞれ呼び出す役目を担う
+*/
 document.addEventListener('DOMContentLoaded', () => {
-    // ページがロードされた場合、現在の質問を取得・表示する。リロード時も同じ
+    nextButton = document.getElementById('next-button');  // ボタン要素を取得
+    // '次へ'ボタンを有効化
+    nextButton.disabled = false;
+    if (!nextButton) {
+        console.error('Next button not found');
+        return;
+    }
+    
+    /* 「次へ」ボタンに対し、クリックすると解答データをサーバーへ送信する関数"submitAnswer"
+    を呼び出す目的の関数*/
+    setupNextButtonListener();
+    // ページのロード時に画面に表示される質問を取得・表示関数
     getAndDisplayQuestion();
 });
+
+// 「次へ」ボタンに解答データを送信するイベントリスナーを設定
+function setupNextButtonListener() {
+    nextButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+        if (choiceId === null) {
+            alert('選択肢が選ばれていません');
+            return;
+        }
+
+        // 質問要素からquestionIdを取得
+        const questionElement = document.getElementById('question');
+        const questionId = questionElement.getAttribute('data-question-id');
+
+        try {
+            await submitAnswer(choiceId, nextButton, questionId);
+        } catch (error) {
+            console.error('解答の送信中にエラーが発生しました:', error);
+            alert('解答の送信に失敗しました。ネットワークの接続を確認して、再度試してください。');
+        }
+    });
+}
 
 // 1. 問題データの取得と表示：
 // 非同期リクエストで問題をサーバーから取得し、結果を関数"displayQuestion"に渡す関数
@@ -123,33 +162,6 @@ function displayQuestion(questionData) {
         choicesContainer.appendChild(choiceElement);
     });
 
-    // '次へ'ボタンを有効化
-    document.getElementById('next-button').disabled = false;
-
-    // '次へ'ボタンのイベントリスナーを設定
-    const nextButton = document.getElementById('next-button');
-    nextButton.disabled = false;
-    nextButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-        if (choiceId === null) {
-            alert('選択肢が選ばれていません');
-            return;
-        }
-
-        // 質問要素からquestionIdを取得
-        const questionElement = document.getElementById('question');
-        const questionId = questionElement.getAttribute('data-question-id');
-
-        // ここで nextButton は event.target から取得する必要がある
-        // const nextButton = event.target;
-
-        try {
-            await submitAnswer(choiceId, nextButton, questionId);
-        } catch (error) {
-            console.error('解答の送信中にエラーが発生しました:', error);
-            alert('解答の送信に失敗しました。ネットワークの接続を確認して、再度試してください。');
-        }
-    });
 }
 
 // 各選択肢をコンテナに追加し、イベントリスナーを設定
@@ -182,6 +194,7 @@ function createChoiceElement(choice, index) {  // 取得した選択肢データ
 
     return choiceElement;
 }
+
 
 
 // ユーザーが選択肢をクリックしたときにポップアップを表示する関数
@@ -282,6 +295,8 @@ function setActiveChoice(selectedChoiceId) {
 
 // 解答データを送信するsubmitAnswer関数の定義、目的は解説文を正しく表示するため
 async function submitAnswer(choiceId, nextButton, questionId) {
+    console.log('questionId in submitAnswer:', questionId, 'Type:', typeof questionId);
+    console.log('activeChoice in submitAnswer:', choiceId, 'Type:', typeof choiceId);
     try {
         const response = await fetch('http://127.0.0.1:5000/submit_answer', {
             method: 'POST',
@@ -289,8 +304,8 @@ async function submitAnswer(choiceId, nextButton, questionId) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                questionId: questionId,
-                activeChoice: choiceId,
+                questionId: parseInt(questionId),
+                activeChoice: parseInt(choiceId),
             }),
         });
 
@@ -307,12 +322,17 @@ async function submitAnswer(choiceId, nextButton, questionId) {
         if (data.result) {
             // サーバーからのレスポンスでクイズの終了を確認
             if (data.isQuizFinished) {
+                // beforeunloadイベント（ページリロード時の動作に関するイベントリスナー）を解除
+                window.onbeforeunload = null;
                 // 結果画面へリダイレクト
                 window.location.href = '/result';
             } else {
                 // 次の問題を表示する前に、次の問題インデックスを反映
                 getAndDisplayQuestion();
             }
+        } else {
+            console.error('Unexpected response from server:', data);
+            alert('解答の処理中にエラーが発生しました。再度試してください。');
         }
     } catch (error) {
             console.error('解答の送信中にエラーが発生しました:', error);
@@ -354,3 +374,12 @@ function resetQuiz(callback) {
         })
         .catch(error => console.error('クイズのリセット中にエラー:', error));
 }
+
+/* ページリロードした時にブラウザからのデフォルトメッセージを表示させるイベントリスナー*/
+
+// リロードボタンクリック関数を起動させるイベントリスナー
+window.onbeforeunload = function(event) {
+    // メッセージを設定
+    event.returnValue = 'ページをリロードすると、解答途中の質問から表示されます。'
+    return event.returnValue;
+};

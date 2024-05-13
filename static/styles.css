@@ -337,8 +337,8 @@ li.ht_t_style{
 
 /*クイズのコンテナ*/
 .q_e_container{
-  width: 100vw;
-  height: 60vh;
+  width: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   background-color: beige;
@@ -484,6 +484,7 @@ li.ht_t_style{
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-top: calc(3em + 1vw);
 }
 
 /*再挑戦ボタンを示すテキスト*/
@@ -522,6 +523,7 @@ li.ht_t_style{
   border-radius: 1.5vw;
   cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
+
 
 /*------------結果画面のスタイリング:result.html--------------*/
 

@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <!--文字エンコーディング-->
     <meta charset="UTF-8">
     <!--webページが画面幅に合わせて表示-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!--ページタイトル-->
-    <title>結果画面</title>
+    <title>結果</title>
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- フォントをプリロード -->
+    <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
+    <link rel="preload" href="{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}" as="font" type="font/otf" crossorigin="anonymous">
     <!--ページのURL-->
     <a href="result.html"></a>
     
@@ -19,12 +22,14 @@
             src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
             font-weight: normal;
             font-style: normal;
+            font-display: swap; /* フォールバックフォントで即表示し、利用可能になればスワップ */
         }
         @font-face {
             font-family: 'HOT-Gyoshokk-R';
             src: url("{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}") format('opentype');
             font-weight: normal;
             font-style: normal;
+            font-display: swap;
         }
     </style>
     
@@ -57,7 +62,7 @@
         <button id="home_b">ホームへ戻る</button>
     </div>
     
-
+    <!--自作-->
     <script src="{{ url_for('static', filename='result.js') }}"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 dataset_path = os.path.join(project_root, 'py', 'dataset.csv')
 
 # CSVファイルからデータを読み込む
-questions = []
+questions = [] # 辞書型：questions
 with open(dataset_path, 'r', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for index, row in enumerate(reader): # enumerateを使用してインデックスを追加
@@ -44,7 +44,8 @@ with open(dataset_path, 'r', encoding='utf-8') as csvfile:
             {'id': 2, 'text': row['選択肢2']},
             {'id': 3, 'text': row['選択肢3']},
             {'id': 4, 'text': row['選択肢4']}
-        ]    
+        ]
+        # 整数型：correct_choice_id
         correct_choice_id = next((i + 1 for i, choice in enumerate(choices) if choice['text'] == row['正解']), None)
         explanation = row['解説']
         questions.append({
@@ -57,7 +58,8 @@ with open(dataset_path, 'r', encoding='utf-8') as csvfile:
 
 TOTAL_QUESTIONS = 2  # 問題総数
 
-# render_temlpate関数を使い、フロントエンドとバックエンドの連携、再利用可能なコンポーネントを作成する
+# render_temlpate関数を使い、フロントエンドとバックエンドの連携
+# 再利用可能なコンポーネントを作成する
 
 # 例外が発生した場合のグローバルハンドラー
 @app.errorhandler(Exception)
@@ -85,12 +87,18 @@ def quiz():
         session['current_question_index'] = 0
     # 画面に表示された未回答の質問リストを初期化
     if 'current_question' not in session:
+        # None：session['current_question']
         session['current_question'] = None
+    # 解答済みの質問数を初期化
+    if 'answered_question_count' not in session:
+        session['answered_question_count'] = 0
     # 解答済みの質問リストを初期化
     if 'answered_questions' not in session:
+        # リスト型：session['answered_questions']
         session['answered_questions'] = []
     # 正答だった質問リストを初期化
     if 'correct_answers' not in session:
+        # 整数型：session['correct_answers']
         session['correct_answers'] = 0
     
     if not session['current_question']:
@@ -120,7 +128,13 @@ def get_random_question():
     current_index = session['current_question_index']
 
     # 未回答の質問を取得
-    unanswered_questions = [q for q in questions if q['id'] not in session['answered_questions']]
+    # セッションからanswered_questionsリストを取得しそのうちのquestion_idのみ取り出してsetに変換
+    # session.get('answered_questions', [])は、answered_questionsキーが存在しない場合に
+    # 空リストを返すようになっている
+    answered_question_ids = set(aq['question_id'] for aq in session.get('answered_questions', []))
+    # questionsリストから、question_idがanswered_question_idsセットに含まれないものだけを抽出
+    # して、unanswered_questionsリストを作成
+    unanswered_questions = [q for q in questions if q['id'] not in answered_question_ids]
     
     # 未回答の質問がない場合、クイズ終了
     if not unanswered_questions:
@@ -153,11 +167,23 @@ def get_random_question():
 def submit_answer():
     # リクエストデータをロギング
     data = request.json
+    # 整数型：question_id
+    question_id = data['questionId']
     logger.debug('Received data: %s', data)
+    print('question_id in submit_answer:', question_id)
+    # 解答済みの質問数を増分
+    session['answered_question_count'] += 1
 
-    # questionIdとchoiceIdの値が適切か確認するデバックプリント
+    # questionIdの値が適切か確認するデバックプリント
     print(f"Received questionId: {question_id}, type: {type(question_id)}")
-    print(f"Received activeChoiceId: {active_choice_id}, type: {type(active_choice_id)}")
+
+     # データ型確認
+    if not isinstance(question_id, int):
+        # エラー処理
+        return jsonify({'error': 'Invalid data type question_id'}), 400
+
+    # question_idを整数に変換
+    # question_id = int(question_id)
 
     # questionIdがquestions配列のインデックス範囲内にあるか検証する
     if question_id < 0 or question_id >= len(questions) or question_id not in [q['id'] for q in questions]:
@@ -168,22 +194,27 @@ def submit_answer():
 
 
     # jsで定義したグローバル変数を割り当てるキー名
-    try:
-        active_choice_id = data['activeChoice']
-    except ValueError:
-        logger.error('Invalid active choice ID: %s', data['activeChoice'])
-        return jsonify({'error': 'Invalid active choice ID'}), 400
-
-    # リクエストデータから'questionId'を取得し、対応する質問を探す
-    question_id = data['questionId']
-    question = next((q for q in questions if q['id'] == question_id), None)
+    # 整数型：active_choice_id
+    active_choice_id = data['activeChoice']
+    # choiceIdの値が適切か確認するデバックプリント
+    print(f"Received activeChoiceId: {active_choice_id}, type: {type(active_choice_id)}")
+    if active_choice_id is None:
+        logger.error('activeChoice key is missing in the request data')
+        return jsonify({'error': 'activeChoice key is missing'}), 400
     
-    if question is None:
-        return jsonify({'error': 'Invalid question ID'}), 400
-
+     # データ型確認
+    if not isinstance(active_choice_id, int):
+        # エラー処理
+        return jsonify({'error': 'Invalid data type active_choice_id'}), 400
 
     # インデックスとして質問を取得
-    question = questions[question_id]
+    question = next((q for q in questions if q['id'] == question_id), None)
+    if question is None:
+        return jsonify({'error': 'Invalid question ID'}), 400
+    # "question = questions[question_id]"の記述はquestion_id整数に変換し
+    # questionsリストから直接質問を取得しようとするものだが、リストの要素が辞書型なので
+    # 整数の添字アクセスはできない。よってquestion_idは整数のまま使用し
+    # questionsリストから質問を探すようにする。
     
     if 'correct_answers' not in session:
         session['correct_answers'] = 0  # セッションに正答数を初期化、変数は"correct_answersに設定"
@@ -192,18 +223,20 @@ def submit_answer():
     session['current_question_index'] += 1
 
     # 正誤判定
-    result = 'correct' if int(active_choice_id) == question['correct_choice_id'] else 'incorrect'
+    if question is not None:
+        # 整数型：result　整数型：current_choice_id
+        result = 'correct' if active_choice_id == question['correct_choice_id'] else 'incorrect'
+    else:
+        return jsonify({'error': 'Invalid question'}), 400
+    
     if result == 'correct':
         session['correct_answers'] += 1  # 正答数を増分
-    # 解答済みの質問IDを追加
-    session['answered_questions'].append(question_id)
+    
     # 現在の質問をクリア
     session['current_question'] = None
 
-    # ユーザーが回答した質問のIDをセッションに記録する
-    if 'answered_questions' not in session:
-        session['answered_questions'] = []  # キーが存在しない場合はリストを初期化
-
+    
+    # 現在の質問の解答データをリストに追加
     session['answered_questions'].append({
         'question_id': question_id,
         'result': result,
@@ -216,7 +249,8 @@ def submit_answer():
     print(f"Updated answered_questions: {session['answered_questions']}")    
 
     # クイズの終了条件を判定
-    is_quiz_finished = len(session['answered_questions']) >= TOTAL_QUESTIONS
+    # session['answered_questions']を使うことで実際に表示された質問数
+    is_quiz_finished = session['answered_question_count'] >= TOTAL_QUESTIONS
 
     # クイズが終了していない場合、次の質問のインデックスを保存
     if not is_quiz_finished:
@@ -240,14 +274,21 @@ def result():
     # answered_questionsの構造を確認
     print(f"answered_questions in session: {session.get('answered_questions', [])}")
 
-    answered_questions_info = [
-        {
-        'text': question['text'],
-        'explanation': next((q['explanation'] for q in session.get('answered_questions', []) if q['question_id'] == question['id']), question['explanation'])
-        }
-        for question in questions
-    ]
-    
+    # 空のリストとして初期化
+    answered_questions_info = []
+    # questionsリストをループ処理し、それぞれの問題文に対し個別にtry-except文を適用
+    # これによりエラーが発生した質問だけを特定
+    for question in questions:
+        try:
+            answered_question_info = {
+                'text': question['text'],
+                'explanation': next((q['explanation'] for q in session.get('answered_questions', []) if q['question_id'] == question['id']), question['explanation'])
+            }
+            answered_questions_info.append(answered_question_info)    
+        except (TypeError, KeyError) as e:
+            print(f"Error occurred: {str(e)}")
+            print(f"question object: {question}")
+            raise e
 
     # セッションから正答数を取得
     correct_answers = session.get('correct_answers', 0)
@@ -266,6 +307,7 @@ def reset_quiz():
     session.pop('current_question', None)
     session.pop('correct_answers', None)
     session.pop('answered_questions', None)
+    session.pop('answered_question_count', None)
     session.modified = True
 
     # JSONレスポンスを返す
