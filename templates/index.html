@@ -9,10 +9,17 @@
     <title>ホーム</title>
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
     <!--フォントリンク-->
+    <!--shippori mintyo b1-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&display=swap" rel="stylesheet">
+
+    <!--noto sans jp-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
     <!-- フォントをプリロード -->
     <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
     <link rel="preload" href="{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}" as="font" type="font/otf" crossorigin="anonymous">
@@ -41,9 +48,10 @@
 <body>
     <main class="main">
         <div class="q_container">
+            <span class="qt1_furigana">ながれじゃく</span>
             <!--クイズタイトル-->
             <div class="q_title">
-                <span class="qt1_furigana">ながれじゃく</span>
+                <img class="logo" src="{{ url_for('static', filename='logo_eye_white.svg') }}" alt="logo">
                 <h1 class="q_title1">流れ鵲</h1>
             </div>
             <!--クイズの概要-->
@@ -67,8 +75,8 @@
                     </button>
 
                 </div>
-            </div>
-
+            </div> 
+        </div>
         <!--ポップアップコンテンツ-->
         <!--ポップアップを作るためのコンテナをdivタグで作る-->
         <div id="popup" class="popup">
@@ -91,42 +99,106 @@
                                 一度選んで、違うかもしれないと思ったら、焦らず選択肢を変えてください。
                                 「次へ」ボタンを押すと次の問題へ移り、前の問題の選択肢を変えることはできないので注意してください。
                             </li>
+                            <li class="ht_t_style">問題は計十問。全問終了後、結果画面に移ります。
+                                何問正解できたかチェックしてみてください。
+                            </li>
                         </ul>
                     </div>
                     <div class="slide">
                         <ul class="howto_t">
-                            <li class="ht_t_style">問題は計十問。全問終了後、結果画面に移ります。
-                                何問正解できたかチェックしてみてください。</li>
                             <li class="ht_t_style">名称の表記は、基本、英語による一般的な発音に基づいて表記しています。
                                 過去に習った表記と異なる場合もあるかもしれませんが、内容そのものに違いはありません。
-                                </li>
+                            </li>
+                            <li class="ht_t_style">クイズ画面中にページをリロードすると、リロード前の問題がそのまま表示されます。ページバックをした場合も同様です。クイズを最初からやり直したい場合は画面下の「ホームに戻る」ボタンを押してください。
+                            </li>
+                        </ul>
+                    </div>
+                     <div class="slide">
+                        <ul class="howto_t">
                             <li class="ht_t_style">最後まで諦めずに解いてみてください。</li>
                         </ul>
                     </div>
-                    <div class="slide">
-                        <ul class="howto_t">
-                            <li class="ht_t_style">クイズ画面中にページをリロードすると、未解答だった問題がそのまま表示されます。クイズを最初からやり直したい場合は画面下の「ホームに戻る」ボタンを押してください。</li>
-                        </ul>
-                    </div>
-                    
                     <!-- Navigation -->
-                        <div class="navigation">
-                            <span class="prev"><img src="{{ url_for('static', filename='fonts/arrow/slider_arrow.svg') }}" alt="Previous" class="arrow-left" /></span>
-                            <span class="next"><img src="{{ url_for('static', filename='fonts/arrow/slider_arrow.svg') }}" alt="Next" class="arrow-right" /></span>
-
-                            <div class="dots">
-                                <span class="dot active"></span>
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                            </div>
+                    <div class="navigation">
+                        <span class="prev"><img src="{{ url_for('static', filename='fonts/arrow/slider_arrow.svg') }}" alt="Previous" class="arrow-left" /></span>
+                        <span class="next"><img src="{{ url_for('static', filename='fonts/arrow/slider_arrow.svg') }}" alt="Next" class="arrow-right" /></span>
+                        <div class="dots">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
                         </div>
+                    </div>
+                </div>   
+            </div>
+        </div>
+
+        <!--クイズを遊ぶ際の注意、トグルで-->
+        <div class="toggle-caution">
+            <input type="checkbox" id="toggle-checkbox" class="toggle-checkbox">
+            <label for="toggle-checkbox" class="toggle-label">
+                <div class="item-row">
+                    <span class="toggle-icon"></span>
+                    <span class="toggle-title">クイズを遊ぶ皆様へ</span>
                 </div>
-                      
+            </label>
+            <div class="toggle-content">
+              <ul class="content-ul">
+                <li class="content-p">事実の正確性には十分配慮していますが、素人による制作なので誤りがある場合もあります。より正確な内容はご自身でお調べ下さい。</br>あくまで歴史の流れをざっくりと理解する目的で楽しんでいただければ幸いです。
+                </li>
+                <li class="content-p">アプリの不具合については入念にチェックしていますが、それでも予想しないエラーが起こることはあります。その場合は大変お手数ですが、こちらの連絡先または私のXアカウントからDMにてお知らせください。    
+                </li>
+              </ul>
+            </div>
+        </div>
+
+        <!--タイトルの由来とロゴの紹介、トグルで-->
+        <div class="toggle-desidn-info">
+            <input type="checkbox" id="toggle-checkbox-tl" class="toggle-checkbox-tl">
+            <label for="toggle-checkbox-tl" class="toggle-label">
+                <div class="item-row">
+                    <span class="toggle-icon"></span>
+                    <span class="toggle-title">タイトルの由来とロゴ</span>
+                </div>
+            </label>
+            <div class="toggle-content">
+                <h1 class="title-in-toggle">流れ鵲</h1>
+                <p class="p-tl">「鵲（ジャク）」とはカササギというカラス目の鳥のこと。
+                    古代中国の伝説では、カラスは太陽に住むとされ、歳月や時間の象徴でした。
+                    ここから、「いままでの、そしてこれからの時間の流れ体験する」
+                    という意味を込めて「流れ鵲（ながれじゃく）」名付けています。
+                </p>
+                <div class="logo-in-toggle">
+                    <img class="toggle-lo-style" src="{{ url_for('static', filename='logo_eye_white.svg') }}" alt="logo-in-toggle">
+                </div>
+                <p class="p-tl">カササギが雲の上に乗りながら時間の流れを感じる様子を
+                    ロゴにしています。色が金色なのは、四字熟語に「金烏玉兎（きんうぎょくと）」
+                    というものがあり、これを参考にしたから。太陽と月、または歳月や時間の流れを表す
+                    のですが、「金烏」「玉兎」はどちらも中国の伝説上の動物であり、
+                    金烏は太陽、玉兎は月をそれぞれ象徴する存在であるといいます。「金のカラスの方が
+                    カッコ良さそう」という安直な理由で金烏の方を採用しました。
+                </p>
 
             </div>
         </div>
-        
     </main>
+    <footer class="footer">
+        <div class="sns_icon">
+            <a href="https://x.com/allm1107" target="_blank" rel="noopener noreferrer">
+                <img class="x" src="{{ url_for('static', filename='sns_logo/x-logo/logo-black.png') }}" alt="x">
+            </a>
+            <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
+                <img class="Instagram" src="{{ url_for('static', filename='sns_logo/Instagram/03 Black Glyph/Instagram_Glyph_Black.svg') }}" alt="Instagram">
+            </a>
+        </div>
+        <div class="p-p-info">
+            <a href="{{ url_for('privacy_policy') }}" target="_self">
+            プライバシーポリシー
+            </a>
+        </div>
+        <div class="copyrights">
+            <small >&copy; nagarejaku 2024</small>
+        </div>
+      </footer>
     
     <!-- 外部JavaScriptファイルをリンク -->
     <!--jquery-->
@@ -135,7 +207,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js" integrity="sha512-0QbL0ph8Tc8g5bLhfVzSqxe9GERORsKhIn1IrpxDAgUsbBGz/V7iSav2zzW325XGd1OMLdL4UiqRJj702IeqnQ==" crossorigin="anonymous"></script>
     <!--自作-->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    
 
 </body>
 </html>

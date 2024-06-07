@@ -10,6 +10,13 @@
     <title>クイズ</title>
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
+    <!--フォントリンク-->
+    <!--noto sans jp-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+
     <!-- フォントをプリロード -->
     <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
     <!--ページのURL-->
@@ -29,7 +36,9 @@
         <!--クイズのコンテナ-->
         <section>
             <div class="q_e_container">
-                <heading class="num" id="current-question-number">第1問</heading>
+                <heading class="num" id="current-question-number">
+                    第{{ current_question_index }}問
+                </heading>
                 <!--問題文-->
                 <div id="question"></div>
                 <!-- 選択肢のコンテナ -->
@@ -51,6 +60,11 @@
         </section>
     </main>
 
+    <footer class="footer">
+        <div class="copyrights">
+            <small >&copy; nagarejaku 2024</small>
+        </div>
+      </footer>
 
      <!-- 外部JavaScriptファイルをリンク -->
      <!--自作-->

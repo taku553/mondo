@@ -1,0 +1,296 @@
+<!--問題画面のhtml-->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!--文字エンコーディング-->
+    <meta charset="UTF-8">
+    <!--webページが画面幅に合わせて表示-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--ページタイトル-->
+    <title>プライバシーポリシー</title>
+    <!--cssにリンク-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
+    <!--noto sans jp-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+    <!-- フォントをプリロード -->
+    <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
+    <!--ページのURL-->
+    <a href="privacy-policy.html"></a>
+    <style>
+        @font-face {
+            font-family: 'GenSekiGothic JP H';
+            src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap; /* フォールバックフォントで即表示し、利用可能になればスワップ */
+        }
+    </style>
+</head>
+<body>
+    <!--プライバシーポリシー本文-->
+    <main>
+        <div class="p_p">
+            <h1 class="p_p_title">プライバシーポリシー</h1>
+            <div class="p_p_contents">
+                <p>本サイトは、個人情報の重要性を認識し、適正な利用、安全管理の実現のため、
+                    以下のプライバシーポリシーを定め、次の通り運用します。</p>
+            </div>
+
+            <h2 class="p_p_section">広告</h2>
+            <div class="p_p_contents">
+                <p>本サイトでは第三者配信の広告サービスとしてGoogle Adsenseを利用し、
+                    ユーザーの興味に応じた商品やサービスの広告を表示するため、
+                     Cookie を使用しております。
+                     Cookie を使用することで本サイトはユーザーのコンピュータを識別
+                    できるようになりますが、お客様個人を特定できるものではありません。
+                    </p>
+                <p>ユーザーは、
+                    <a href="https://www.google.com/settings/ads" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                        広告設定</a>でパーソナライズ広告を無効にできます
+                        （または、
+                        <a href="http://www.aboutads.info/choices/" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                            www.aboutads.info</a>にアクセスすることで、
+                            パーソナライズ広告に使われる第三者配信事業者の
+                             Cookie を無効にできるます）。</p>     
+                <p>Google Adsenseに関して、このプロセスの詳細やこのような情報が
+                    広告配信事業者に使用されないようにする方法については、
+                    <a href="http://www.google.co.jp/policies/technologies/ads/" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                        Googleポリシーと規約</a>
+                    をご覧ください。</p>
+                <p>また、本サイトはAmazonのアソシエイトとして、
+                    適格販売により収入を得ています。</p>
+            </div>
+
+            <h2 class="p_p_section">アクセス解析ツール</h2>
+            <div class="p_p_contents">
+                <p>本サイトでは、Googleによるアクセス解析ツール「Googleアナリティクス」
+                を利用しています。このGoogleアナリティクスはトラフィックデータの収集のために
+                 Cookie を使用しております。トラフィックデータは匿名で収集されており、
+                 個人を特定するものではありません。</p>
+                <p>規約の詳細は、
+                    <a href="https://marketingplatform.google.com/about/analytics/terms/jp/" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                        Googleアナリティクス利用規約</a>
+                    をご覧ください。</p>
+            </div>
+
+            <h2 class="p_p_section">利用者情報の外部送信について</h2>
+            <div class="p_p_contents">
+                <p>本サイトでは、アクセス解析や広告配信のために以下のツールを導入しています。</p>
+                <p>ツール運営事業者にはサイト訪問者の情報が提供され、
+                    それぞれのプライベートポリシーにおいて管理運用されます。
+                    当社が使用するツールに関連するデータ一覧は以下のとおりです。</p>
+                
+                <h3 class="p_p_subsection">参照情報</h3>
+                <p><a href="https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/gaibusoushin_kiritsu.html" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                    総務省HP 外部送信規律
+                </a></p>
+                <p><a href="https://www.soumu.go.jp/main_content/000934677.pdf" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                    電気通信事業における個人情報等の保護に関するガイドライン 
+                    本文（令和六年三月十二日版）
+                </a></p>
+                <p><a href="https://www.soumu.go.jp/main_content/000934678.pdf" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                    電気通信事業における個人情報等の保護に関するガイドライン 
+                    解説（令和六年三月十二日版）
+                </a></p>
+                <p><a href="https://elaws.e-gov.go.jp/document?lawid=415AC0000000057_20240401_505AC0000000079&keyword=%E5%80%8B%E4%BA%BA%E6%83%85%E5%A0%B1%E4%BF%9D%E8%AD%B7%E6%B3%95" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                    個人情報の保護に関する法律（令和六年四月一日施行、e-GOV）
+                </a></p>
+                <p><a href="https://www.ppc.go.jp/personalinfo/legal/guidelines_tsusoku/" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                    個人情報の保護に関する法律についてのガイドライン（通則編）
+                    （令和五年十二月一部改正、個人情報保護委員会）
+                </a></p>
+
+                <h3 class="p_p_subsection">アクセス解析 </h3>
+                <ol>
+                    <li>利用目的
+                        <ul class="p_p_ul">
+                            <li>アクセス解析による利便性の向上</li>
+                        </ul>
+                    </li>
+
+                    <li>送信情報
+                        <ul class="p_p_ul">
+                            <li>IPアドレス</li>
+                            <li>Webブラウザ上のアクティビティ</li>
+                            <li>利用環境（使用ブラウザ/端末など）</li>
+                            <li>Cookie等利用者を識別する為の識別子</li>
+                        </ul>
+                    </li>
+
+                    <li>サービス名：会社名（プライバシーポリシー）
+                        <ul class="p_p_ul">
+                            <li>Google Analytics: 
+                                <a href="https://policies.google.com/privacy?hl=ja" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    Google LLC
+                                </a>
+                            </li>
+                            <li>Google Seach Console: 
+                                <a href="https://policies.google.com/privacy?hl=ja" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    Google LLC
+                                </a>
+                            </li>
+                            <li>Microsoft Clarity: 
+                                <a href="https://privacy.microsoft.com/ja-jp/privacystatement" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    Microsoft
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3 class="p_p_subsection">広告配信 </h3>
+                <ol>
+                    <li>利用目的
+                        <ul class="p_p_ul">
+                            <li>
+                                ユーザーの興味に応じた商品やサービスの広告を表示するため
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li>送信情報
+                        <ul class="p_p_ul">
+                            <li>
+                                Cookie等利用者を識別する為の識別子
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li>サービス名
+                        <ul class="p_p_ul">
+                            <li>
+                                Google Adsense: 
+                                <a href="https://policies.google.com/privacy" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    Google LLC
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+                <h3 class="p_p_subsection">SNSプラグイン</h3>
+                <ol>
+                    <li>利用目的
+                        <ul class="p_p_ul">
+                            <li>ユーザーの利便性の向上および集客のため</li>
+                        </ul>
+                    </li>
+                    <li>送信される情報
+                        <ul class="p_p_ul">
+                            <li>ユーザーID、IPアドレス、Cookie等の情報</li>
+                            <li>アクセスしているサイト、アクセス日時</li>
+                            <li>閲覧履歴、検索ワード</li>
+                            <li>ブラウザの情報、識別子</li>
+                        </ul>
+                    </li>
+                    <li>サービス名：会社名（プライバシーポリシー）
+                        <ul class="p_p_ul">
+                            <li>Instagram: 
+                                <a href="https://www.facebook.com/privacy/policy/?entry_point=data_policy_redirect&entry=0" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    Meta Platform,Inc.
+                                </a>
+                            </li>
+                            <li>X: 
+                                <a href="https://x.com/ja/privacy#twitter-privacy-1" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    X Corp.
+                                </a>
+                            </li>
+                            <li>LINE: 
+                                <a href="http://www.lycorp.co.jp/ja/company/privacypolicy/" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    LINEヤフー株式会社
+                                </a>
+                            </li>
+                            <li>Discord: 
+                                <a href="https://support.discord.com/hc/ja/sections/115000344951-%E3%83%97%E3%83%A9%E3%82%A4%E3%83%90%E3%82%B7%E3%83%BC%E3%81%A8%E3%83%9D%E3%83%AA%E3%82%B7%E3%83%BC" class="p_p_link_style" target="_blank" rel="noopener noreferrer">
+                                    Discord Inc.
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h2 class="p_p_section">プライバシーポリシーの変更</h2>
+            <div class="p_p_contents">
+                <p>本ポリシーの内容は，法令その他本ポリシーに別段の定めのある事項を除いて、
+                ユーザーに通知することなく，変更することができるものとします。
+                当社が別途定める場合を除いて、変更後のプライバシーポリシーは、
+                本ウェブサイトに掲載したときから効力を生じるものとします。</p>
+            </div> 
+
+            <h2 class="p_p_section">お問い合わせ窓口</h2>
+            <div class="p_p_contents">
+                <p>本ポリシーに関するお問い合わせは、
+                下記のEメールアドレスまでお願いいたします。</p>
+            </div>
+            
+            <h2 class="p_p_section">免責事項</h2>
+            <div class="p_p_contents">
+                <p>本サイトからのリンクやバナーなどで移動したサイトで提供される情報、
+                サービス等について一切の責任を負いません。</p>
+
+                <p>また本サイトのコンテンツ・情報について、
+                できる限り正確な情報を提供するように努めておりますが、
+                正確性や安全性を保証するものではありません。
+                情報が古くなっていることもございます。
+                </p>
+                    
+                <p>本サイトに掲載された内容によって生じた損害等の一切の責任を
+                負いかねますのでご了承ください。
+                </p>
+            </div>
+
+            <h2 class="p_p_section">著作権ついて</h2>
+            <div class="p_p_contents">
+                <p>
+                    本サイトで掲載している文章や画像などにつきましては、
+                    無断転載することを禁止します。
+                </p>
+                <p>
+                    本サイトは著作権や肖像権の侵害を目的としたものではありません。
+                    著作権や肖像権に関して問題がございましたら、
+                    お問い合わせ窓口のEメールアドレスよりご連絡ください。迅速に対応いたします。
+                </p>
+            </div>
+
+            <h2 class="p_p_section">リンクついて</h2>
+            <div class="p_p_contents">
+                <p>本サイトは基本的にリンクフリーです。リンクを行う場合の許可や連絡は不要です。</p>
+                <p>ただし、インラインフレームの使用や画像の直リンクはご遠慮ください。文章や画像を引用する場合、引用先の明記と該当ページへのリンクをお願いいたします。</p> 
+            </div>
+
+            <!--ホーム画面に戻る-->
+            <div class="back_h">
+                <a href="/" target="_self" rel="noopener noreferrer">
+                    ホームに戻る
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!--フッター-->
+    <footer class="footer">
+        <div class="sns_icon">
+            <a href="https://x.com/allm1107" target="_blank" rel="noopener noreferrer">
+                <img class="x" src="{{ url_for('static', filename='sns_logo/x-logo/logo-black.png') }}" alt="x">
+            </a>
+            <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
+                <img class="Instagram" src="{{ url_for('static', filename='sns_logo/Instagram/03 Black Glyph/Instagram_Glyph_Black.svg') }}" alt="Instagram">
+            </a>
+        </div>
+        <div class="p-p-info">
+            <a href="{{ url_for('privacy_policy') }}" target="_blank">
+            プライバシーポリシー
+            </a>
+        </div>
+        <div class="copyrights">
+            <small >&copy;  2024 nagarejaku</small>
+        </div>
+      </footer>
+     <!-- 外部JavaScriptファイルをリンク -->
+     <!--自作-->
+</body>
+</html>

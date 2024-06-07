@@ -9,6 +9,12 @@
     <title>結果</title>
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
+    <!--フォントリンク-->
+    <!--noto sans jp-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
     <!-- フォントをプリロード -->
     <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
     <link rel="preload" href="{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}" as="font" type="font/otf" crossorigin="anonymous">
@@ -35,32 +41,42 @@
     
 </head>
 <body>
-    <h1 class="result_f">結果</h1>
-    <!-- Flaskから渡された正答数と総問題数を表示 -->
-    <div id="correct-answers">
-        <p>{{ total }}問中、{{ correct }}問正解</p>
-    </div>
-    <div id="explanations">
-        <h3 class="explanation_title">解説</h3>
-        {% for q in answered_questions %}
-        <div class="question-and-explanation">
-            <!-- 問題番号を表示 -->
-            <div class="question-number">
-                第{{ loop.index }}問
-            </div>
-            
-            <p class="question_t">Q. {{ q.text }}</p>
-            <p class="explanation">A. {{ q.explanation }}</p>
+    <main>
+        <h1 class="result_f">結果</h1>
+        <!-- Flaskから渡された正答数と総問題数を表示 -->
+        <div id="correct-answers">
+            <p>{{ total }}問中、{{ correct }}問正解</p>
         </div>
-        {% endfor %}
-      </div>
+        <div id="explanations">
+            <h3 class="explanation_title">解説</h3>
 
-    <div class="transition">
-        <h4 class="restart_f">クイズへの再挑戦はこちら</h4>
-        <button id="restart_b">もう一度挑戦する</button>
-        <h4 class="home_f">ホームへ戻るにはこちら</h4>
-        <button id="home_b">ホームへ戻る</button>
-    </div>
+            {% for question in answered_questions %}
+            <div class="question-and-explanation">
+                <!-- 問題番号を表示 -->
+                <div class="question-order">
+                    第{{ question.display_order }}問
+                </div>
+
+                <p class="question_t">Q. {{ question.text }}</p>
+                <p class="choice_t">あなたの解答： {{ question.user_choice_text }}</p>
+                <p class="explanation"> 解説： {{ question.explanation | safe }}</p>
+            </div>
+            {% endfor %}
+          </div>
+
+        <div class="transition">
+            <h4 class="restart_f">クイズへの再挑戦はこちら</h4>
+            <button id="restart_b">もう一度挑戦する</button>
+            <h4 class="home_f">ホームへ戻るにはこちら</h4>
+            <button id="home_b">ホームへ戻る</button>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="copyrights">
+            <small >&copy; nagarejaku 2024</small>
+        </div>
+      </footer>
     
     <!--自作-->
     <script src="{{ url_for('static', filename='result.js') }}"></script>

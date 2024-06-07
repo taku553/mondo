@@ -18,8 +18,23 @@ document.addEventListener('DOMContentLoaded', function() {
             // ホーム画面にリダイレクト
             window.location.href = '/';
         });
+
     });
+
+
+    // 結果画面の問題番号を取得し、ログ出力する
+    logQuestionNumbers();
 });
+
+// 問題番号をログ出力する関数
+function logQuestionNumbers() {
+    const questionNumberElements = document.querySelectorAll('.question-order');
+    questionNumberElements.forEach(function(element) {
+        const questionNumber = element.textContent.trim().replace('第', '').replace('問', '');
+        console.log('結果画面の問題番号:', questionNumber);
+    });
+}
+
 
 // クイズをリセットする関数
 function resetQuiz(callback) {

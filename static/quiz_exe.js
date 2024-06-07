@@ -2,10 +2,13 @@
 
 // アクティブな選択肢を保持する変数（グローバルスコープで宣言）
 let choiceId = null;
+
 /* グローバルスコープでtotalQuestionsを宣言。
 totalQuestionsの値をsubmitAnswer関数の外部から取得した後にtotal_questionsを保存し、
 submitAnswer関数で使用させるのが目的 */
 let totalQuestions;
+
+let currentQuestionIndex = 0;  // グローバルスコープで宣言し、初期値を0に設定
 // ページロード時に一度だけ要素を取得してグローバル変数に保存
 let nextButton;
     // --------- 各種関数 ---------
@@ -92,8 +95,12 @@ function getAndDisplayQuestion() {
             totalQuestions = data.total_questions_index;
 
 
-            // 問題を画面に表示
-            displayQuestion(data);
+            // 問題を画面に表示、セッションに保存された質問があればそれを使用する
+            if (data.current_question) {
+                displayQuestion(data.current_question);
+            } else {
+                displayQuestion(data);
+            }
         })
 
         // エラーが発生した場合にコンソールにエラーメッセージを表示
@@ -119,8 +126,8 @@ function handleResponse(response) {
 // 2. 問題文と選択肢を表示する関数
 function displayQuestion(questionData) {
     // サーバーからの現在の問題インデックスを取得して更新
-    if (questionData.current_index !== undefined) {
-        currentQuestionIndex = questionData.current_index;
+    if (questionData.next_index !== undefined) {
+        currentQuestionIndex = parseInt(questionData.next_index, 10);
     }
     console.log(`currentQuestionIndex: ${currentQuestionIndex}`);
 

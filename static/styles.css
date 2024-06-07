@@ -11,38 +11,36 @@
 
 /*メイン画面を囲むコンテナの設定*/
 .main{
-    margin: 0 auto; /* 外側の余白 */
-    width: 100%; /*メインコンテナの横幅を画面サイズと等しく*/
-    height: 100%; /*メインコンテナの縦幅を画面サイズと等しく*/
-    background-color: coral;
+  width: 100%; /*メインコンテナの横幅を画面サイズと等しく*/
+  margin: 0 auto; /* 外側の余白 */
+  height: 100%; /*メインコンテナの縦幅を画面サイズと等しく*/
+  /*background-color: coral;*/
+}
+
+/*aタグ内のスタイルを初期化*/
+a{
+  color: inherit;
+  text-decoration: none;
 }
 
 /*クイズ部分全体の設定*/
 .q_container{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around; /* 各要素が均等なスペースで配置されるようにします */
-    align-items: center; /* 水平方向の中央揃え */
-    width: 80%; /*クイズ部分全体の幅を画面幅の70%に*/
-    max-width: 1000px;
-    margin: 0 auto; /*クイズ部分全体を中央に配置*/
-    background-color: khaki;
+  flex-direction: column;
+  display: flex;
+  justify-content: space-around; /* 各要素が均等なスペースで配置されるようにします */
+  align-items: center; /* 水平方向の中央揃え */
+  width: 90%; /*クイズ部分全体の幅を画面幅の70%に*/
+  max-width: 1000px;
+  margin: 0 auto; /*クイズ部分全体を中央に配置*/
+  /*background-color: khaki;*/
 }
 
 /*タイトルとスタートボタン要素の高さ*/
 .q_title, .start_b {
-    flex: 1; /* flex-grow, flex-shrink, flex-basis のショートハンドで、要素が等しい高さを持つようにします */
-  }
+  flex: 1; /* flex-grow, flex-shrink, flex-basis のショートハンドで、要素が等しい高さを持つようにします */
+}
 
 /*スタート画面のスタイリング*/
-
-/*タイトル文字の枠*/
-.q_title {
-    width: 100%;
-    position: relative;
-    text-align: center;
-    background-color: yellowgreen;
-}
 
 /*タイトルの振り仮名*/
 span.qt1_furigana {
@@ -51,43 +49,62 @@ span.qt1_furigana {
   font-weight: normal;
   font-size: calc(0.1em + 1vw);
   letter-spacing: calc(0.01em + 0.5vw);
-  background-color: yellow;
+  margin-top: calc(1em + 1vw);
+  /*background-color: yellow;*/
 }
+
+/*ロゴとタイトルを水平方向に揃えるflexbox*/
+.q_title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  /*background-color: yellowgreen;*/
+}
+
+/* ロゴのサイズとタイトルのフォントサイズを揃える */
+.logo, .q_title1 {
+  width: calc(1em + 4vw);
+  height: auto; /* 適切な値に調整 */
+}
+
 
 /*タイトル文字の枠に対する位置とデザイン*/
 .q_title1{
-    width: 100%;
-    position: relative;
-    margin: 0 auto;
-    font-size: calc(0.8em + 2vw);
-    font-family: "Shippori Mincho B1", serif;
-    font-style: normal;
-    letter-spacing: calc(0.3em + 1vw);
-    background-color: aqua;
+  width: auto;
+  position: relative;
+  margin: 0 calc(1.5em + 1vw) 0 calc(0.3em + 1vw);
+  font-size: calc(0.8em + 2vw);
+  font-family: "Shippori Mincho B1", serif;
+  font-style: normal;
+  letter-spacing: calc(0.3em + 1vw);
+  /*background-color: aqua;*/
 }
 
 
 /*説明枠*/
 .q_explain{
-    width: 100%;
-    height: 60%;
-    align-self: center; /* この要素だけ水平方向の中央揃えを行います */
+  width: 100%;
+  height: 60%;
+  align-self: center; /* この要素だけ水平方向の中央揃えを行います */
 }
 
 /*黒枠の角丸長方形*/
 .rounded_border {
-    border: 0.3vw solid black; /* 黒色の直線の罫線 */
-    border-radius: calc(2px + 1vw);    /* 角の丸み */
-    margin: calc(0.8em + 1vw) 0;       /* 外側の余白 */
-    padding: calc(0.4em + 1vw) calc(0.2em + 1vw);           /* 内側の余白 */
-    background-color: #ffff;   /*枠内の背景色*/
+  border: 0.3vw solid black; /* 黒色の直線の罫線 */
+  border-radius: calc(2px + 1vw);    /* 角の丸み */
+  margin: calc(1em + 5vw) 0;       /* 外側の余白 */
+  padding: calc(0.4em + 1vw) calc(0.2em + 1vw);           /* 内側の余白 */
+  background-color: #ffff;   /*枠内の背景色*/
 }
 
 /*説明文のスタイル*/
 .q_ex{
-    margin: 0 auto;
-    font-family: osaka, sans-serif;
-    font-size: calc(0.5em + 1vw);
+  margin: 0 auto;
+  font-family: "osaka", sans-serif;
+  font-size: calc(0.5em + 1vw);
+  text-align: center;
 }
 
 /*遊び方ボタンのコンテナ*/
@@ -97,8 +114,8 @@ span.qt1_furigana {
     align-items: center; /* 垂直方向の中央揃え */
     width: 60%;
     height: 100%;
-    margin: 20px auto 0 auto;
-    background-color: blueviolet;
+    margin: 0 auto calc(2em + 4vw) auto;
+    /*background-color: blueviolet;*/
 }
 
 /*遊び方ボタンの枠*/
@@ -116,7 +133,7 @@ span.qt1_furigana {
     display: inline-block;
     font-family: 'GenSekiGothic JP H', sans-serif;
     font-size: calc(0.6em + 1vw);
-    background-color: aqua;
+    /*background-color: aqua;*/
 }
 
 /* ポップアップ画面のスタイリング */
@@ -139,11 +156,11 @@ span.qt1_furigana {
     margin: 10% auto;
     border: none;
     width: 90%;
-    height: 70%;
+    height: 75%;
     min-width: 100px;
     max-width: 1000px;
     min-height: 80px;
-    max-height: 800px;
+    max-height: 1000px;
     position: relative;
 }
 
@@ -311,8 +328,7 @@ li.ht_t_style{
     align-items: center; /* 垂直方向の中央揃え */
     width: 100%;
     height: 100%;
-    margin: 20px auto 0 auto;
-    background-color: yellowgreen;
+    /*background-color: yellowgreen;*/
 }
 
 /* スタートボタン枠と文字 */
@@ -320,7 +336,7 @@ li.ht_t_style{
     display: flex;
     justify-content: center;
     align-items: center;
-    width: calc(9em + 13vw);
+    width: calc(8em + 13vw);
     height: 10%;
     font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
     font-family: 'GenSekiGothic JP H', sans-serif;
@@ -331,8 +347,214 @@ li.ht_t_style{
     cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
 
+/* クイズを遊ぶ際の注意、トグルのスタイリング */
+.toggle-caution {
+  width: 90%;
+  margin: calc(5em + 1vw) auto 0 auto;
+  max-width: 600px;
+}
+
+.toggle-checkbox {
+  display: none;
+}
+
+.toggle-label {
+  display: block;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.item-row{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.toggle-icon {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  margin-right: calc(0.5em + 1vw);
+}
+
+.toggle-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 9px solid #000;
+  transition: transform 0.2s ease-in-out;
+}
+
+.toggle-checkbox:checked ~ .toggle-label .toggle-icon::before {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+  
+.toggle-title {
+  font-size: calc(0.7em + 1vw);
+  font-family: 'osaka', sans-serif;
+}
 
 
+.toggle-content {
+  display: none;
+  padding: calc(1em + 1vw);
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.toggle-checkbox:checked ~ .toggle-content {
+  display: block;
+}
+
+.content-ul{
+  margin: 0;
+  padding-left: calc(20px + 1vw);
+  font-size: calc(0.6em + 0.6vw);
+  font-family: 'Yu Gothic',sans-serif;
+}
+
+.content-p{
+  margin-bottom: 20px;
+}
+
+
+/*タイトルとロゴの紹介をトグルで、スタイリング*/
+/*idとして使用される"toggle-checkbox-tl"とコンテンツのフォントに関するスタイリングだけ残す*/
+.toggle-desidn-info{
+  width: 90%;
+  margin: calc(3em + 1vw) auto;
+  max-width: 600px;
+}
+
+.toggle-checkbox-tl {
+  display: none;
+}
+
+
+.toggle-checkbox-tl:checked ~ .toggle-label .toggle-icon::before {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+  
+
+.toggle-checkbox-tl:checked ~ .toggle-content {
+  display: block;
+}
+
+.title-in-toggle{
+  width: auto;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: calc(0.8em + 2vw);
+  font-family: "Shippori Mincho B1", serif;
+  font-style: normal;
+  letter-spacing: calc(0.3em + 1vw);
+  /*background-color: aqua;*/
+}
+
+.p-tl {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-size: calc(0.7em + 0.6vw);
+  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN', 
+  sans-serif;
+}
+
+.logo-in-toggle{
+  width: calc(5em + 5vw);
+  height: auto; /* 適切な値に調整 */
+  margin: 0 auto;
+}
+.toggle-lo-style{
+  width: calc(5em + 5vw);
+  height: auto;
+}
+
+.footer{
+  position: relative;
+  width: 100%;
+  border-top: 1px solid #ddd;
+  min-height: 50px;
+  padding-top: calc(1em + 1vw);
+  margin-top: calc(3em + 1vw);
+  /*background-color: #eb0e0e;*/
+}
+.sns_icon{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: calc(1em + 1vw);
+  margin-bottom: calc(1em + 1vw);
+}
+.x{
+  width: calc(1em + 0.7vw);
+  
+}
+.Instagram{
+  width: calc(1em + 0.7vw);
+}
+.p-p-info{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: calc(0.7em + 0.5vw);
+  margin-bottom: 2em;
+}
+.copyrights{
+  width: 100%;
+  position: relative;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  margin-top: calc(1em + 6vh);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+
+/*------------プライバシーポリシー画面のスタイリング:praivacy_policy.html--------------*/
+.p_p{
+  width: 90%;
+  margin: 0 auto;
+}
+.p_p_title{
+  text-align: center;
+}
+.p_p_section{
+  margin: calc(1.5em + 1vw) auto 0 calc(1em + 1vw);
+}
+.p_p_contents{
+  width: 90%;
+  margin: 0 auto;
+}
+.p_p_link_style{
+  color: #0033cc;
+  text-decoration: underline;
+}
+.p_p_subsection{
+  margin: calc(1em + 1vw) auto 0 auto;
+}
+.p_p_ul{
+  list-style: disc;
+}
+
+.back_h{
+  margin-top: calc(3em + 1vw);
+  text-decoration: underline;
+  text-align: center;
+  font-family: 'osaka', sans-serif;
+}
 /*------------クイズ出題画面のスタイリング:quiz_execution.html--------------*/
 
 /*クイズのコンテナ*/
@@ -352,7 +574,7 @@ li.ht_t_style{
   padding: 0;
   font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.9em + 1vw);
-  background-color: blueviolet;
+  /*background-color: blueviolet;*/
 }
 
 /*問題文*/
@@ -362,7 +584,7 @@ li.ht_t_style{
   height: auto;
   font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.8em + 1vw);
-  background-color: yellow;
+  /*background-color: yellow;*/
 }
 /*グリッドのコンテンアを中央に配置*/
 #choices_container {
@@ -374,7 +596,7 @@ li.ht_t_style{
     height: auto;
     margin: 0 auto;
     padding: 0;
-    background-color: orange; /*フレックスボックスがどのように適用されたのか見る*/ 
+    /*background-color: orange;*/ /*フレックスボックスがどのように適用されたのか見る*/ 
   }
 
 /*ボタン機能付き角丸長方形のスタイリング*/
@@ -525,7 +747,7 @@ li.ht_t_style{
 }
 
 
-/*------------結果画面のスタイリング:result.html--------------*/
+/*-----------------結果画面のスタイリング:result.html-------------------*/
 
 /*「結果」見出しのスタイリング*/
 .result_f{
@@ -549,48 +771,73 @@ li.ht_t_style{
   font-family: 'osaka', sans-serif;
   font-size: calc(1.3em + 1vw);
   margin-bottom: 5%;
-  background-color: aqua;
+  /*background-color: aqua;*/
 }
 
 /*全体を囲むコンテナ*/
 #explanations{
   width: auto;
   height: auto;
-  background-color: yellowgreen;
+  /*background-color: yellowgreen;*/
 }
 
 /*それぞれの解説ブロック*/
 .question-and-explanation {
-  margin-bottom: calc(2em + 1vw);
+  width: 80%;
+  margin: 0 auto calc(2em + 1vw) auto;
+  border: 0.5vw solid black;
+  border-radius: 1.5vw;
+  padding: calc(1em + 1vw);
 }
 
 /*問題番号*/
-.question-number{
+.question-order{
   width: calc(85% + 1vw);
   margin: 0 auto 3% auto;
   font-family: 'osaka', sans-serif;
   font-size: calc(1em + 1vw);
-  background-color: pink;
+  /*background-color: pink;*/
 }
 
 /*問題文*/
 .question_t {
   width: calc(85% + 1vw);
-  margin: 0 auto 5% auto;
+  margin: 0 auto 6% auto;
   height: auto;
   font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.8em + 1vw);
-  background-color: yellow;
+  line-height: 1.6em;
+  letter-spacing: 0.05em;
+  /*background-color: yellow;*/
+}
+
+/*選択肢の文章*/
+.choice_t{
+  width: calc(85% + 1vw);
+  margin: 0 auto 6% auto;
+  height: auto;
+  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-size: calc(0.8em + 1vw);
+  font-weight: 600;
+  line-height: 1.6em;
+  letter-spacing: 0.05em;
+  color: #e83828;
+  /*background-color: yellow;*/
 }
 
 /*解説文*/
 .explanation {
   width: calc(85% + 1vw);
   margin: 0 auto;
+  padding: calc(0.5em + 1vw);
   height: auto;
+  border-radius: calc(3px + 1vw);
   font-family:'osaka', serif;
   font-size: calc(0.8em + 1vw);
-  background-color: orange;
+  line-height: calc(1.6em + 0.7vw);
+  letter-spacing: 0.05em;
+  white-space: pre-line;
+  background-color: #fff1cf;
 }
 
 
