@@ -1,7 +1,7 @@
 // ページ遷移のスクリプト
 document.addEventListener('DOMContentLoaded', function() {
   // フォントの読み込みエラーハンドリング
-  document.fonts.load('12px "HOT-Gyoshokk-R"').then(function (fonts) {
+  document.fonts.load('12px "GenSekiGothic JP H"').then(function (fonts) {
     // フォントが正しく読み込まれたかを確認
     if (fonts.length === 0) {
       console.error('フォントが読み込めませんでした。');

@@ -22,7 +22,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
     <!-- フォントをプリロード -->
     <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
-    <link rel="preload" href="{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}" as="font" type="font/otf" crossorigin="anonymous">
     <!--ページのURL-->
     <a href="index.html"></a>
 
@@ -34,13 +33,6 @@
             font-weight: normal;
             font-style: normal;
             font-display: swap; /* フォールバックフォントで即表示し、利用可能になればスワップ */
-        }
-        @font-face {
-            font-family: 'HOT-Gyoshokk-R';
-            src: url("{{ url_for('static', filename='fonts/HOT-Gyoshokk-R/HOT-Gyoshokk-R.otf') }}") format('opentype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap
         }
     </style>
 
@@ -196,7 +188,7 @@
             </a>
         </div>
         <div class="copyrights">
-            <small >&copy; nagarejaku 2024</small>
+            <small >&copy; ngarjaku 2024</small>
         </div>
       </footer>
     
