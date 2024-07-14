@@ -1,4 +1,7 @@
-// quiz_exe.js
+// クイズ画面のスクリプト quiz_exe.js
+
+// アプリケーションのベースURLを定義
+const BASE_URL = window.location.origin;
 
 // アクティブな選択肢を保持する変数（グローバルスコープで宣言）
 let choiceId = null;
@@ -82,7 +85,7 @@ function getAndDisplayQuestion() {
     console.log('getAndDisplayQuestion called'); // 呼び出しの確認用ログ
     setLoadingState(true);  // ローディング状態をonにする
     // サーバー（Flaskを使用）から問題データを取得するための非同期リクエスト
-    fetch('http://127.0.0.1:5000/get_random_question')  // Flaskサーバーから問題データを取得。'/get_question'エンドポイントにHTTP GETリクエストを非同期で送信
+    fetch(`${BASE_URL}/get_random_question`)  // Flaskサーバーから問題データを取得。'/get_question'エンドポイントにHTTP GETリクエストを非同期で送信
         .then(handleResponse)
         .then(data => {
             if(data.error) {
@@ -305,7 +308,7 @@ async function submitAnswer(choiceId, nextButton, questionId) {
     console.log('questionId in submitAnswer:', questionId, 'Type:', typeof questionId);
     console.log('activeChoice in submitAnswer:', choiceId, 'Type:', typeof choiceId);
     try {
-        const response = await fetch('http://127.0.0.1:5000/submit_answer', {
+        const response = await fetch(`${BASE_URL}/submit_answer`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -372,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // クイズをリセットする関数
 function resetQuiz(callback) {
-    fetch('http://127.0.0.1:5000/reset_quiz')
+    fetch(`${BASE_URL}/reset_quiz`)
         .then(response => response.json())
         .then(data => {
             console.log(data.status); // リセットのステータスをログ出力

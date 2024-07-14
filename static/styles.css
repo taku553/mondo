@@ -5,6 +5,10 @@
   font-style: normal;
 }
 
+/*ページ全体のデフォルトフォント*/
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Osaka', sans-serif;
+}
 
 /*メイン画面のスタイリング*/
 
@@ -102,8 +106,9 @@ span.qt1_furigana {
 /*説明文のスタイル*/
 .q_ex{
   margin: 0 auto;
-  font-family: "osaka", sans-serif;
+  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
   font-size: calc(0.5em + 1vw);
+  font-weight: 600;
   text-align: center;
 }
 
@@ -156,7 +161,7 @@ span.qt1_furigana {
     margin: 10% auto;
     border: none;
     width: 90%;
-    height: 75%;
+    height: 82%;
     min-width: 100px;
     max-width: 1000px;
     min-height: 80px;
@@ -175,15 +180,15 @@ span.qt1_furigana {
         /*transform: translateX(-50%);*/  /* 横方向の中央揃えのための調整 
         /* その他のスタイルは維持 */
         font-size: calc(1.3em + 1vw);
-        font-weight: 900;
-        background-color: #ffde59;
+        font-weight: 700;
+        /* background-color: #ffde59; */
 }
 
 /* 閉じるボタンのスタイリング */
 .close img{
     position: absolute;
     top: 20px;
-    left: 90%;
+    left: 88%;
     right: 0;
     width: calc(20px + 1vw);
     height: calc(20px + 1vw);
@@ -191,7 +196,7 @@ span.qt1_furigana {
     color: #aaa;
     font-size: calc(1em + 1vw);
     font-weight: bold;
-    background-color: chartreuse;
+    /* background-color: chartreuse; */
 }
 
 /*閉じるボタンをホバーした時のスタイリング*/
@@ -209,13 +214,13 @@ span.qt1_furigana {
     /*長方形の左上隅をポップアップウィンドウの中心に配置します。*/
     top: 50%;  /*ポップアップウィンドウの左上隅を起点に、長方形枠の左上端をウェイドウ高さの半分だけ移動。*/
     left: 50%;  /*ポップアップウィンドウの左上隅を起点に、長方形枠の左上端をウェイドウ幅の半分だけ移動。*/
-    transform: translate(-50%, -50%); /* これで長方形が中央に配置されます */
+    transform: translate(-50%, -45%); /* これで長方形が中央に配置されます */
     width: calc(100% - 40px); /* ポップアップより小さいサイズに調整します */
     height: calc(100% - 150px); /* ポップアップより小さいサイズに調整します */
     border: 0.3vw solid black; /* 黒色の直線の罫線 */
     border-radius: 8px;     /* 角の丸み */
     padding: 10px; /* 追加または更新 */
-    margin: 0 auto; /* 必要に応じて追加または更新 */
+    margin: 0; /* 必要に応じて追加または更新 */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -232,7 +237,7 @@ span.qt1_furigana {
     margin: auto;
     padding-top: 10px;
     padding-left: 15px;
-    background-color: green;
+    /* background-color: green; */
   }
   
   .slide.active {
@@ -247,7 +252,7 @@ span.qt1_furigana {
     height: 100%;
     margin: 10px 6px 0 15px;
     padding: 0;
-    font-family: osaka, sans-serif;
+    font-family: 'Osaka', 'Hiragino Sans', sans-serif;
     font-size: calc(0.8em + 1vw);
 }
 
@@ -273,7 +278,7 @@ li.ht_t_style{
     height: 90%;
     position: absolute;
     left: 0;
-    background-color: yellow;
+    /* background-color: yellow; */
   }
   
   .arrow-left {
@@ -400,7 +405,8 @@ li.ht_t_style{
   
 .toggle-title {
   font-size: calc(0.7em + 1vw);
-  font-family: 'osaka', sans-serif;
+  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
 }
 
 
@@ -418,7 +424,7 @@ li.ht_t_style{
 .content-ul{
   margin: 0;
   padding-left: calc(20px + 1vw);
-  font-size: calc(0.6em + 0.6vw);
+  font-size: calc(0.7em + 0.6vw);
   font-family: 'Yu Gothic',sans-serif;
 }
 
@@ -553,7 +559,7 @@ li.ht_t_style{
   margin-top: calc(3em + 1vw);
   text-decoration: underline;
   text-align: center;
-  font-family: 'osaka', sans-serif;
+  font-family: 'Osaka', 'Hiragino Sans', sans-serif;
 }
 /*------------クイズ出題画面のスタイリング:quiz_execution.html--------------*/
 
@@ -572,8 +578,9 @@ li.ht_t_style{
   height: auto;
   margin: 5% auto 4% 10%;
   padding: 0;
-  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-family: 'Noto Serif JP', 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.9em + 1vw);
+  font-weight: 500;
   /*background-color: blueviolet;*/
 }
 
@@ -582,8 +589,9 @@ li.ht_t_style{
   width: calc(80% + 1vw);
   margin: 0 auto 2% auto;
   height: auto;
-  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-family: 'Noto Serif JP', 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.8em + 1vw);
+  font-weight: 500;
   /*background-color: yellow;*/
 }
 /*グリッドのコンテンアを中央に配置*/
@@ -608,8 +616,9 @@ li.ht_t_style{
   padding: calc(0.5em + 1vw);
   border-radius: 10px;
   border: 2px solid black; /* 枠線設定 */
-  font-family: 'ヒラギノ明朝 ProN', 'Hiragino Mincho ProN', sans-serif;
+  font-family: 'Noto Serif JP', 'ヒラギノ明朝 ProN', 'Hiragino Mincho ProN', sans-serif;
   font-size: calc(0.8em + 1vw);
+  font-weight: 500;
   color: black;
 }
 
@@ -651,8 +660,9 @@ li.ht_t_style{
 .popup-choice-text{
   width: 85%;
   margin: 5% auto;
-  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-family: 'Noto Serif JP', 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.9em + 1vw);
+  font-weight: 500;
 }
 
 /*決定ボタン*/
@@ -671,7 +681,7 @@ li.ht_t_style{
 .confirm-b-f{
   text-align: center;
   font-size: calc(1em + 0.7vw);
-  font-family: 'osaka', sans-serif;
+  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
   color: #fff;
 }
 
@@ -768,7 +778,7 @@ li.ht_t_style{
 /*タイトル*/
 .explanation_title{
   text-align: center;
-  font-family: 'osaka', sans-serif;
+  font-family: 'Osaka', 'Hiragino Sans', sans-serif;
   font-size: calc(1.3em + 1vw);
   margin-bottom: 5%;
   /*background-color: aqua;*/
@@ -794,7 +804,7 @@ li.ht_t_style{
 .question-order{
   width: calc(85% + 1vw);
   margin: 0 auto 3% auto;
-  font-family: 'osaka', sans-serif;
+  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
   font-size: calc(1em + 1vw);
   /*background-color: pink;*/
 }
@@ -804,8 +814,9 @@ li.ht_t_style{
   width: calc(85% + 1vw);
   margin: 0 auto 6% auto;
   height: auto;
-  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-family: 'Noto Serif JP','ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.8em + 1vw);
+  font-weight: 500;
   line-height: 1.6em;
   letter-spacing: 0.05em;
   /*background-color: yellow;*/
@@ -816,7 +827,7 @@ li.ht_t_style{
   width: calc(85% + 1vw);
   margin: 0 auto 6% auto;
   height: auto;
-  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-family: 'Noto Serif JP', 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.8em + 1vw);
   font-weight: 600;
   line-height: 1.6em;
@@ -832,7 +843,7 @@ li.ht_t_style{
   padding: calc(0.5em + 1vw);
   height: auto;
   border-radius: calc(3px + 1vw);
-  font-family:'osaka', serif;
+  font-family:'Osaka', serif;
   font-size: calc(0.8em + 1vw);
   line-height: calc(1.6em + 0.7vw);
   letter-spacing: 0.05em;

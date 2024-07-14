@@ -4,6 +4,9 @@ entrypoint: gunicorn -b :$PORT py.main:app
 env_variables:
   FLASK_APP: py.main.py
   APP_ENV: production
+  SECRET_KEY: '[YOUR_SECRET_KEY]' # ランダムな文字列を生成して使用
+  REDISHOST: '10.22.46.187'
+  REDISPORT: '6379'
 
 handlers:
 - url: /static
@@ -11,11 +14,13 @@ handlers:
 - url: /(.*\.(gif|png|jpg|css|js|svg|ttc))$
   static_files: static/\1
   upload: static/.*\.(gif|png|jpg|css|js|svg|ttc)$
-- url: /.*
-  script: auto
+
 
 instance_class: F1  # 最小インスタンスクラス、必要に応じて調整
 
 automatic_scaling:
-  min_instances: 1
-  max_instances: 5  # トラフィックに応じて調整
+  min_instances: 2
+  max_instances: 3  # トラフィックに応じて調整
+
+vpc_access_connector:
+ name: projects/crack-celerity-429215-a2/locations/asia-northeast1/connectors/myconnector

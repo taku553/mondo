@@ -11,10 +11,9 @@ from datetime import timedelta
 # 送受信されるデータの状態をコンソールから確認するためloggingをインポート
 import logging
 from logging.handlers import RotatingFileHandler
-# 条件付きインポート
-if os.environ.get('APP_ENV') == 'production':
-    from pymemcache.client.base import Client
-# from .config import DevelopmentConfig, ProductionConfig
+# redisをインポート
+import redis
+
 
 # Flaskアプリケーションを初期化
 app = Flask(__name__, template_folder=os.path.join('../templates'), static_folder='../static')
@@ -23,23 +22,28 @@ app = Flask(__name__, template_folder=os.path.join('../templates'), static_folde
 app_env = os.environ.get('APP_ENV', 'development')
 
 if app_env == 'production':
+    redis_host = os.environ.get('REDISHOST', 'localhost')
+    redis_port = int(os.environ.get('REDISPORT', 6379))
     app.config.update(
         DEBUG=False,
+        SESSION_TYPE='redis',  # セッションデータをRedisに保存
+        SESSION_REDIS = redis.from_url(f'redis://{redis_host}:{redis_port}'),  # Redisの接続情報を設定
         SECRET_KEY=os.environ.get('SECRET_KEY', 'default-secret-key'),  # 環境変数から取得
-        SESSION_TYPE='memcached',
-        SESSION_MEMCACHED = Client(('127.0.0.1', 11211)),  # App Engine用に後で調整
+    
         SESSION_PERMANENT = False, # セッションが永続的でないように設定
         PERMANENT_SESSION_LIFETIME = timedelta(days=1) # セッションの有効期限を1日に設定
         # 他の本番環境用の設定
-    )
+    )    
     # App Engine環境用のログ設定
     app.logger.setLevel(logging.INFO)
+    
 else:
     app.config.update(
         DEBUG=True,
         SECRET_KEY='dev-secret-key',  # 開発環境用のデフォルトのシークレットキー
-        SESSION_TYPE='filesystem',
-        SESSION_FILE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sessions')), # セッションファイルの保存先ディレクトリを指定
+        SESSION_TYPE='redis',
+        # SESSION_FILE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sessions')), # セッションファイルの保存先ディレクトリを指定
+        SESSION_REDIS = redis.from_url('redis://localhost:6379'),  # Redisの接続情報を設定
         SESSION_PERMANENT=False,
         PERMANENT_SESSION_LIFETIME=timedelta(days=1),
         # 他の開発環境用の設定
@@ -74,10 +78,7 @@ with open(dataset_path, 'r', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader: # enumerateを使用してインデックスを追加
         choices = [
-            {'id': 1, 'text': row['choice1']},
-            {'id': 2, 'text': row['choice2']},
-            {'id': 3, 'text': row['choice3']},
-            {'id': 4, 'text': row['choice4']}
+            {'id': i+1, 'text': row[f'choice{i+1}']} for i in range(4)
         ]
         # 整数型：correct_choice_id
         correct_choice_id = next((i + 1 for i, choice in enumerate(choices) if choice['text'] == row['correct_choice']), None)
@@ -220,13 +221,13 @@ def submit_answer():
     data = request.json
     # 整数型：question_id
     question_id = data['questionId']
-    logger.debug('Received data: %s', data)
-    print('question_id in submit_answer:', question_id)
+    app.logger.debug('Received data: %s', data)
+    # print('question_id in submit_answer:', question_id)
     # 解答済みの質問数を増分
     session['answered_question_count'] += 1
 
     # questionIdの値が適切か確認するデバックプリント
-    print(f"Received questionId: {question_id}, type: {type(question_id)}")
+    # print(f"Received questionId: {question_id}, type: {type(question_id)}")
 
      # データ型確認
     if not isinstance(question_id, int):
@@ -248,7 +249,7 @@ def submit_answer():
     # 整数型：active_choice_id
     active_choice_id = data['activeChoice']
     # choiceIdの値が適切か確認するデバックプリント
-    print(f"Received activeChoiceId: {active_choice_id}, type: {type(active_choice_id)}")
+    # print(f"Received activeChoiceId: {active_choice_id}, type: {type(active_choice_id)}")
     if active_choice_id is None:
         logger.error('activeChoice key is missing in the request data')
         return jsonify({'error': 'activeChoice key is missing'}), 400
@@ -298,7 +299,7 @@ def submit_answer():
     })
 
     # session['answerer_questions']の構造を確認するデバッグプリント
-    print(f"Updated answered_questions: {session['answered_questions']}")  
+    # print(f"Updated answered_questions: {session['answered_questions']}")  
 
     # クイズの終了条件を判定
     # session['answered_questions']を使うことで実際に表示された質問数
@@ -307,7 +308,7 @@ def submit_answer():
     # クイズが終了していない場合、次の質問のインデックスを保存
     if not is_quiz_finished:
         next_question = get_random_question()
-        session['current_question'] = next_question
+        session['current_question'] = next_question.get_data(as_text=True)
         session['current_question_index'] += 1
         session.modified = True # セッションが変更されたことをFlaskに通知
                        

@@ -1,3 +1,8 @@
+// ホーム画面のスクリプト script.js
+
+// アプリケーションのベースURLを定義
+const BASE_URL = window.location.origin;
+
 // ページ遷移のスクリプト
 document.addEventListener('DOMContentLoaded', function() {
   // フォントの読み込みエラーハンドリング
@@ -34,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // クイズをリセットする関数
 function resetQuiz() {
-  fetch('http://127.0.0.1:5000/reset_quiz')
+  fetch(`${BASE_URL}/reset_quiz`)
       .then(response => response.json())
       .then(data => {
           console.log(data.status); // リセットのステータスをログ出力

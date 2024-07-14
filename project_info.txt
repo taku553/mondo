@@ -1,0 +1,184 @@
+# google sdkの情報
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud config list
+[compute]
+region = asia-northeast1
+zone = asia-northeast1-a
+[core]
+account = chenway0124.takuya@gmail.com
+disable_usage_reporting = True
+project = crack-celerity-429215-a2
+
+Your active configuration is: [default]
+
+# プロジェクトの詳細情報
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud projects describe $(gcloud config get-value project)
+createTime: '2024-07-12T15:46:56.366892Z'
+lifecycleState: ACTIVE
+name: My Project 9164
+projectId: crack-celerity-429215-a2
+projectNumber: '31339892529'
+
+#プロジェクト内の権限
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud projects get-iam-policy crack-celerity-429215-a2 \                     
+  --flatten="bindings[].members" \
+  --format='table(bindings.role)' \
+  --filter="bindings.members:crack-celerity-429215-a2@appspot.gserviceaccount.com"
+ROLE
+roles/editor
+
+# app engineアプリケーションの情報
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud app describe
+authDomain: gmail.com
+codeBucket: staging.crack-celerity-429215-a2.appspot.com
+databaseType: CLOUD_DATASTORE_COMPATIBILITY
+defaultBucket: crack-celerity-429215-a2.appspot.com
+defaultHostname: crack-celerity-429215-a2.an.r.appspot.com
+featureSettings:
+  splitHealthChecks: true
+  useContainerOptimizedOs: true
+gcrDomain: asia.gcr.io
+id: crack-celerity-429215-a2
+locationId: asia-northeast1
+name: apps/crack-celerity-429215-a2
+serviceAccount: 31339892529-compute@developer.gserviceaccount.com
+servingStatus: SERVING
+
+# redisインスタンスの情報
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud redis instances list --region=asia-northeast1
+INSTANCE_NAME  VERSION    REGION           TIER   SIZE_GB  HOST          PORT  NETWORK  RESERVED_IP      STATUS  CREATE_TIME
+redis-db       REDIS_7_0  asia-northeast1  BASIC  1        10.16.32.147  6378  default  10.16.32.144/29  READY   2024-07-12T16:08:48
+
+# vpcネットワークの詳細情報
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud compute networks describe default
+autoCreateSubnetworks: true
+creationTimestamp: '2024-07-12T08:56:29.324-07:00'
+description: Default network for the project
+id: '453702820478905538'
+kind: compute#network
+name: default
+networkFirewallPolicyEnforcementOrder: AFTER_CLASSIC_FIREWALL
+peerings:
+- autoCreateRoutes: true
+  exchangeSubnetRoutes: true
+  exportCustomRoutes: false
+  exportSubnetRoutesWithPublicIp: true
+  importCustomRoutes: false
+  importSubnetRoutesWithPublicIp: true
+  name: redis-peer-953790730372
+  network: https://www.googleapis.com/compute/v1/projects/dde4646a9979a53d5p-tp/global/networks/default-redis-e619463a-57d4-4053-a70d-b8c275ad4d49
+  stackType: IPV4_ONLY
+  state: ACTIVE
+  stateDetails: '[2024-07-12T09:10:29.248-07:00]: Connected.'
+routingConfig:
+  routingMode: REGIONAL
+selfLink: https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/global/networks/default
+selfLinkWithId: https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/global/networks/453702820478905538
+subnetworks:
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-east7/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-southwest1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/me-west1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-west4/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-west2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-south2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-east2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/africa-south1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west3/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/southamerica-west1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/northamerica-northeast1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-east4/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west9/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-northeast1/subnetworks/aet-asianortheast1-connector-sbnt
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/australia-southeast2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-west8/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-east1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west10/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-west1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-northeast1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-east1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west12/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west6/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-central2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/australia-southeast1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/northamerica-northeast2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-southeast1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/me-central1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-south1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-east5/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-north1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-south1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west8/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/southamerica-east1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west4/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-southeast2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-central1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-northeast2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/europe-west2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/us-west3/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/crack-celerity-429215-a2/regions/asia-northeast3/subnetworks/default
+x_gcloud_bgp_routing_mode: REGIONAL
+x_gcloud_subnet_mode: AUTO
+
+# vpcコネクタの情報
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud compute networks vpc-access connectors describe connector --region=asia-northeast1
+connectedProjects:
+- crack-celerity-429215-a2
+ipCidrRange: 10.8.0.0/28
+machineType: e2-micro
+maxInstances: 3
+maxThroughput: 300
+minInstances: 2
+minThroughput: 200
+name: projects/crack-celerity-429215-a2/locations/asia-northeast1/connectors/connector
+network: default
+state: READY
+
+# 現在のロールとメンバー（プリンシパル）
+(venv) takahashitakuya@takahashitakuyanoMacBook-Pro history_flow_quiz % gcloud projects get-iam-policy crack-celerity-429215-a2
+bindings:
+- members:
+  - serviceAccount:31339892529@cloudbuild.gserviceaccount.com
+  role: roles/appengine.appAdmin
+- members:
+  - serviceAccount:service-31339892529@gcp-gae-service.iam.gserviceaccount.com
+  role: roles/appengine.serviceAgent
+- members:
+  - serviceAccount:service-31339892529@gcp-sa-artifactregistry.iam.gserviceaccount.com
+  role: roles/artifactregistry.serviceAgent
+- members:
+  - serviceAccount:31339892529@cloudbuild.gserviceaccount.com
+  role: roles/cloudbuild.builds.builder
+- members:
+  - serviceAccount:service-31339892529@gcp-sa-cloudbuild.iam.gserviceaccount.com
+  role: roles/cloudbuild.serviceAgent
+- members:
+  - serviceAccount:service-31339892529@compute-system.iam.gserviceaccount.com
+  role: roles/compute.serviceAgent
+- members:
+  - serviceAccount:service-31339892529@container-engine-robot.iam.gserviceaccount.com
+  role: roles/container.serviceAgent
+- members:
+  - serviceAccount:service-31339892529@containerregistry.iam.gserviceaccount.com
+  role: roles/containerregistry.ServiceAgent
+- members:
+  - serviceAccount:31339892529-compute@developer.gserviceaccount.com
+  - serviceAccount:31339892529@cloudservices.gserviceaccount.com
+  - serviceAccount:crack-celerity-429215-a2@appspot.gserviceaccount.com
+  role: roles/editor
+- members:
+  - serviceAccount:service-31339892529@gcp-sa-firestore.iam.gserviceaccount.com
+  role: roles/firestore.serviceAgent
+- members:
+  - user:chenway0124.takuya@gmail.com
+  role: roles/owner
+- members:
+  - serviceAccount:service-31339892529@gcp-sa-pubsub.iam.gserviceaccount.com
+  role: roles/pubsub.serviceAgent
+- members:
+  - serviceAccount:service-31339892529@cloud-redis.iam.gserviceaccount.com
+  role: roles/redis.serviceAgent
+- members:
+  - serviceAccount:service-31339892529@gcp-sa-vpcaccess.iam.gserviceaccount.com
+  role: roles/vpcaccess.serviceAgent
+etag: BwYdHQDP9v0=
+version: 1

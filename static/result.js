@@ -1,4 +1,7 @@
-// result.js
+// 結果画面のスクリプト result.js
+
+// アプリケーションのベースURLを定義
+const BASE_URL = window.location.origin;
 
 // ページがロードされたらイベントリスナーを追加する
 document.addEventListener('DOMContentLoaded', function() {
@@ -38,7 +41,7 @@ function logQuestionNumbers() {
 
 // クイズをリセットする関数
 function resetQuiz(callback) {
-    fetch('http://127.0.0.1:5000/reset_quiz')
+    fetch(`${BASE_URL}/reset_quiz`)
         .then(response => response.json())
         .then(data => {
             console.log(data.status); // リセットのステータスをログ出力
