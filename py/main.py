@@ -19,7 +19,7 @@ import redis
 app = Flask(__name__, template_folder=os.path.join('../templates'), static_folder='../static')
 
 # 環境変数から設定を読み込む
-app_env = os.environ.get('APP_ENV', 'development')
+app_env = os.environ.get('APP_ENV', 'production')
 
 if app_env == 'production':
     redis_host = os.environ.get('REDISHOST', 'localhost')

@@ -136,7 +136,8 @@ span.qt1_furigana {
 /*遊び方ボタンのフォント*/
 .how_to_f{
     display: inline-block;
-    font-family: 'GenSekiGothic JP H', sans-serif;
+    font-family: 'Noto Sans JP', 'GenSekiGothic JP H', sans-serif;
+    font-weight: 800;
     font-size: calc(0.6em + 1vw);
     /*background-color: aqua;*/
 }
@@ -425,13 +426,19 @@ li.ht_t_style{
   margin: 0;
   padding-left: calc(20px + 1vw);
   font-size: calc(0.7em + 0.6vw);
-  font-family: 'Yu Gothic',sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 300;
+  font-style: normal;
 }
 
 .content-p{
   margin-bottom: 20px;
 }
 
+.contact_x{
+  color: #0033cc;
+  text-decoration: underline;
+}
 
 /*タイトルとロゴの紹介をトグルで、スタイリング*/
 /*idとして使用される"toggle-checkbox-tl"とコンテンツのフォントに関するスタイリングだけ残す*/
@@ -471,8 +478,9 @@ li.ht_t_style{
   margin-top: 20px;
   margin-bottom: 20px;
   font-size: calc(0.7em + 0.6vw);
-  font-family: 'ヒラギノ明朝 ProN','Hiragino Mincho ProN', 
-  sans-serif;
+  font-family: shippori-mincho-b1, sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .logo-in-toggle{
@@ -559,7 +567,8 @@ li.ht_t_style{
   margin-top: calc(3em + 1vw);
   text-decoration: underline;
   text-align: center;
-  font-family: 'Osaka', 'Hiragino Sans', sans-serif;
+  font-family: 'Noto sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
 }
 /*------------クイズ出題画面のスタイリング:quiz_execution.html--------------*/
 
@@ -682,6 +691,7 @@ li.ht_t_style{
   text-align: center;
   font-size: calc(1em + 0.7vw);
   font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
   color: #fff;
 }
 
@@ -827,7 +837,7 @@ li.ht_t_style{
   width: calc(85% + 1vw);
   margin: 0 auto 6% auto;
   height: auto;
-  font-family: 'Noto Serif JP', 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-family: 'Noto Sans JP', 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
   font-size: calc(0.8em + 1vw);
   font-weight: 600;
   line-height: 1.6em;
@@ -843,8 +853,9 @@ li.ht_t_style{
   padding: calc(0.5em + 1vw);
   height: auto;
   border-radius: calc(3px + 1vw);
-  font-family:'Osaka', serif;
+  font-family: source-han-sans-japanese, sans-serif;
   font-size: calc(0.8em + 1vw);
+  font-weight: 500;
   line-height: calc(1.6em + 0.7vw);
   letter-spacing: 0.05em;
   white-space: pre-line;

@@ -20,6 +20,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- adobe fonts のプロジェクトを読み込む-->
+    <script>
+        (function(d) {
+          var config = {
+            kitId: 'hdm6oce',
+            scriptTimeout: 3000,
+            async: true
+          },
+          h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+        })(document);
+    </script>
+
     <!-- フォントをプリロード -->
     <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
     <!--ページのURL-->
@@ -101,7 +114,7 @@
                             <li class="ht_t_style">名称の表記は、基本、英語による一般的な発音に基づいて表記しています。
                                 過去に習った表記と異なる場合もあるかもしれませんが、内容そのものに違いはありません。
                             </li>
-                            <li class="ht_t_style">クイズ画面中にページをリロードすると、リロード前の問題がそのまま表示されます。ページバックをした場合も同様です。クイズを最初からやり直したい場合は画面下の「ホームに戻る」ボタンを押してください。
+                            <li class="ht_t_style">（※現在調整中です）クイズ画面中にページをリロードすると、リロード前の問題がそのまま表示されます。ページバックをした場合も同様です。クイズを最初からやり直したい場合は画面下の「ホームに戻る」ボタンを押してください。
                             </li>
                         </ul>
                     </div>
@@ -135,9 +148,9 @@
             </label>
             <div class="toggle-content">
               <ul class="content-ul">
-                <li class="content-p">事実の正確性には十分配慮していますが、素人による制作なので誤りがある場合もあります。より正確な内容はご自身でお調べ下さい。</br>あくまで歴史の流れをざっくりと理解する目的で楽しんでいただければ幸いです。
+                <li class="content-p">事実の正確さには十分配慮していますが、素人による制作なので誤りがある場合もあります。より正確な内容はご自身でお調べ下さい。</br>あくまで歴史の流れをざっくりと理解する目的で楽しんでいただければ幸いです。
                 </li>
-                <li class="content-p">アプリの不具合については入念にチェックしていますが、それでも予想しないエラーが起こることはあります。その場合は大変お手数ですが、こちらの連絡先または私のXアカウントからDMにてお知らせください。    
+                <li class="content-p">アプリの不具合については入念にチェックしていますが、それでも予想しないエラーが起こることはあります。その場合は大変お手数ですが<a href="https://x.com/taku_nuc" class="contact_x" target="_blank" rel="noopener noreferrer">私のXアカウントからDMにてお知らせください。</a>    
                 </li>
               </ul>
             </div>
@@ -163,11 +176,8 @@
                     <img class="toggle-lo-style" src="{{ url_for('static', filename='logo_eye_white.svg') }}" alt="logo-in-toggle">
                 </div>
                 <p class="p-tl">カササギが雲の上に乗りながら時間の流れを感じる様子を
-                    ロゴにしています。色が金色なのは、四字熟語に「金烏玉兎（きんうぎょくと）」
-                    というものがあり、これを参考にしたから。太陽と月、または歳月や時間の流れを表す
-                    のですが、「金烏」「玉兎」はどちらも中国の伝説上の動物であり、
-                    金烏は太陽、玉兎は月をそれぞれ象徴する存在であるといいます。「金のカラスの方が
-                    カッコ良さそう」という安直な理由で金烏の方を採用しました。
+                    表現しています。全身の金色は四字熟語の「金烏玉兎（きんうぎょくと）」
+                    を参考に、歳月や時間の流れを表す伝説上の動物「金烏」をモチーフにしています。
                 </p>
 
             </div>
@@ -175,7 +185,7 @@
     </main>
     <footer class="footer">
         <div class="sns_icon">
-            <a href="https://x.com/allm1107" target="_blank" rel="noopener noreferrer">
+            <a href="https://x.com/taku_nuc" target="_blank" rel="noopener noreferrer">
                 <img class="x" src="{{ url_for('static', filename='sns_logo/x-logo/logo-black.png') }}" alt="x">
             </a>
             <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
