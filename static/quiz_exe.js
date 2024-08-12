@@ -128,6 +128,8 @@ function handleResponse(response) {
 
 // 2. 問題文と選択肢を表示する関数
 function displayQuestion(questionData) {
+    // デバッグ用のログ
+    console.log("Received question data:", questionData);
     // サーバーからの現在の問題インデックスを取得して更新
     if (questionData.next_index !== undefined) {
         currentQuestionIndex = parseInt(questionData.next_index, 10);
@@ -305,7 +307,10 @@ function setActiveChoice(selectedChoiceId) {
 
 // 解答データを送信するsubmitAnswer関数の定義、目的は解説文を正しく表示するため
 async function submitAnswer(choiceId, nextButton, questionId) {
-    console.log('questionId in submitAnswer:', questionId, 'Type:', typeof questionId);
+    // questionIdを整数に変換
+    const questionIdInt = parseInt(questionId, 10);
+
+    console.log('questionId in submitAnswer:', questionIdInt, 'Type:', typeof questionIdInt);
     console.log('activeChoice in submitAnswer:', choiceId, 'Type:', typeof choiceId);
     try {
         const response = await fetch(`${BASE_URL}/submit_answer`, {
@@ -314,7 +319,7 @@ async function submitAnswer(choiceId, nextButton, questionId) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                questionId: parseInt(questionId),
+                questionId: questionIdInt,
                 activeChoice: parseInt(choiceId),
             }),
         });

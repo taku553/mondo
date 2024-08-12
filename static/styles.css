@@ -440,6 +440,28 @@ li.ht_t_style{
   text-decoration: underline;
 }
 
+.caution-p{
+  display: flex;
+  flex-direction: row;
+}
+
+.caution{
+  width: calc(20px + 1vw);
+  height: calc(20px + 1vw);
+  margin: calc(8px + 1vw) calc(5px + 1vw) 0 0;
+}
+
+.caution-t{
+  font-size: calc(0.7em + 0.6vw);
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.red-t{
+  color: red;
+}
+
 /*タイトルとロゴの紹介をトグルで、スタイリング*/
 /*idとして使用される"toggle-checkbox-tl"とコンテンツのフォントに関するスタイリングだけ残す*/
 .toggle-desidn-info{

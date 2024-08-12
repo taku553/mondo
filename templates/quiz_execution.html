@@ -10,7 +10,7 @@
     <title>クイズ</title>
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='logo_eye_white_bw.svg') }}" type="svg/x-icon">
     <!--フォントリンク-->
     <!--noto sans jp-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,6 +46,16 @@
             font-display: swap; /* フォールバックフォントで即表示し、利用可能になればスワップ */
         }
     </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRFNLZKC9G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+        
+      gtag('config', 'G-BRFNLZKC9G');
+    </script>
 </head>
 <body>
     <main>

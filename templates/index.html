@@ -9,7 +9,7 @@
     <title>ホーム</title>
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='logo_eye_white_bw.svg') }}" type="svg/x-icon">
     <!--フォントリンク-->
     <!--shippori mintyo b1-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,6 +35,7 @@
 
     <!-- フォントをプリロード -->
     <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
+    
     <!--ページのURL-->
     <a href="index.html"></a>
 
@@ -49,6 +50,19 @@
         }
     </style>
 
+    <!-- google adsence -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1905179670404848"
+     crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRFNLZKC9G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BRFNLZKC9G');
+    </script>
 </head>
 <body>
     <main class="main">
@@ -150,9 +164,12 @@
               <ul class="content-ul">
                 <li class="content-p">事実の正確さには十分配慮していますが、素人による制作なので誤りがある場合もあります。より正確な内容はご自身でお調べ下さい。</br>あくまで歴史の流れをざっくりと理解する目的で楽しんでいただければ幸いです。
                 </li>
-                <li class="content-p">アプリの不具合については入念にチェックしていますが、それでも予想しないエラーが起こることはあります。その場合は大変お手数ですが<a href="https://x.com/taku_nuc" class="contact_x" target="_blank" rel="noopener noreferrer">私のXアカウントからDMにてお知らせください。</a>    
-                </li>
-              </ul>
+                <li class="content-p">アプリの不具合については入念にチェックしていますが、それでも予想しないエラーが起こることはあります。その場合は大変お手数ですが<a href="https://x.com/taku_nuc" class="contact_x" target="_blank" rel="noopener noreferrer">私のXアカウントからDMにてお知らせください。</a>
+                </li>    
+            </ul>
+            <div class="caution-p">
+                <img src="{{url_for('static', filename='fonts/caution/caution.svg')}}" alt="caution" class="caution">
+                <p class="caution-t">一問目の解答したときに<span class="red-t">「解答の送信に失敗しました。」</span>と表示されてしまう場合は、前回の解答データがセッションに残ったまま初期化できずにデータが衝突してしまっている可能性があります。この場合はクイズ中の「やり直す」ボタンあるいは「ホームに戻る」ボタンを押して、前回の解答データをクリアにしてからもう一度クイズを始めてみてください。それでも解答の送信に失敗する場合は、ブラウザのキャッシュをクリアして再度試してみてください。それでも失敗する場合は、これもお手数ですが<a href="https://x.com/taku_nuc" class="contact_x" target="_blank" rel="noopener noreferrer">私のXアカウントまでDMでお知らせください。</a></p>
             </div>
         </div>
 

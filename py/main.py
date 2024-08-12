@@ -199,20 +199,18 @@ def get_random_question():
     # 現在の質問データがセッションに保存されたことをターミナルログに表示
     app.logger.info(f"Current question data saved to session: {random_question['text']}")
 
-    return jsonify({
-        # 質問のID
+    # 現在の質問をセッションに保存
+    session['current_question'] = {
         'id': random_question['id'],
-        # 質問の問題文
         'question': {'text': random_question['text']},
-        # 質問の選択肢
         'choices': random_question['choices'],
-       # 次の問題インデックスを返す
-        'next_index': current_index + 1,
-        # 解答済み問題数をレスポンスに含める
+        'next_index': session['current_question_index'] + 1,
         'answered_questions': session.get('answered_questions', []),
-        # 質問の総数
         'total_questions': TOTAL_QUESTIONS
-})
+    }
+    session.modified = True
+
+    return jsonify(session['current_question'])
 
 # ------ POSTリクエストでユーザーの回答を処理するエンドポイント ------
 @app.route('/submit_answer', methods=['POST'])
