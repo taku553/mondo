@@ -91,6 +91,7 @@ function getAndDisplayQuestion() {
             if(data.error) {
                 throw new Error(data.error);
             }
+
             // question_idの値が正しく取得されてるか確認するデバッグプリントを追加
             console.log(`question_id: ${data.id}`);
 
@@ -174,6 +175,8 @@ function displayQuestion(questionData) {
         choicesContainer.appendChild(choiceElement);
     });
 
+    // データが全て適用されたら、bodyのhidden属性を削除して表示
+    document.body.hidden = false;
 }
 
 // 各選択肢をコンテナに追加し、イベントリスナーを設定

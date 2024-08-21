@@ -1,5 +1,5 @@
 # Flaskとその他のモジュールをインポート
-from flask import Flask, request, jsonify, session, render_template, url_for, redirect
+from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app
 from flask_session import Session  # Flask-Sessionを追加、ユーザーからの解答データ（セッションデータ）を管理するflaskのパッケージ
 from flask_cors import CORS  # CORSをインポート
 import random
@@ -13,10 +13,12 @@ import logging
 from logging.handlers import RotatingFileHandler
 # redisをインポート
 import redis
+import logging
 
 
 # Flaskアプリケーションを初期化
 app = Flask(__name__, template_folder=os.path.join('../templates'), static_folder='../static')
+app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
 
 # 環境変数から設定を読み込む
 app_env = os.environ.get('APP_ENV', 'production')
@@ -45,7 +47,7 @@ else:
         # SESSION_FILE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sessions')), # セッションファイルの保存先ディレクトリを指定
         SESSION_REDIS = redis.from_url('redis://localhost:6379'),  # Redisの接続情報を設定
         SESSION_PERMANENT=False,
-        PERMANENT_SESSION_LIFETIME=timedelta(days=1),
+        PERMANENT_SESSION_LIFETIME=timedelta(days=1)
         # 他の開発環境用の設定
     )
     # 開発環境用のログ設定
@@ -57,13 +59,6 @@ else:
 Session(app)
 
 CORS(app)  # CORSをアプリケーションに適用
-
-
-# ロガーを設定
-logging.basicConfig(level=logging.DEBUG)
-
-# Flaskのロガーにアクセス
-logger = logging.getLogger('werkzeug')
 
 
 # プロジェクトのルートディレクトリへの絶対パス
@@ -107,7 +102,6 @@ def handle_exception(e):
 def home():
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
-    
     return render_template('index.html', css_url=css_url)
 
 # ------ プライバシーポリシー画面のhtmlファイルをレンダリングするためのルートハンドラー ------
@@ -120,6 +114,7 @@ def privacy_policy():
 # ------ クイズ実行画面のhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/quiz')
 def quiz():
+    print("quiz called")  # quiz()関数が呼び出されてるか確かめるプリント
     # 必要に応じてセッション変数を初期化
 
     # 現在の質問のインデックスを初期化
@@ -147,34 +142,17 @@ def quiz():
         if not random_question:
             return redirect(url_for('result')) # url_forを使用してresultエンドポイントにリダイレクト
 
-     # 次の質問のインデックスを増分
-    # session['current_question_index'] += 1
 
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
-    
     return render_template('quiz_execution.html', css_url=css_url, current_question_index=session['current_question_index'])
-
 
 # ------ GETリクエストでランダムに選ばれた質問をフロントエンドに送信するエンドポイント ------
 @app.route('/get_random_question', methods=['GET'])
 def get_random_question():
-    print("get_random_question called")  # デバッグ用のプリント
-
-    # 初めて質問を取得するときは、セッション変数を初期化
-    if 'current_question_index' not in session:
-        # 0に初期化。
-        session['current_question_index'] = 0
-        session['answered_questions'] = []
-        session['current_question'] = None
+    print("get_random_question called")  # get_ramdom_question()関数が呼び出されてるか確かめるプリント
 
     
-    # 現在の質問インデックスを取得
-    current_index = session['current_question_index']
-
-    # session['current_question_index'] += 1
-    
-
     # 未回答の質問を取得
     # セッションからanswered_questionsリストを取得しそのうちのquestion_idのみ取り出してsetに変換
     # session.get('answered_questions', [])は、answered_questionsキーが存在しない場合に
@@ -184,20 +162,17 @@ def get_random_question():
     # して、unanswered_questionsリストを作成
     unanswered_questions = [q for q in questions if q['id'] not in answered_question_ids]
     
-    # 未回答の質問がない場合、クイズ終了
+    # 未回答の質問がない場合クイズ終了。問題数がデータ数を上回った場合に出力される
     if not unanswered_questions:
         return jsonify({'error': 'No more questions'}), 404
 
      # 未回答の質問からランダムに選択
     random_question = random.choice(unanswered_questions)
     # 現在の質問をセッションに保存
-    session['current_question'] = random_question
+    # session['current_question'] = random_question
 
     # 選択肢をランダムに並び替える
     random.shuffle(random_question['choices'])
-
-    # 現在の質問データがセッションに保存されたことをターミナルログに表示
-    app.logger.info(f"Current question data saved to session: {random_question['text']}")
 
     # 現在の質問をセッションに保存
     session['current_question'] = {
@@ -210,6 +185,11 @@ def get_random_question():
     }
     session.modified = True
 
+    # 現在の質問データがセッションに保存されたことをターミナルログに表示
+    app.logger.info(f"Current question data saved to session: {random_question['id']}")
+    app.logger.info(f"Current question data saved to session: {random_question['text']}")
+
+    
     return jsonify(session['current_question'])
 
 # ------ POSTリクエストでユーザーの回答を処理するエンドポイント ------
@@ -232,8 +212,6 @@ def submit_answer():
         # エラー処理
         return jsonify({'error': 'Invalid data type question_id'}), 400
 
-    # question_idを整数に変換
-    # question_id = int(question_id)
 
     # questionIdがquestions配列のインデックス範囲内にあるか検証する
     if question_id not in [q['id'] for q in questions]:
@@ -245,11 +223,11 @@ def submit_answer():
 
     # jsで定義したグローバル変数を割り当てるキー名
     # 整数型：active_choice_id
-    active_choice_id = data['activeChoice']
+    active_choice_id = data.get('activeChoice', None)
     # choiceIdの値が適切か確認するデバックプリント
     # print(f"Received activeChoiceId: {active_choice_id}, type: {type(active_choice_id)}")
     if active_choice_id is None:
-        logger.error('activeChoice key is missing in the request data')
+        current_app.logger.error('activeChoice key is missing in the request data')
         return jsonify({'error': 'activeChoice key is missing'}), 400
     
      # データ型確認
@@ -269,7 +247,6 @@ def submit_answer():
     if 'correct_answers' not in session:
         session['correct_answers'] = 0  # セッションに正答数を初期化、変数は"correct_answersに設定"
 
-    
 
     # 正誤判定
     if question is not None:
@@ -309,6 +286,7 @@ def submit_answer():
         session['current_question'] = next_question.get_data(as_text=True)
         session['current_question_index'] += 1
         session.modified = True # セッションが変更されたことをFlaskに通知
+
                        
     # 結果と解説の返送
     return jsonify({

@@ -96,8 +96,8 @@ span.qt1_furigana {
 
 /*黒枠の角丸長方形*/
 .rounded_border {
-  border: 0.3vw solid black; /* 黒色の直線の罫線 */
-  border-radius: calc(2px + 1vw);    /* 角の丸み */
+  border: calc(1px + 0.2vw) solid black; /* 黒色の直線の罫線 */
+  border-radius: calc(1px + 1vw);    /* 角の丸み */
   margin: calc(1em + 5vw) 0;       /* 外側の余白 */
   padding: calc(0.4em + 1vw) calc(0.2em + 1vw);           /* 内側の余白 */
   background-color: #ffff;   /*枠内の背景色*/
@@ -125,9 +125,9 @@ span.qt1_furigana {
 
 /*遊び方ボタンの枠*/
 #howto_button{
-    border: 0.3vw solid black; /* 黒色の直線の罫線 */
-    border-radius: 1.5vw;     /* 角の丸み */
-    padding: 1.5vw 10vw;      /* 内側の余白 */
+    border: calc(1px + 0.2vw) solid black; /* 黒色の直線の罫線 */
+    border-radius: calc(2px + 1vw);    /* 角の丸み */
+    padding: calc(4px +  1vw) calc(10px + 8vw);      /* 内側の余白 */
     margin: 0 auto;         /* 外側の余白 */
     background-color: #ffff;   /*枠内の背景色*/
     cursor: pointer;   /* ホバー時にポインタカーソルを表示 */
@@ -162,7 +162,7 @@ span.qt1_furigana {
     margin: 10% auto;
     border: none;
     width: 90%;
-    height: 82%;
+    height: 80%;
     min-width: 100px;
     max-width: 1000px;
     min-height: 80px;
@@ -188,8 +188,8 @@ span.qt1_furigana {
 /* 閉じるボタンのスタイリング */
 .close img{
     position: absolute;
-    top: 20px;
-    left: 88%;
+    top: calc(20px + 0.1vw);
+    left: calc(88% + 0.1vw);
     right: 0;
     width: calc(20px + 1vw);
     height: calc(20px + 1vw);
@@ -216,11 +216,11 @@ span.qt1_furigana {
     top: 50%;  /*ポップアップウィンドウの左上隅を起点に、長方形枠の左上端をウェイドウ高さの半分だけ移動。*/
     left: 50%;  /*ポップアップウィンドウの左上隅を起点に、長方形枠の左上端をウェイドウ幅の半分だけ移動。*/
     transform: translate(-50%, -45%); /* これで長方形が中央に配置されます */
-    width: calc(100% - 40px); /* ポップアップより小さいサイズに調整します */
+    width: calc(100% - 15%); /* ポップアップより小さいサイズに調整します */
     height: calc(100% - 150px); /* ポップアップより小さいサイズに調整します */
-    border: 0.3vw solid black; /* 黒色の直線の罫線 */
+    border: calc(1px + 0.2vw) solid black; /* 黒色の直線の罫線 */
     border-radius: 8px;     /* 角の丸み */
-    padding: 10px; /* 追加または更新 */
+    padding: calc(10px + 1vw); /* 追加または更新 */
     margin: 0; /* 必要に応じて追加または更新 */
     display: flex;
     flex-direction: column;
@@ -237,7 +237,7 @@ span.qt1_furigana {
     left: 0;
     margin: auto;
     padding-top: 10px;
-    padding-left: 15px;
+    padding-left: calc(10px + 1vw);
     /* background-color: green; */
   }
   
@@ -251,7 +251,7 @@ span.qt1_furigana {
     list-style-position: outside;
     width: auto;
     height: 100%;
-    margin: 10px 6px 0 15px;
+    margin: 10px 14px 0 14px;
     padding: 0;
     font-family: 'Osaka', 'Hiragino Sans', sans-serif;
     font-size: calc(0.8em + 1vw);
@@ -342,14 +342,14 @@ li.ht_t_style{
     display: flex;
     justify-content: center;
     align-items: center;
-    width: calc(8em + 13vw);
-    height: 10%;
-    font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
+    width: calc(7em + 13vw);
+    height: calc(2.5em + 1vw);
+    font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
     font-family: 'GenSekiGothic JP H', sans-serif;
     background-color: #ffde59; /* 黄色の背景 */
     border: none;
     padding: 2vw; /* レスポンシブなパディング */
-    border-radius: 1.5vw;
+    border-radius: calc(2px + 1vw);
     cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
 
@@ -550,11 +550,11 @@ li.ht_t_style{
 .copyrights{
   width: 100%;
   position: relative;
-  bottom: 0;
+  bottom: 3px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  margin-top: calc(1em + 6vh);
+  margin-top: calc(2em + 5vh);
   font-family: 'Noto Sans JP', sans-serif;
 }
 
@@ -593,6 +593,11 @@ li.ht_t_style{
   font-weight: 500;
 }
 /*------------クイズ出題画面のスタイリング:quiz_execution.html--------------*/
+
+/* body内要素の初期状態を非表示。js側でデータが全て適用されたら表示させる*/
+body[hidden] {
+  display: none;
+}
 
 /*クイズのコンテナ*/
 .q_e_container{
