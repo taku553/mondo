@@ -1,8 +1,10 @@
+# ページリロード後の質問再表示に成功し正しく動作したソースコード
 # Flaskとその他のモジュールをインポート
-from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app
+from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app, Response
 from flask_session import Session  # Flask-Sessionを追加、ユーザーからの解答データ（セッションデータ）を管理するflaskのパッケージ
 from flask_cors import CORS  # CORSをインポート
 import random
+import json
 # dataset.csvからデータセットをインポート
 import csv
 # ファイルパスの指定のためosをインポート
@@ -152,6 +154,12 @@ def quiz():
 def get_random_question():
     print("get_random_question called")  # get_ramdom_question()関数が呼び出されてるか確かめるプリント
 
+    # セッションに保存された現在の質問をチェック
+    current_question = session.get('current_question')
+
+    if current_question:
+        # セッションに保存された質問がある場合、JSONとしてパースしてから返す
+        return jsonify(json.loads(current_question))
     
     # 未回答の質問を取得
     # セッションからanswered_questionsリストを取得しそのうちのquestion_idのみ取り出してsetに変換
@@ -168,29 +176,32 @@ def get_random_question():
 
      # 未回答の質問からランダムに選択
     random_question = random.choice(unanswered_questions)
-    # 現在の質問をセッションに保存
-    # session['current_question'] = random_question
 
     # 選択肢をランダムに並び替える
     random.shuffle(random_question['choices'])
 
+    # 現在の質問インデックスを更新
+    current_index = session.get('current_question_index', 0)
+    next_index = current_index + 1
+
     # 現在の質問をセッションに保存
-    session['current_question'] = {
+    session['current_question'] = json.dumps({
         'id': random_question['id'],
         'question': {'text': random_question['text']},
         'choices': random_question['choices'],
-        'next_index': session['current_question_index'] + 1,
+        'next_index': next_index,
         'answered_questions': session.get('answered_questions', []),
         'total_questions': TOTAL_QUESTIONS
-    }
+    }, ensure_ascii=False)
+    session['current_question_index'] = current_index  # 現在のインデックスを保存
     session.modified = True
 
     # 現在の質問データがセッションに保存されたことをターミナルログに表示
     app.logger.info(f"Current question data saved to session: {random_question['id']}")
     app.logger.info(f"Current question data saved to session: {random_question['text']}")
 
-    
-    return jsonify(session['current_question'])
+    # セッションに保存したデータをJSONとしてパースしてから返す
+    return jsonify(json.loads(session['current_question']))
 
 # ------ POSTリクエストでユーザーの回答を処理するエンドポイント ------
 @app.route('/submit_answer', methods=['POST'])
@@ -280,22 +291,32 @@ def submit_answer():
     # session['answered_questions']を使うことで実際に表示された質問数
     is_quiz_finished = session['answered_question_count'] >= TOTAL_QUESTIONS
 
+    # 現在の質問インデックスを更新
+    session['current_question_index'] = session.get('current_question_index', 0) + 1
+
     # クイズが終了していない場合、次の質問のインデックスを保存
     if not is_quiz_finished:
         next_question = get_random_question()
         session['current_question'] = next_question.get_data(as_text=True)
-        session['current_question_index'] += 1
         session.modified = True # セッションが変更されたことをFlaskに通知
 
+    # 解説文をUTF-8でエンコード
+    encoded_explanation = json.dumps(question['explanation'], ensure_ascii=False)
                        
     # 結果と解説の返送
-    return jsonify({
+    response_data = {
         'result': result, 
-        'explanation': question['explanation'], 
+        'explanation': encoded_explanation, 
         'correct_answers': session['correct_answers'],
         'isQuizFinished': is_quiz_finished,
         'currrent_question_index': session['current_question_index']
-    })
+    }
+
+     # レスポンスデータ全体をJSONエンコード
+    encoded_response = json.dumps(response_data, ensure_ascii=False)
+
+    # エンコードされたデータをレスポンスとして返す
+    return Response(encoded_response, content_type='application/json; charset=utf-8')
 
 
 # ------ 結果画面のhtmlファイルをレンダリングするためのルートハンドラー ------
