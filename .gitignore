@@ -1,0 +1,29 @@
+# ログとデバッグファイル
+app.log*
+debug.txt
+*.log
+
+# データベースとキャッシュファイル
+dump.rdb
+__pycache__/
+*.pyc
+*.pyo
+
+# プロジェクト固有のファイル
+project_info.txt
+config.py
+
+# セッションと仮想環境
+sessions/
+venv/
+
+# システムファイル
+.DS_Store
+
+# 環境設定ファイル
+.env
+
+# エディタ固有のファイル
+.vscode/
+.idea/
+*.swp
