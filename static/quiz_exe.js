@@ -1,3 +1,4 @@
+// ページリロード後の処理を解決したjsファイルのソースコード
 // クイズ画面のスクリプト quiz_exe.js
 
 // アプリケーションのベースURLを定義
@@ -333,8 +334,20 @@ async function submitAnswer(choiceId, nextButton, questionId) {
             throw new Error(`Server responded with ${response.status}: ${error}`);
         }
 
-        const data = await response.json(); // サーバーからのレスポンスボディをJSONとして解析
-        console.log(data); // 必要に応じてレスポンスデータをログ出力
+        // レスポンスの生データをログ出力
+        const rawData = await response.text();
+        console.log('Raw server response:', rawData);
+
+        let data;
+        try {
+            data = JSON.parse(rawData);
+        } catch (error) {
+            console.error('Failed to parse server response:', error);
+            throw new Error('Invalid JSON in server response');
+        }
+
+        console.log('Parsed server response:', data);
+
 
         // 次の問題へ移動、または結果画面へリダイレクト
         if (data.result) {
