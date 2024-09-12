@@ -17,22 +17,47 @@ document.addEventListener('DOMContentLoaded', function() {
   }).catch(function (error) {
     console.error('フォントの読み込み中にエラーが発生しました:', error);
   });
-  
-    // ボタン要素を取得
-    var button = document.getElementById('start_b_f');
 
-    // リセットボタンのイベントリスナー
-  document.getElementById('start_b_f').addEventListener('click', function() {
-    // クイズをリセットする関数を呼び出す
-    resetQuiz();
+  // ドロップダウンメニューによる通信
+  //Secect2の初期化
+  $('.js-example-basic-single').select2({
+    width: 'calc(7em + 6vw)', // または '100%' など、任意の値を設定
+    minimumResultsForSearch: Infinity, // 検索ボックスを非表示
+    containerCssClass: 'custom-select2-container',
+    dropdownCssClass: 'custom-select2-dropdown'      
+    // 必要に応じて追加のオプションを設定
   });
 
-    // ボタンがクリックされたときのイベントリスナーを追加
-    button.addEventListener('click', function() {
-        // ここでページ遷移を実行
-        window.location.href = '/quiz';  // 遷移先のURLを指定
-    });
+  // スタートボタンのイベントリスナー
+  $('#start_b_f').on('click', function(e) {
+      e.preventDefault();
+      var selectedRange = $('#quiz_range').val();
+      if (!selectedRange) {
+          alert('出題範囲を選択してください。');
+          return;
+      }
 
+      //クイズをリセット
+      // resetQuiz();
+
+      // 選択された範囲をサーバーに送信
+      $.ajax({
+          url: `${BASE_URL}/set_quiz_range`,
+          method: 'POST',
+          data: JSON.stringify({ range: selectedRange }),
+          contentType: 'application/json',
+          success: function(response) {
+              if (response.status === 'success') {
+                  window.location.href = '/quiz';
+              } else {
+                  alert('出題範囲の設定に失敗しました。もう一度お試しください。');
+              }
+          },
+          error: function() {
+              alert('サーバーとの通信に失敗しました。もう一度お試しください。');
+          }
+      });
+  });
 });
 
 
@@ -45,6 +70,8 @@ function resetQuiz() {
           console.log(data.status); // リセットのステータスをログ出力
           // ここで必要に応じてクライアント側の状態もリセットする
           // ページをリロードするか、ホームにリダイレクトするなど
+          // resetQuiz関数はホーム画面スタートボタンだけじゃなく結果画面の再挑戦ボタンでも使うので
+          // /quizルートへ遷移する際は直前の出題範囲をそのまま使うようにしたい。そのための調整が必要。
           window.location.href = '/quiz';
       })
       .catch(error => console.error('クイズのリセット中にエラー:', error));
@@ -110,3 +137,4 @@ $(document).ready(function(){
       changeSlide(index);
     });
   });
+

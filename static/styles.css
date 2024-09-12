@@ -325,7 +325,76 @@ li.ht_t_style{
   .dot.active {
     background-color: black;
   }
-  
+
+/* ドロップダウンメニューのスタイリング */
+/* コンテナ */
+.quiz-range-selector{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto calc(1em + 1vw) auto;
+  width: 100%;
+  height: 100%;
+  /*background-color: yellow;*/
+}
+
+/* 選択ボックス */
+.js-example-basic-single{
+  width: calc(7em + 6vw);
+  border: calc(1px + 0.2vw) solid #000;
+  border-radius: calc(2px + 1vw);
+  padding: calc(0.4em + 1vw);
+  background-color: #ffff;
+}
+
+/* select2要素のスタイリング */
+ body .select2-container--default .select2-selection--single{
+  border: calc(0.8px + 0.1vw) solid #1f1f1f;
+  border-radius: calc(2px + 0.5vw);
+  background-color: #ffff;
+}
+
+body .select2-container .select2-selection--single{
+  height: calc(25px + 1vw);
+}
+
+body .select2-container--default .select2-selection--single .select2-selection__rendered{
+  line-height: calc(24px + 1vw);
+  font-size: calc(0.7em + 0.2vw);
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+body .select2-container .select2-selection--single .select2-selection__rendered{
+  padding-left: calc(15px + 1vw);
+}
+
+body .select2-container--default .select2-selection--single .select2-selection__arrow{
+  height: calc(24px + 1vw);
+}
+/* リスト内要素のスタイリング */
+body .select2-container--default .select2-results>.select2-results__options{
+  font-family: 'Noto Sans JP';
+  font-size: calc(0.6em + 0.5vw);
+  font-weight: 500;
+}
+
+/* 矢印のカラー */
+/* 展開前 */
+body .select2-container--default .select2-selection--single .select2-selection__arrow b{
+  border-color: #3f3f3f transparent transparent transparent;
+}
+/* 展開後 */
+body .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+  border-color: transparent transparent #3f3f3f transparent;
+}
+
+
+/* ドロップダウン時の外側ボックスのスタイリング */
+body .select2-dropdown{
+  border: calc(0.8px + 0.1vw) solid #1f1f1f;
+}
+
 
 /*スタートボタンのコンテナ*/
 .start_b{
@@ -592,7 +661,7 @@ li.ht_t_style{
   font-family: 'Noto sans JP', 'Hiragino Sans', sans-serif;
   font-weight: 500;
 }
-/*------------クイズ出題画面のスタイリング:quiz_execution.html--------------*/
+/*------------クイズ出題画面のスタイリング:quiz.html--------------*/
 
 /* body内要素の初期状態を非表示。js側でデータが全て適用されたら表示させる*/
 body[hidden] {

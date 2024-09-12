@@ -81,14 +81,14 @@ with open(dataset_path, 'r', encoding='utf-8') as csvfile:
         correct_choice_id = next((i + 1 for i, choice in enumerate(choices) if choice['text'] == row['correct_choice']), None)
         explanation = row['explanation'].replace('"', '').replace('|','<br>')
         questions.append({
-            'id': int(row['id']),  # 各質問にインデックスを割り当てる
-            'text': row['question'],
-            'choices': choices,
-            'correct_choice_id': correct_choice_id,
-            'explanation': explanation
+            'id': int(row['id']),  # 各質問にインデックス（id）を割り当てる
+            'text': row['question'], # 質問文
+            'choices': choices, # 選択肢
+            'correct_choice_id': correct_choice_id, # 正解の選択肢
+            'explanation': explanation, # 解説文
+            'millennium': row['millennium']  # 年代
         })
 
-TOTAL_QUESTIONS = 10  # 問題総数
 
 # render_temlpate関数を使い、フロントエンドとバックエンドの連携
 # 再利用可能なコンポーネントを作成する
@@ -113,10 +113,39 @@ def privacy_policy():
     css_url = url_for('static', filename='styles.css')
     return render_template('privacy_policy.html', css_url=css_url)
 
+
+# ------ ドロップダウンメニューで選択された項目対応したデータ列の範囲を決定するエンドポイント ------
+@app.route('/set_quiz_range', methods=['POST'])
+def set_quiz_range():
+    print("set_quiz_range called")  # set_quiz_range()関数が呼び出されてるか確かめるプリント
+    data = request.json
+    selected_range = data.get('range')
+    if selected_range in ['first', 'second', 'third']: # 有効な年代のみを受け付ける
+        session['quiz_range'] = selected_range
+        app.logger.info(f"Quiz range set to: {session['quiz_range']}")  # session['quiz_range']にどのデータ範囲が保存されたか確認するログ
+        # 選択された範囲に基づいて質問をフィルタリング
+        filtered_questions = [q for q in questions if q['millennium'] == selected_range]
+        # フィルタリングされた質問の総数をセッションに保存
+        session['total_questions'] = len(filtered_questions)
+        global TOTAL_QUESTIONS
+        # TOTAL_QUESTIONSを動的に設定
+        TOTAL_QUESTIONS = len(filtered_questions)
+        app.logger.info(f"Total questions for selected range '{selected_range}': {len(filtered_questions)}")
+        return jsonify({'status': 'success'})
+    else:
+        app.logger.warning(f"Invalid quiz range selected: {selected_range}")  # エラー時のログ
+        return jsonify({'status': 'error', 'message': '出題範囲が選択されていません。'}), 400
+
+
 # ------ クイズ実行画面のhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/quiz')
 def quiz():
     print("quiz called")  # quiz()関数が呼び出されてるか確かめるプリント
+
+    # セッションに出題範囲が設定されていない場合、ホーム画面にリダイレクト
+    if 'quiz_range' not in session:
+        app.logger.warning("Attempted to access /quiz without setting quiz_range")
+        return redirect(url_for('/'))  # url_forを使用してホーム画面にリダイレクト
     # 必要に応じてセッション変数を初期化
 
     # 現在の質問のインデックスを初期化
@@ -143,11 +172,12 @@ def quiz():
         random_question = get_random_question()
         if not random_question:
             return redirect(url_for('result')) # url_forを使用してresultエンドポイントにリダイレクト
-
+        
 
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
-    return render_template('quiz_execution.html', css_url=css_url, current_question_index=session['current_question_index'])
+    return render_template('quiz.html', css_url=css_url, current_question_index=session['current_question_index'])
+
 
 # ------ GETリクエストでランダムに選ばれた質問をフロントエンドに送信するエンドポイント ------
 @app.route('/get_random_question', methods=['GET'])
@@ -161,6 +191,19 @@ def get_random_question():
         # セッションに保存された質問がある場合、JSONとしてパースしてから返す
         return jsonify(json.loads(current_question))
     
+    # セッションに保存された出題範囲を取得
+    quiz_range = session.get('quiz_range')
+    app.logger.info(f"Current quiz range: {quiz_range}") # 現在設定されているクイズ範囲を出力
+    if not quiz_range:
+        return jsonify({'error': '出題範囲が設定されていません。'}), 400
+
+     # quiz_rangeに基づいて質問をフィルタリング
+    filtered_questions = [q for q in questions if q['millennium'] == quiz_range]
+
+    if not filtered_questions:
+        return jsonify({'error': '選択された範囲の問題が見つかりません。'}), 404
+
+
     # 未回答の質問を取得
     # セッションからanswered_questionsリストを取得しそのうちのquestion_idのみ取り出してsetに変換
     # session.get('answered_questions', [])は、answered_questionsキーが存在しない場合に
@@ -168,7 +211,7 @@ def get_random_question():
     answered_question_ids = set(aq['question_id'] for aq in session.get('answered_questions', []))
     # questionsリストから、question_idがanswered_question_idsセットに含まれないものだけを抽出
     # して、unanswered_questionsリストを作成
-    unanswered_questions = [q for q in questions if q['id'] not in answered_question_ids]
+    unanswered_questions = [q for q in filtered_questions if q['id'] not in answered_question_ids]
     
     # 未回答の質問がない場合クイズ終了。問題数がデータ数を上回った場合に出力される
     if not unanswered_questions:
@@ -214,6 +257,17 @@ def submit_answer():
     # print('question_id in submit_answer:', question_id)
     # 解答済みの質問数を増分
     session['answered_question_count'] += 1
+    
+    # try:
+    #     # 既存のコード
+    #     session['answered_question_count'] = session.get('answered_question_count', 0) + 1
+    #     # 残りのコード
+    # except KeyError as e:
+    #     app.logger.error(f"KeyError in submit_answer: {str(e)}")
+    #     return jsonify({'error': str(e)}), 500
+    # except Exception as e:
+    #     app.logger.error(f"Unexpected error in submit_answer: {str(e)}")
+    #     return jsonify({'error': 'An unexpected error occurred'}), 500    
 
     # questionIdの値が適切か確認するデバックプリント
     # print(f"Received questionId: {question_id}, type: {type(question_id)}")
@@ -344,6 +398,8 @@ def result():
         try:
             # セッションからこの質問に対するユーザーの解答を取得
             user_answer = next((q for q in session.get('answered_questions', []) if q['question_id'] == question['id']), None)
+            if user_answer is None:
+                continue  # user_answerがNoneの場合はスキップ
             # ユーザーが選んだ選択肢の文章を格納するキーをまだ設定していなかったので新たに作成し、
             # これに文章を格納する
             # ユーザーが選んだ選択肢の文章を取得
@@ -354,7 +410,12 @@ def result():
                 'explanation': next((q['explanation'] for q in session.get('answered_questions', []) if q['question_id'] == question['id']), question['explanation']),
                 'display_order': user_answer['display_order'] + 1  # 表示順序を1から始めるよう修正
             }
-            answered_questions_info.append(answered_question_info)    
+            answered_questions_info.append(answered_question_info)
+
+            # answered_questions_infoが存在しない場合のエラーハンドリング
+            if not answered_questions_info:
+                return "No questions have been answered.", 400
+
         except (TypeError, KeyError) as e:
             print(f"Error occurred: {str(e)}")
             print(f"question object: {question}")
@@ -362,7 +423,8 @@ def result():
 
     # セッションから正答数を取得
     correct_answers = session.get('correct_answers', 0)
-    total_questions = len(questions)
+    # セッションからフィルタリングされた質問の総数を取得
+    total_questions = session.get('total_questions', 0)
 
     # セッション内容を出力
     app.logger.debug(session)
@@ -373,18 +435,28 @@ def result():
     # result.htmlに正答数と総問題数を渡す
     return render_template('result.html', correct=correct_answers, total=total_questions, answered_questions=answered_questions_info)
 
-@app.route('/reset_quiz', methods=['GET'])
-def reset_quiz():
-    # セッションをリセットする必要があるクイズ関連の変数のみクリア
-    session.pop('current_question_index', None)
-    session.pop('current_question', None)
-    session.pop('correct_answers', None)
-    session.pop('answered_questions', None)
-    session.pop('answered_question_count', None)
+# ------ クイズをリセットするエンドポイント ------
+
+# リスタートボタンとホームに戻るボタンが共通で使用する、引数と条件分岐付きの関数
+def reset_quiz(keep_quiz_range=False):
+    keys_to_keep = ['quiz_range', 'total_questions'] if keep_quiz_range else []
+    for key in list(session.keys()):
+        if key not in keys_to_keep:
+            session.pop(key, None)
     session.modified = True
 
-    # JSONレスポンスを返す
+# リスタートボタンが呼び出すエンドポイント、ここでは変数"keep__quiz_range"に保存された値を使う前提でreset_quiz()関数を呼び出す
+@app.route('/reset_quiz', methods=['POST'])
+def reset_quiz_route():
+    keep_quiz_range = request.json.get('keep_quiz_range', False)
+    reset_quiz(keep_quiz_range)
     return jsonify({'status': 'Quiz reset successfully'}), 200
+
+# リセットボタンが呼び出すエンドポイント、ここでは変数"keep__quiz_range"に保存された値を使わない前提でreset_quiz()関数を呼び出す
+@app.route('/reset_all', methods=['POST'])
+def reset_all_route():
+    reset_quiz(keep_quiz_range=False)
+    return jsonify({'status': 'All session data reset successfully'}), 200
 
 # スクリプトが直接実行された場合にアプリケーションが開始
 if __name__ == '__main__':

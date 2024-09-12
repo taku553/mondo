@@ -38,88 +38,43 @@ function setDisabledState(choiceElement, isDisabled) {
     }
 }
 
-/*質問画面表示のタイミングでDOMコンテンツを読み込むイベントリスナー
-質問idを取得する関数"getAndDisplayQuestion()"と、「次へ」ボタン要素の取得、および
-ボタンクリック時に解答データを送信する関数"setupNextButtonListener();"をそれぞれ呼び出す役目を担う
-*/
-document.addEventListener('DOMContentLoaded', () => {
-    nextButton = document.getElementById('next-button');  // ボタン要素を取得
-    // '次へ'ボタンを有効化
-    nextButton.disabled = false;
-    if (!nextButton) {
-        console.error('Next button not found');
-        return;
-    }
-    
-    /* 「次へ」ボタンに対し、クリックすると解答データをサーバーへ送信する関数"submitAnswer"
-    を呼び出す目的の関数*/
-    setupNextButtonListener();
-    // ページのロード時に画面に表示される質問を取得・表示関数
-    getAndDisplayQuestion();
-});
-
-// 「次へ」ボタンに解答データを送信するイベントリスナーを設定
-function setupNextButtonListener() {
-    nextButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-        if (choiceId === null) {
-            alert('選択肢が選ばれていません');
-            return;
-        }
-
-        // 質問要素からquestionIdを取得
-        const questionElement = document.getElementById('question');
-        const questionId = questionElement.getAttribute('data-question-id');
-
-        try {
-            await submitAnswer(choiceId, nextButton, questionId);
-        } catch (error) {
-            console.error('解答の送信中にエラーが発生しました:', error);
-            alert('解答の送信に失敗しました。ネットワークの接続を確認して、再度試してください。');
-        }
-    });
-}
 
 // 1. 問題データの取得と表示：
 // 非同期リクエストで問題をサーバーから取得し、結果を関数"displayQuestion"に渡す関数
-function getAndDisplayQuestion() {
+// 非同期関数として修正
+async function getAndDisplayQuestion() {
     console.log('getAndDisplayQuestion called'); // 呼び出しの確認用ログ
     setLoadingState(true);  // ローディング状態をonにする
-    // サーバー（Flaskを使用）から問題データを取得するための非同期リクエスト
-    fetch(`${BASE_URL}/get_random_question`)  // Flaskサーバーから問題データを取得。'/get_question'エンドポイントにHTTP GETリクエストを非同期で送信
-        .then(handleResponse)
-        .then(data => {
-            if(data.error) {
-                throw new Error(data.error);
-            }
-
-            // question_idの値が正しく取得されてるか確認するデバッグプリントを追加
-            console.log(`question_id: ${data.id}`);
-
-            // クイズ開始時に問題総数を保存
-            totalQuestions = data.total_questions_index;
-
-
-            // 問題を画面に表示、セッションに保存された質問があればそれを使用する
-            if (data.current_question) {
-                displayQuestion(data.current_question);
-            } else {
-                displayQuestion(data);
-            }
-        })
-
-        // エラーが発生した場合にコンソールにエラーメッセージを表示
-        .catch(error => {
-            console.error('問題を取得中にエラーが発生しました:', error);
-            // "No more questions"エラーの場合は結果ページにリダイレクト
-            if (error.message.includes("No more questions")) {
-                window.location.href = '/result';
-            }
-        })
-        .finally(() => {
-            setLoadingState(false); // ローディング状態をoffにする
-        });
+    try {
+        // サーバー（Flaskを使用）から問題データを取得するための非同期リクエスト
+        // Flaskサーバーから問題データを取得。'/get_question'エンドポイントにHTTP GETリクエストを非同期で送信
+        const response  = await fetch(`${BASE_URL}/get_random_question`);
+        const data = await handleResponse(response);
         
+        if(data.error) {
+            throw new Error(data.error);
+        }
+
+        // question_idの値が正しく取得されてるか確認するデバッグプリントを追加
+        console.log(`question_id: ${data.id}`);
+        // クイズ開始時に問題総数を保存
+        totalQuestions = data.total_questions_index;
+        // 問題を画面に表示、セッションに保存された質問があればそれを使用する
+        if (data.current_question) {
+            displayQuestion(data.current_question);
+        } else {
+            displayQuestion(data);
+        }
+    // エラーが発生した場合にコンソールにエラーメッセージを表示
+    } catch (error) {
+        console.error('問題を取得中にエラーが発生しました:', error);
+        // "No more questions"エラーの場合は結果ページにリダイレクト
+        if (error.message.includes("No more questions")) {
+            window.location.href = '/result';
+        }
+    } finally {
+        setLoadingState(false); // ローディング状態をoffにする
+    }   
 }
 
 // HTTPレスポンスの処理を担当する関数
@@ -175,6 +130,9 @@ function displayQuestion(questionData) {
         const choiceElement = createChoiceElement(choice, index);
         choicesContainer.appendChild(choiceElement);
     });
+
+    // choiceId をリセット
+    choiceId = null;
 
     // データが全て適用されたら、bodyのhidden属性を削除して表示
     document.body.hidden = false;
@@ -309,6 +267,31 @@ function setActiveChoice(selectedChoiceId) {
 }
 
 
+// 「次へ」ボタンに解答データを送信するイベントリスナーを設定
+async function handleNextButtonClick(event) {
+    // 関数の呼び出しとchoiceIdの状態を確認するログ
+    console.log('handleNextButtonClick called');
+    console.log('choiceId:', choiceId);
+
+    // デフォルトの動作（フォーム送信など）を防ぐ
+    event.preventDefault();
+
+    if (choiceId === null) {
+        alert('選択肢が選ばれていません');
+        return;
+    }
+    // 質問要素からquestionIdを取得
+    const questionElement = document.getElementById('question');
+    const questionId = questionElement.getAttribute('data-question-id');
+
+    try {
+        await submitAnswer(choiceId, nextButton, questionId);
+    } catch (error) {
+        console.error('解答の送信中にエラーが発生しました:', error);
+        alert('解答の送信に失敗しました。ネットワークの接続を確認して、再度試してください。');
+    }
+}
+
 // 解答データを送信するsubmitAnswer関数の定義、目的は解説文を正しく表示するため
 async function submitAnswer(choiceId, nextButton, questionId) {
     // questionIdを整数に変換
@@ -358,8 +341,11 @@ async function submitAnswer(choiceId, nextButton, questionId) {
                 // 結果画面へリダイレクト
                 window.location.href = '/result';
             } else {
+                // 次の問題を表示する前に、選択状態をリセット
+                choiceId = null;
+                // awaitを使って次の問題が完全に読み込まれてから処理が続行されることを保証
                 // 次の問題を表示する前に、次の問題インデックスを反映
-                getAndDisplayQuestion();
+                await getAndDisplayQuestion();
             }
         } else {
             console.error('Unexpected response from server:', data);
@@ -373,41 +359,78 @@ async function submitAnswer(choiceId, nextButton, questionId) {
     }
 }
 
-// ページがロードされたらイベントリスナーを追加する
-document.addEventListener('DOMContentLoaded', function() {
+// クイズをリセットする関数
+function resetQuiz(keepQuizRange, callback) {
+    fetch(`${BASE_URL}/reset_quiz`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ keep_quiz_range: keepQuizRange })
+    }).then(response => {
+        if (response.ok) {
+            callback();
+        }
+    }).catch(error => console.error('クイズのリセット中にエラー:', error));
+}
+
+// 全てのセッションデータをリセットする関数
+function resetAll(callback) {
+    fetch(`${BASE_URL}/reset_all`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            callback();
+        }
+    }).catch(error => console.error('全てのセッションデータのリセット中にエラー:', error));
+}
+
+// DOMContentLoaded イベントリスナーを最後に配置
+/*質問画面表示のタイミングでDOMコンテンツを読み込むイベントリスナー
+質問idを取得する関数"getAndDisplayQuestion()"と、「次へ」ボタン要素の取得、および
+ボタンクリック時に解答データを送信する関数"setupNextButtonListener();"をそれぞれ呼び出す役目を担う
+*/
+document.addEventListener('DOMContentLoaded', () => {
+    nextButton = document.getElementById('next-button');  // ボタン要素を取得
+    // '次へ'ボタンを有効化
+    nextButton.disabled = false;
+    if (!nextButton) {
+        console.error('Next button not found');
+        return;
+    }
+    
+    // 次へボタンに直接イベントリスナーを設定
+    nextButton.addEventListener('click', handleNextButtonClick);
+
+    // ページのロード時に画面に表示される質問を取得・表示関数
+    getAndDisplayQuestion();
+
+    // ページがロードされたらイベントリスナーを追加する
     // リセットボタンのイベントリスナー
     document.getElementById('q_window_restart_b').addEventListener('click', function() {
         // クイズをリセットする関数を呼び出す。リセットに成功したらホーム画面にリダイレクトする
-        resetQuiz(() => {
+        resetQuiz(true, () => {
             //Javascriptでクイズ画面にリダイレクト
             window.location.href = '/quiz';
         });
     });
-
     // ホームに戻るボタンのイベントリスナー
     document.getElementById('q_window_home_b').addEventListener('click', function() {
         // クイズデータをリセットし、ホームにリダイレクト
-        resetQuiz(() => {
+        resetAll(() => {
             // ホーム画面にリダイレクト
             window.location.href = '/';
         });
+
     });
 });
 
-// クイズをリセットする関数
-function resetQuiz(callback) {
-    fetch(`${BASE_URL}/reset_quiz`)
-        .then(response => response.json())
-        .then(data => {
-            console.log(data.status); // リセットのステータスをログ出力
-            callback();
-            
-        })
-        .catch(error => console.error('クイズのリセット中にエラー:', error));
-}
-
 /* ページリロードした時にブラウザからのデフォルトメッセージを表示させるイベントリスナー*/
 
+// リロードボタンクリックおよびページ閉じる際に起動させるイベントリスナー
 // リロードボタンクリック関数を起動させるイベントリスナー
 window.onbeforeunload = function(event) {
     // メッセージを設定
