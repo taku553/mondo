@@ -15,6 +15,20 @@ let totalQuestions;
 let currentQuestionIndex = 0;  // グローバルスコープで宣言し、初期値を0に設定
 // ページロード時に一度だけ要素を取得してグローバル変数に保存
 let nextButton;
+
+// 意図的なページ離脱（リセットやホームに戻る）と、ブラウザを閉じるなどの意図しない離脱を区別するフラグ
+// ファイルの先頭付近に追加
+let isQuitting = false;
+
+// リロード検出するフラグ
+let isReloading = false;
+
+// ページロード時に isReloading フラグを設定
+window.addEventListener('load', () => {
+    const [navigationEntry] = performance.getEntriesByType('navigation');
+    isReloading = navigationEntry && navigationEntry.type === 'reload';
+});
+
     // --------- 各種関数 ---------
 
 // 非同期処理を開始する前にロード状態を表す
@@ -48,7 +62,12 @@ async function getAndDisplayQuestion() {
     try {
         // サーバー（Flaskを使用）から問題データを取得するための非同期リクエスト
         // Flaskサーバーから問題データを取得。'/get_question'エンドポイントにHTTP GETリクエストを非同期で送信
-        const response  = await fetch(`${BASE_URL}/get_random_question`);
+        const response  = await fetch(`${BASE_URL}/get_random_question`, {
+            method: 'GET',
+            headers: {
+                'X-Reload': isReloading ? 'true' : 'false'
+            }
+        });
         const data = await handleResponse(response);
         
         if(data.error) {
@@ -313,8 +332,9 @@ async function submitAnswer(choiceId, nextButton, questionId) {
 
         if (!response.ok) {
             // response.okがfalseの場合、エラーメッセージを生成してthrow
-            const error = await response.text(); // サーバーからのエラーテキストを取得
-            throw new Error(`Server responded with ${response.status}: ${error}`);
+            const errorText = await response.text(); // サーバーからのエラーテキストを取得
+            console.error('Server error response:', errorText);
+            throw new Error(`Server responded with ${response.status}: ${errorText}`);
         }
 
         // レスポンスの生データをログ出力
@@ -336,6 +356,7 @@ async function submitAnswer(choiceId, nextButton, questionId) {
         if (data.result) {
             // サーバーからのレスポンスでクイズの終了を確認
             if (data.isQuizFinished) {
+                isQuitting = true;  // クイズ終了時にフラグを設定
                 // beforeunloadイベント（ページリロード時の動作に関するイベントリスナー）を解除
                 window.onbeforeunload = null;
                 // 結果画面へリダイレクト
@@ -359,81 +380,189 @@ async function submitAnswer(choiceId, nextButton, questionId) {
     }
 }
 
-// クイズをリセットする関数
-function resetQuiz(keepQuizRange, callback) {
-    fetch(`${BASE_URL}/reset_quiz`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ keep_quiz_range: keepQuizRange })
-    }).then(response => {
-        if (response.ok) {
-            callback();
-        }
-    }).catch(error => console.error('クイズのリセット中にエラー:', error));
+
+// ページがアンロードされる直前に呼び出される関数
+function handleBeforeUnload(event) {
+    console.log('handleBeforeUnload called');
+    if (!isQuitting) {
+        const message = 'ページを離れると、現在のセッションデータが失われます。よろしいですか？';
+        event.preventDefault(); // 標準の動作をキャンセル
+        event.returnValue = message; // Chrome用
+        return message; // 他のブラウザ用
+    }
 }
 
-// 全てのセッションデータをリセットする関数
-function resetAll(callback) {
+
+// ページアンロード時に実行される関数
+function handleUnload() {
+    isQuitting = true;
+    console.log('handleUnload called');
     fetch(`${BASE_URL}/reset_all`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(response => {
-        if (response.ok) {
-            callback();
-        }
-    }).catch(error => console.error('全てのセッションデータのリセット中にエラー:', error));
+            'Content-Type': 'application/json',
+            'X-Reload': 'false'
+        },
+        body: JSON.stringify({})
+    });
+
 }
+
+
+
+// イベントリスナーを設定
+window.addEventListener('beforeunload', handleBeforeUnload);
+window.addEventListener('unload', handleUnload);
+
+// ページロード時に実行される関数
+function handlePageLoad() {
+    console.log('handlePageLoad called');
+    const [navigationEntry] = performance.getEntriesByType('navigation');
+    if (navigationEntry && navigationEntry.type === 'reload') {
+        isReloading = true;
+        console.log('This page is reloaded');
+        // リロード時にセッションを保持するリクエストを送信
+        fetch(`${BASE_URL}/keep_session`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Reload': 'true'
+            },
+            body: JSON.stringify({})
+        }).then(() => {
+            // セッションの保持が成功したら、質問を取得
+            getAndDisplayQuestion();
+        }).catch(error => {
+            console.error('セッションの保持に失敗しました:', error);
+            // エラー時の処理（例：ホーム画面へリダイレクト）
+            window.location.href = '/';            
+        }).finally(() => {
+            // 処理が完了したらフラグをリセット
+            isReloading = false;
+        });
+    } else {
+        // 通常のページロード時は直接質問を取得
+        getAndDisplayQuestion();
+    }
+}
+
+
+// --------- リセット関数 ---------
+
+// 出題範囲以外のセッションをリセットする関数。リスタートボタン用。
+async function resetQuiz(keepQuizRange) {
+    isQuitting = true;
+    try {
+        const response = await fetch(`${BASE_URL}/reset_quiz`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ keep_quiz_range: keepQuizRange })
+        });
+
+        if (!response.ok) {
+            throw new Error('サーバーエラー：' + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            // クイズ画面へのリダイレクト用のパスを返す
+            return '/quiz';
+        } else {
+            throw new Error(data.message || 'クイズのリセットに失敗しました。');
+        }
+    } catch (error) {
+        console.error('クイズのリセット中にエラー:', error);
+        alert('クイズのリセット中にエラーが発生しました。ページをリロードして再度お試しください。');
+        throw error;
+    }
+}
+
+// 全てのセッションデータをリセットする関数。リセットボタン用。
+async function resetAll() {
+    console.log('resetAll called');
+    isQuitting = true;
+    try {
+        const response  = await fetch(`${BASE_URL}/reset_all`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('サーバーエラー：' + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            // ホーム画面へのリダイレクト用のパスを返す
+            return '/';
+        } else {
+            throw new Error(data.message || '全セッションデータのリセットに失敗しました。');
+        }
+    } catch (error) {
+        console.error('全セッションデータのリセット中にエラー:', error);
+        alert('全セッションデータのリセット中にエラーが発生しました。ページをリロードして再度お試しください。');
+        throw error;
+    }
+}
+
+
 
 // DOMContentLoaded イベントリスナーを最後に配置
 /*質問画面表示のタイミングでDOMコンテンツを読み込むイベントリスナー
 質問idを取得する関数"getAndDisplayQuestion()"と、「次へ」ボタン要素の取得、および
-ボタンクリック時に解答データを送信する関数"setupNextButtonListener();"をそれぞれ呼び出す役目を担う
+ボタンクリック時に解答データを送信する関数"handleNextButtonClick"をそれぞれ呼び出す役目を担う
 */
 document.addEventListener('DOMContentLoaded', () => {
     nextButton = document.getElementById('next-button');  // ボタン要素を取得
-    // '次へ'ボタンを有効化
-    nextButton.disabled = false;
     if (!nextButton) {
         console.error('Next button not found');
         return;
     }
+    // '次へ'ボタンを有効化
+    nextButton.disabled = false;
     
     // 次へボタンに直接イベントリスナーを設定
     nextButton.addEventListener('click', handleNextButtonClick);
 
     // ページのロード時に画面に表示される質問を取得・表示関数
-    getAndDisplayQuestion();
+    //getAndDisplayQuestion();
+
+    // ページロード時に実行される関数
+    handlePageLoad();
 
     // ページがロードされたらイベントリスナーを追加する
     // リセットボタンのイベントリスナー
-    document.getElementById('q_window_restart_b').addEventListener('click', function() {
-        // クイズをリセットする関数を呼び出す。リセットに成功したらホーム画面にリダイレクトする
-        resetQuiz(true, () => {
-            //Javascriptでクイズ画面にリダイレクト
-            window.location.href = '/quiz';
-        });
+    document.getElementById('q_window_restart_b').addEventListener('click', async function(event) {
+        event.preventDefault(); // デフォルトの動作をキャンセル
+        isQuitting = true;  // 意図的なナビゲーションを示すフラグをセット
+        try {
+            const url = await resetQuiz(true);
+            window.onbeforeunload = null; // beforeunloadイベントハンドラーを解除
+            window.location.href = url;
+        } catch (error) {
+            console.error('クイズのリセットに失敗しました:', error);
+            isQuitting = false;  // エラーが発生した場合、フラグをリセット
+        }
     });
+
     // ホームに戻るボタンのイベントリスナー
-    document.getElementById('q_window_home_b').addEventListener('click', function() {
-        // クイズデータをリセットし、ホームにリダイレクト
-        resetAll(() => {
-            // ホーム画面にリダイレクト
-            window.location.href = '/';
-        });
-
+    document.getElementById('q_window_home_b').addEventListener('click', async function(event) {
+        event.preventDefault(); // デフォルトの動作をキャンセル
+        isQuitting = true;  // 意図的なナビゲーションを示すフラグをセット
+        try {
+            const url = await resetAll();
+            window.onbeforeunload = null; // beforeunloadイベントハンドラーを解除
+            window.location.href = url;
+        } catch (error) {
+            console.error('全セッションデータのリセットに失敗しました:', error);
+            isQuitting = false;  // エラーが発生した場合、フラグをリセット
+        }
     });
+
 });
-
-/* ページリロードした時にブラウザからのデフォルトメッセージを表示させるイベントリスナー*/
-
-// リロードボタンクリックおよびページ閉じる際に起動させるイベントリスナー
-// リロードボタンクリック関数を起動させるイベントリスナー
-window.onbeforeunload = function(event) {
-    // メッセージを設定
-    event.returnValue = 'ページをリロードすると、解答途中の質問から表示されます。'
-    return event.returnValue;
-};

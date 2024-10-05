@@ -1,6 +1,5 @@
-# ページリロード後の質問再表示に成功し正しく動作したソースコード
 # Flaskとその他のモジュールをインポート
-from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app, Response
+from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app
 from flask_session import Session  # Flask-Sessionを追加、ユーザーからの解答データ（セッションデータ）を管理するflaskのパッケージ
 from flask_cors import CORS  # CORSをインポート
 import random
@@ -179,17 +178,42 @@ def quiz():
     return render_template('quiz.html', css_url=css_url, current_question_index=session['current_question_index'])
 
 
+# ------ページをリロードした時に呼び出されるエンドポイント ------
+@app.route('/keep_session', methods=['POST'])
+def keep_session():
+    app.logger.info("keep_session called")
+    app.logger.info(f"Request headers: {request.headers}")
+    app.logger.info(f"Request data: {request.json}")       
+    # セッションを保持し、quiz_rangeが設定されていることを確認
+    if 'quiz_range' not in session or session['quiz_range'] is None:
+        # quiz_rangeが設定されていない場合、エラーを返す
+        return jsonify({'error': '出題範囲が設定されていません。ホーム画面に戻ってください。'}), 400
+    # セッションを保持するだけで何もしない
+    return jsonify({'status': 'success'})
+
+
 # ------ GETリクエストでランダムに選ばれた質問をフロントエンドに送信するエンドポイント ------
 @app.route('/get_random_question', methods=['GET'])
 def get_random_question():
     print("get_random_question called")  # get_ramdom_question()関数が呼び出されてるか確かめるプリント
 
+    is_reload = request.headers.get('X-Reload') == 'true'
+
+    # quiz_rangeが設定されていない場合、エラーを返す
+    if 'quiz_range' not in session or session['quiz_range'] is None:
+        return jsonify({'error': '出題範囲が設定されていません。ホーム画面に戻ってください。'}), 400    
+
     # セッションに保存された現在の質問をチェック
     current_question = session.get('current_question')
 
-    if current_question:
-        # セッションに保存された質問がある場合、JSONとしてパースしてから返す
-        return jsonify(json.loads(current_question))
+    # if current_question:
+    #     # セッションに保存された質問がある場合、JSONとしてパースしてから返す
+    #     return jsonify(json.loads(current_question))
+    
+    
+    if is_reload and current_question:
+        # リロード時は現在の質問を再利用
+        return jsonify(json.loads(session['current_question']))    
     
     # セッションに保存された出題範囲を取得
     quiz_range = session.get('quiz_range')
@@ -249,135 +273,147 @@ def get_random_question():
 # ------ POSTリクエストでユーザーの回答を処理するエンドポイント ------
 @app.route('/submit_answer', methods=['POST'])
 def submit_answer():
-    # リクエストデータをロギング
-    data = request.json
-    # 整数型：question_id
-    question_id = data['questionId']
-    app.logger.debug('Received data: %s', data)
-    # print('question_id in submit_answer:', question_id)
-    # 解答済みの質問数を増分
-    session['answered_question_count'] += 1
+    try:
+        # リクエストデータをロギング
+        data = request.json
+        # 整数型：question_id
+        question_id = data['questionId']
+        app.logger.debug('Received data: %s', data)
+        # print('question_id in submit_answer:', question_id)
+        # 解答済みの質問数を増分
+        # session['answered_question_count'] += 1
+        
+            # 既存のコード
+        session['answered_question_count'] = session.get('answered_question_count', 0) + 1
+            # 残りのコード
+
+        # questionIdの値が適切か確認するデバックプリント
+        # print(f"Received questionId: {question_id}, type: {type(question_id)}")
+
+        # データ型確認
+        if not isinstance(question_id, int):
+            # エラー処理
+            return jsonify({'error': 'Invalid data type question_id'}), 400
+
+
+        # questionIdがquestions配列のインデックス範囲内にあるか検証する
+        if question_id not in [q['id'] for q in questions]:
+            return jsonify({'error': 'questionId is out of range'}), 400
+
+        # セッション内容を出力
+        app.logger.debug(session)
+
+
+        # jsで定義したグローバル変数を割り当てるキー名
+        # 整数型：active_choice_id
+        active_choice_id = data.get('activeChoice', None)
+        # choiceIdの値が適切か確認するデバックプリント
+        # print(f"Received activeChoiceId: {active_choice_id}, type: {type(active_choice_id)}")
+        if active_choice_id is None:
+            current_app.logger.error('activeChoice key is missing in the request data')
+            return jsonify({'error': 'activeChoice key is missing'}), 400
+        
+        # データ型確認
+        if not isinstance(active_choice_id, int):
+            # エラー処理
+            return jsonify({'error': 'Invalid data type active_choice_id'}), 400
+
+        # インデックスとして質問を取得
+        question = next((q for q in questions if q['id'] == question_id), None)
+        if question is None:
+            return jsonify({'error': 'Invalid question ID'}), 400
+        # "question = questions[question_id]"の記述はquestion_id整数に変換し
+        # questionsリストから直接質問を取得しようとするものだが、リストの要素が辞書型なので
+        # 整数の添字アクセスはできない。よってquestion_idは整数のまま使用し
+        # questionsリストから質問を探すようにする。
+        
+        if 'correct_answers' not in session:
+            session['correct_answers'] = 0  # セッションに正答数を初期化、変数は"correct_answersに設定"
+
+
+        # 正誤判定
+        if question is not None:
+            # 整数型：result　整数型：current_choice_id
+            result = 'correct' if active_choice_id == question['correct_choice_id'] else 'incorrect'
+        else:
+            return jsonify({'error': 'Invalid question'}), 400
+        
+        if result == 'correct':
+            session['correct_answers'] += 1  # 正答数を増分
+        
+        # 現在の質問をクリア
+        session['current_question'] = None
+
+        
+        # 現在の質問の解答データをリストに追加
+        session['answered_questions'] = session.get('answered_questions', [])
+        session['answered_questions'].append({
+            'question_id': question_id,
+            'result': result,
+            'user_choice': active_choice_id,  # ユーザーの選択した選択肢のIDも記録することができます
+            'correct_choice': question['correct_choice_id'],
+            'explanation': question['explanation'],  # 解説文もここでセッションに格納
+            'display_order': session['current_question_index']  # 表示順序を設定
+        })
+
+        # session['answerer_questions']の構造を確認するデバッグプリント
+        # print(f"Updated answered_questions: {session['answered_questions']}")  
+
+        # クイズの終了条件を判定
+        # session['answered_questions']を使うことで実際に表示された質問数
+        is_quiz_finished = session['answered_question_count'] >= TOTAL_QUESTIONS
+
+        # 現在の質問インデックスを更新
+        session['current_question_index'] = session.get('current_question_index', 0) + 1
+
+        # クイズが終了していない場合、次の質問のインデックスを保存
+        if not is_quiz_finished:
+            next_question = get_random_question()
+            session['current_question'] = next_question.get_data(as_text=True)
+            session.modified = True # セッションが変更されたことをFlaskに通知
+
+        # 解説文をUTF-8でエンコード
+        encoded_explanation = json.dumps(question['explanation'], ensure_ascii=False)
+                        
+        # 結果と解説の返送
+        response_data = {
+            'result': result, 
+            'explanation': encoded_explanation, 
+            'correct_answers': session['correct_answers'],
+            'isQuizFinished': is_quiz_finished,
+            'currrent_question_index': session['current_question_index'],
+            'success': True
+        }
+
+        # レスポンスデータをデバッグログに出力
+        app.logger.debug(f"response_data: {response_data}")
+        for key, value in response_data.items():
+            app.logger.debug(f"{key}: {type(value)}")
+
+        # JSONレスポンスを返す
+        return jsonify(response_data), 200            
+
+        # レスポンスデータ全体をJSONエンコード
+        # encoded_response = json.dumps(response_data, ensure_ascii=False), 200
+
+        # エンコードされたデータをレスポンスとして返す
+        # return Response(encoded_response, content_type='application/json; charset=utf-8')
     
-    # try:
-    #     # 既存のコード
-    #     session['answered_question_count'] = session.get('answered_question_count', 0) + 1
-    #     # 残りのコード
-    # except KeyError as e:
-    #     app.logger.error(f"KeyError in submit_answer: {str(e)}")
-    #     return jsonify({'error': str(e)}), 500
-    # except Exception as e:
-    #     app.logger.error(f"Unexpected error in submit_answer: {str(e)}")
-    #     return jsonify({'error': 'An unexpected error occurred'}), 500    
-
-    # questionIdの値が適切か確認するデバックプリント
-    # print(f"Received questionId: {question_id}, type: {type(question_id)}")
-
-     # データ型確認
-    if not isinstance(question_id, int):
-        # エラー処理
-        return jsonify({'error': 'Invalid data type question_id'}), 400
-
-
-    # questionIdがquestions配列のインデックス範囲内にあるか検証する
-    if question_id not in [q['id'] for q in questions]:
-        return jsonify({'error': 'questionId is out of range'}), 400
-
-    # セッション内容を出力
-    app.logger.debug(session)
-
-
-    # jsで定義したグローバル変数を割り当てるキー名
-    # 整数型：active_choice_id
-    active_choice_id = data.get('activeChoice', None)
-    # choiceIdの値が適切か確認するデバックプリント
-    # print(f"Received activeChoiceId: {active_choice_id}, type: {type(active_choice_id)}")
-    if active_choice_id is None:
-        current_app.logger.error('activeChoice key is missing in the request data')
-        return jsonify({'error': 'activeChoice key is missing'}), 400
+    except KeyError as e:
+        app.logger.error(f"KeyError in submit_answer: {str(e)}")
+        return jsonify({'error': str(e), 'success':False}), 400
+    except Exception as e:
+        app.logger.error(f"Unexpected error in submit_answer: {str(e)}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
     
-     # データ型確認
-    if not isinstance(active_choice_id, int):
-        # エラー処理
-        return jsonify({'error': 'Invalid data type active_choice_id'}), 400
 
-    # インデックスとして質問を取得
-    question = next((q for q in questions if q['id'] == question_id), None)
-    if question is None:
-        return jsonify({'error': 'Invalid question ID'}), 400
-    # "question = questions[question_id]"の記述はquestion_id整数に変換し
-    # questionsリストから直接質問を取得しようとするものだが、リストの要素が辞書型なので
-    # 整数の添字アクセスはできない。よってquestion_idは整数のまま使用し
-    # questionsリストから質問を探すようにする。
-    
-    if 'correct_answers' not in session:
-        session['correct_answers'] = 0  # セッションに正答数を初期化、変数は"correct_answersに設定"
-
-
-    # 正誤判定
-    if question is not None:
-        # 整数型：result　整数型：current_choice_id
-        result = 'correct' if active_choice_id == question['correct_choice_id'] else 'incorrect'
-    else:
-        return jsonify({'error': 'Invalid question'}), 400
-    
-    if result == 'correct':
-        session['correct_answers'] += 1  # 正答数を増分
-    
-    # 現在の質問をクリア
-    session['current_question'] = None
-
-    
-    # 現在の質問の解答データをリストに追加
-    session['answered_questions'] = session.get('answered_questions', [])
-    session['answered_questions'].append({
-        'question_id': question_id,
-        'result': result,
-        'user_choice': active_choice_id,  # ユーザーの選択した選択肢のIDも記録することができます
-        'correct_choice': question['correct_choice_id'],
-        'explanation': question['explanation'],  # 解説文もここでセッションに格納
-        'display_order': session['current_question_index']  # 表示順序を設定
-    })
-
-    # session['answerer_questions']の構造を確認するデバッグプリント
-    # print(f"Updated answered_questions: {session['answered_questions']}")  
-
-    # クイズの終了条件を判定
-    # session['answered_questions']を使うことで実際に表示された質問数
-    is_quiz_finished = session['answered_question_count'] >= TOTAL_QUESTIONS
-
-    # 現在の質問インデックスを更新
-    session['current_question_index'] = session.get('current_question_index', 0) + 1
-
-    # クイズが終了していない場合、次の質問のインデックスを保存
-    if not is_quiz_finished:
-        next_question = get_random_question()
-        session['current_question'] = next_question.get_data(as_text=True)
-        session.modified = True # セッションが変更されたことをFlaskに通知
-
-    # 解説文をUTF-8でエンコード
-    encoded_explanation = json.dumps(question['explanation'], ensure_ascii=False)
-                       
-    # 結果と解説の返送
-    response_data = {
-        'result': result, 
-        'explanation': encoded_explanation, 
-        'correct_answers': session['correct_answers'],
-        'isQuizFinished': is_quiz_finished,
-        'currrent_question_index': session['current_question_index']
-    }
-
-     # レスポンスデータ全体をJSONエンコード
-    encoded_response = json.dumps(response_data, ensure_ascii=False)
-
-    # エンコードされたデータをレスポンスとして返す
-    return Response(encoded_response, content_type='application/json; charset=utf-8')
 
 
 # ------ 結果画面のhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/result')
 def result():
     # answered_questionsの構造を確認
-    print(f"answered_questions in session: {session.get('answered_questions', [])}")
+    #print(f"answered_questions in session: {session.get('answered_questions', [])}")
 
     # 空のリストとして初期化
     answered_questions_info = []
@@ -435,6 +471,8 @@ def result():
     # result.htmlに正答数と総問題数を渡す
     return render_template('result.html', correct=correct_answers, total=total_questions, answered_questions=answered_questions_info)
 
+
+
 # ------ クイズをリセットするエンドポイント ------
 
 # リスタートボタンとホームに戻るボタンが共通で使用する、引数と条件分岐付きの関数
@@ -448,15 +486,30 @@ def reset_quiz(keep_quiz_range=False):
 # リスタートボタンが呼び出すエンドポイント、ここでは変数"keep__quiz_range"に保存された値を使う前提でreset_quiz()関数を呼び出す
 @app.route('/reset_quiz', methods=['POST'])
 def reset_quiz_route():
-    keep_quiz_range = request.json.get('keep_quiz_range', False)
-    reset_quiz(keep_quiz_range)
-    return jsonify({'status': 'Quiz reset successfully'}), 200
+    try:
+        keep_quiz_range = request.json.get('keep_quiz_range', False)
+        reset_quiz(keep_quiz_range)
+        return jsonify({'status': 'success', 'message': 'Quiz reset successfully'}), 200
+    except Exception as e:
+        app.logger.error(f"Error in reset_quiz: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500        
 
 # リセットボタンが呼び出すエンドポイント、ここでは変数"keep__quiz_range"に保存された値を使わない前提でreset_quiz()関数を呼び出す
 @app.route('/reset_all', methods=['POST'])
 def reset_all_route():
-    reset_quiz(keep_quiz_range=False)
-    return jsonify({'status': 'All session data reset successfully'}), 200
+    # reset_all()関数が呼び出されてるか確かめるプリント
+    # print("reset_all called", request.headers.get('X-Reload'))
+    try:
+        print('reload was executed. X-Reload:', request.headers.get('X-Reload'))
+        is_reload = request.headers.get('X-Reload') == 'true'
+        if not is_reload:
+            # リロードでない場合のみセッションをリセット
+            print("session all clear was executed")
+            reset_quiz(keep_quiz_range=False)
+        return jsonify({'status': 'success', 'message': 'All session data reset successfully'}), 200
+    except Exception as e:
+        app.logger.error(f"Error in reset_all: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 # スクリプトが直接実行された場合にアプリケーションが開始
 if __name__ == '__main__':

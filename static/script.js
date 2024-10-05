@@ -1,10 +1,48 @@
 // ホーム画面のスクリプト script.js
 
+// 意図的なページ離脱（リセットやホームに戻る）と、ブラウザを閉じるなどの意図しない離脱を区別するフラグ
+// ファイルの先頭付近に追加
+let isQuitting = false;
+
 // アプリケーションのベースURLを定義
 const BASE_URL = window.location.origin;
 
+
+// ページがアンロードされる直前に呼び出される関数
+//function handleBeforeUnload(event) {
+//  if (!isQuitting) {
+//      const message = 'ページを離れると、現在のセッションデータが失われます。よろしいですか？';
+//      event.preventDefault(); // 標準の動作をキャンセル
+//      event.returnValue = message; // Chrome用
+//      return message; // 他のブラウザ用
+//  }
+//}
+
+// ページが実際にアンロードされるときに呼び出される関数
+function handleUnload() {
+  console.log('handleUnload called');
+  if (!isQuitting) {
+      navigator.sendBeacon(`${BASE_URL}/reset_all`, JSON.stringify({}));
+  }
+}
+
+// イベントリスナーを設定
+//window.addEventListener('beforeunload', handleBeforeUnload);
+window.addEventListener('unload', handleUnload);
+
+
+// ページが実際にアンロードされるときに呼び出される関数
+function resetAll() {
+  console.log('handleUnload called');
+  if (!isQuitting) {
+      navigator.sendBeacon(`${BASE_URL}/reset_all`, JSON.stringify({}));
+  }
+}
+
 // ページ遷移のスクリプト
 document.addEventListener('DOMContentLoaded', function() {
+  //ホーム画面ロード時にリセット処理を行う。
+  resetAll();
   // フォントの読み込みエラーハンドリング
   document.fonts.load('12px "GenSekiGothic JP H"').then(function (fonts) {
     // フォントが正しく読み込まれたかを確認
@@ -31,14 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // スタートボタンのイベントリスナー
   $('#start_b_f').on('click', function(e) {
       e.preventDefault();
+      isQuitting = true;  // 意図的なナビゲーションを示すフラグをセット
       var selectedRange = $('#quiz_range').val();
       if (!selectedRange) {
           alert('出題範囲を選択してください。');
           return;
       }
 
-      //クイズをリセット
-      // resetQuiz();
 
       // 選択された範囲をサーバーに送信
       $.ajax({
@@ -60,22 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-
-
-// クイズをリセットする関数
-function resetQuiz() {
-  fetch(`${BASE_URL}/reset_quiz`)
-      .then(response => response.json())
-      .then(data => {
-          console.log(data.status); // リセットのステータスをログ出力
-          // ここで必要に応じてクライアント側の状態もリセットする
-          // ページをリロードするか、ホームにリダイレクトするなど
-          // resetQuiz関数はホーム画面スタートボタンだけじゃなく結果画面の再挑戦ボタンでも使うので
-          // /quizルートへ遷移する際は直前の出題範囲をそのまま使うようにしたい。そのための調整が必要。
-          window.location.href = '/quiz';
-      })
-      .catch(error => console.error('クイズのリセット中にエラー:', error));
-}
 
 
 //ポップアップを切り替えるためのスクリプト
