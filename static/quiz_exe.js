@@ -120,6 +120,7 @@ function displayQuestion(questionData) {
     }
 
     // 問題データの要素、選択肢のコンテナ要素、問題数の要素を取得
+    const imageContainer = document.getElementById('image_container'); // 画像コンテナ要素を取得
     const questionElement = document.getElementById('question');
     const choicesContainer = document.getElementById('choices_container');
     const questionNumberElement = document.getElementById('current-question-number');
@@ -131,6 +132,17 @@ function displayQuestion(questionData) {
 
     // 問題文の表示
     questionElement.textContent = questionData.question.text;
+    // 画像の表示
+    if (questionData.image) {
+        const imgElement = document.createElement('img');
+        imgElement.className = 'question-image';
+        imgElement.src = questionData.image;
+        imgElement.alt = 'Question Image';
+        imageContainer.innerHTML = ''; // 既存の画像をクリア
+        imageContainer.appendChild(imgElement);
+    } else {
+        imageContainer.innerHTML = ''; // 画像がない場合はクリア
+    }
     // 質問IDの設定
     questionElement.setAttribute('data-question-id', questionData.id);
     // 既存の選択肢をクリア

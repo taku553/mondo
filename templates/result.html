@@ -87,6 +87,11 @@
                 </div>
 
                 <p class="question_t">Q. {{ question.text }}</p>
+                <div id="r_qimg_container">
+                    {% if question.image %}
+                        <img src="{{ url_for('static', filename=question.image) }}" alt="Question Image" class="r_qimg">
+                    {% endif %}
+                </div>
                 <p class="choice_t">あなたの解答： {{ question.user_choice_text }}</p>
                 <p class="explanation"> 解説： {{ question.explanation | safe }}</p>
             </div>
@@ -99,6 +104,9 @@
             <h4 class="home_f">ホームへ戻るにはこちら</h4>
             <button id="home_b">ホームへ戻る</button>
         </div>
+        <div class="rakuten_afi">
+            <script type="text/javascript">rakuten_design="slide";rakuten_affiliateId="40d1c6fc.770283a5.40d1c6fd.425a882f";rakuten_items="ctsmatch";rakuten_genreId="0";rakuten_size="200x350";rakuten_target="_blank";rakuten_theme="gray";rakuten_border="off";rakuten_auto_mode="on";rakuten_genre_title="off";rakuten_recommend="on";rakuten_ts="1728562764645";</script><script type="text/javascript" src="https://xml.affiliate.rakuten.co.jp/widget/js/rakuten_widget.js?20230106"></script>
+        </div>        
     </main>
 
     <footer class="footer">

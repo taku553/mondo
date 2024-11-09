@@ -16,8 +16,9 @@ body {
 /*メイン画面を囲むコンテナの設定*/
 .main{
   width: 100%; /*メインコンテナの横幅を画面サイズと等しく*/
+  max-width: 700px; /*メインコンテナの横幅の最大値を700pxに*/
   margin: 0 auto; /* 外側の余白 */
-  height: 100%; /*メインコンテナの縦幅を画面サイズと等しく*/
+  height: auto; /*メインコンテナの縦幅を画面サイズと等しく*/
   /*background-color: coral;*/
 }
 
@@ -127,7 +128,7 @@ span.qt1_furigana {
 #howto_button{
     border: calc(1px + 0.2vw) solid black; /* 黒色の直線の罫線 */
     border-radius: calc(2px + 1vw);    /* 角の丸み */
-    padding: calc(4px +  1vw) calc(10px + 8vw);      /* 内側の余白 */
+    padding: calc(4px +  1vw) calc(10px + 7vw);      /* 内側の余白 */
     margin: 0 auto;         /* 外側の余白 */
     background-color: #ffff;   /*枠内の背景色*/
     cursor: pointer;   /* ホバー時にポインタカーソルを表示 */
@@ -584,6 +585,12 @@ body .select2-dropdown{
   height: auto;
 }
 
+.rakuten_afi{
+  display: flex;
+  justify-content: center;
+  margin-top: calc(3em + 1vw);
+}
+
 .footer{
   position: relative;
   width: 100%;
@@ -711,6 +718,23 @@ body[hidden] {
     padding: 0;
     /*background-color: orange;*/ /*フレックスボックスがどのように適用されたのか見る*/ 
   }
+
+/*画像のスタイリング*/
+/*コンテナ*/
+#image_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(80% + 1vw);
+  height: auto;
+  margin: calc(10px + 1vw) auto;
+}
+/*画像*/
+.question-image {
+  width: calc(280px + 1vw);
+  height: auto;
+}
+
 
 /*ボタン機能付き角丸長方形のスタイリング*/
 .choice {
@@ -921,11 +945,27 @@ body[hidden] {
   margin: 0 auto 6% auto;
   height: auto;
   font-family: 'Noto Serif JP','ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
-  font-size: calc(0.8em + 1vw);
+  font-size: calc(0.7em + 1vw);
   font-weight: 500;
   line-height: 1.6em;
   letter-spacing: 0.05em;
   /*background-color: yellow;*/
+}
+
+/*画像のスタイリング*/
+/*コンテナ*/
+#r_qimg_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(80% + 1vw);
+  height: auto;
+  margin: calc(10px + 1vw) auto;
+}
+/*画像*/
+.r_qimg {
+  width: calc(280px + 1vw);
+  height: auto;
 }
 
 /*選択肢の文章*/

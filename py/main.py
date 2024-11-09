@@ -14,8 +14,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 # redisをインポート
 import redis
-import logging
 
+# ロギングの設定
+logging.basicConfig(level=logging.INFO)
 
 # Flaskアプリケーションを初期化
 app = Flask(__name__, template_folder=os.path.join('../templates'), static_folder='../static')
@@ -32,11 +33,12 @@ if app_env == 'production':
         SESSION_TYPE='redis',  # セッションデータをRedisに保存
         SESSION_REDIS = redis.from_url(f'redis://{redis_host}:{redis_port}'),  # Redisの接続情報を設定
         SECRET_KEY=os.environ.get('SECRET_KEY', 'default-secret-key'),  # 環境変数から取得
-    
+
         SESSION_PERMANENT = False, # セッションが永続的でないように設定
         PERMANENT_SESSION_LIFETIME = timedelta(days=1) # セッションの有効期限を1日に設定
         # 他の本番環境用の設定
-    )    
+    )
+        
     # App Engine環境用のログ設定
     app.logger.setLevel(logging.INFO)
     
@@ -82,6 +84,7 @@ with open(dataset_path, 'r', encoding='utf-8') as csvfile:
         questions.append({
             'id': int(row['id']),  # 各質問にインデックス（id）を割り当てる
             'text': row['question'], # 質問文
+            'image': row['image'], # 画像
             'choices': choices, # 選択肢
             'correct_choice_id': correct_choice_id, # 正解の選択肢
             'explanation': explanation, # 解説文
@@ -119,16 +122,16 @@ def set_quiz_range():
     print("set_quiz_range called")  # set_quiz_range()関数が呼び出されてるか確かめるプリント
     data = request.json
     selected_range = data.get('range')
-    if selected_range in ['first', 'second', 'third']: # 有効な年代のみを受け付ける
+    if selected_range in ['first', 'second', 'third', 'opening']: # 有効な年代のみを受け付ける
         session['quiz_range'] = selected_range
         app.logger.info(f"Quiz range set to: {session['quiz_range']}")  # session['quiz_range']にどのデータ範囲が保存されたか確認するログ
         # 選択された範囲に基づいて質問をフィルタリング
         filtered_questions = [q for q in questions if q['millennium'] == selected_range]
         # フィルタリングされた質問の総数をセッションに保存
         session['total_questions'] = len(filtered_questions)
-        global TOTAL_QUESTIONS
+        #global TOTAL_QUESTIONS
         # TOTAL_QUESTIONSを動的に設定
-        TOTAL_QUESTIONS = len(filtered_questions)
+        #TOTAL_QUESTIONS = len(filtered_questions)
         app.logger.info(f"Total questions for selected range '{selected_range}': {len(filtered_questions)}")
         return jsonify({'status': 'success'})
     else:
@@ -255,10 +258,11 @@ def get_random_question():
     session['current_question'] = json.dumps({
         'id': random_question['id'],
         'question': {'text': random_question['text']},
+        'image': random_question['image'],
         'choices': random_question['choices'],
         'next_index': next_index,
         'answered_questions': session.get('answered_questions', []),
-        'total_questions': TOTAL_QUESTIONS
+        'total_questions': len(filtered_questions)
     }, ensure_ascii=False)
     session['current_question_index'] = current_index  # 現在のインデックスを保存
     session.modified = True
@@ -359,9 +363,11 @@ def submit_answer():
         # session['answerer_questions']の構造を確認するデバッグプリント
         # print(f"Updated answered_questions: {session['answered_questions']}")  
 
+        quiz_range = session.get('quiz_range')
+        filtered_questions = [q for q in questions if q['millennium'] == quiz_range]
         # クイズの終了条件を判定
         # session['answered_questions']を使うことで実際に表示された質問数
-        is_quiz_finished = session['answered_question_count'] >= TOTAL_QUESTIONS
+        is_quiz_finished = session['answered_question_count'] >= len(filtered_questions)
 
         # 現在の質問インデックスを更新
         session['current_question_index'] = session.get('current_question_index', 0) + 1
@@ -440,8 +446,14 @@ def result():
             # これに文章を格納する
             # ユーザーが選んだ選択肢の文章を取得
             user_choice_text = next((c['text'] for c in question['choices'] if c['id'] == user_answer['user_choice']), 'Unknown')
+            # 画像の情報を取得
+            image_url = question.get('image', '')
+            # 画像パスから /static/ を削除。これにより、結果画面に画像を表示させる際にパスが正しく設定され画像表示される
+            if image_url.startswith('static/'):
+                image_url = image_url[len('static/'):]
             answered_question_info = {
                 'text': question['text'],
+                'image': image_url,
                 'user_choice_text': user_choice_text,
                 'explanation': next((q['explanation'] for q in session.get('answered_questions', []) if q['question_id'] == question['id']), question['explanation']),
                 'display_order': user_answer['display_order'] + 1  # 表示順序を1から始めるよう修正
@@ -513,6 +525,6 @@ def reset_all_route():
 
 # スクリプトが直接実行された場合にアプリケーションが開始
 if __name__ == '__main__':
-    app.run()
-    # 開発中は引数に"debug=True"を指定しておくと、
-    # アプリの再起動なしでコードの変更を即座に反映できる。
+    app.run(host='0.0.0.0', port=5000)
+# 開発中は引数に"debug=True"を指定しておくと、
+# アプリの再起動なしでコードの変更を即座に反映できる。
