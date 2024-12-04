@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # スクリプト名を取得
 SCRIPT_NAME=$(basename "$0")
