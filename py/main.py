@@ -15,6 +15,9 @@ from logging.handlers import RotatingFileHandler
 # redisをインポート
 import redis
 
+# dataset.pyからデータセットをインポート
+from py.dataset import questions
+
 # ロギングの設定
 logging.basicConfig(level=logging.INFO)
 
@@ -62,34 +65,6 @@ else:
 Session(app)
 
 CORS(app)  # CORSをアプリケーションに適用
-
-
-# プロジェクトのルートディレクトリへの絶対パス
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# dataset.csvへの絶対パス
-dataset_path = os.path.join(project_root, 'py', 'dataset.csv')
-
-# CSVファイルからデータを読み込む
-questions = [] # 辞書型：questions
-with open(dataset_path, 'r', encoding='utf-8') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader: # enumerateを使用してインデックスを追加
-        choices = [
-            {'id': i+1, 'text': row[f'choice{i+1}']} for i in range(4)
-        ]
-        # 整数型：correct_choice_id
-        correct_choice_id = next((i + 1 for i, choice in enumerate(choices) if choice['text'] == row['correct_choice']), None)
-        explanation = row['explanation'].replace('"', '').replace('|','<br>')
-        questions.append({
-            'id': int(row['id']),  # 各質問にインデックス（id）を割り当てる
-            'text': row['question'], # 質問文
-            'image': row['image'], # 画像
-            'choices': choices, # 選択肢
-            'correct_choice_id': correct_choice_id, # 正解の選択肢
-            'explanation': explanation, # 解説文
-            'millennium': row['millennium']  # 年代
-        })
 
 
 # render_temlpate関数を使い、フロントエンドとバックエンドの連携
