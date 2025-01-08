@@ -12,7 +12,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 # redisをインポート
 import redis
-
 # dataset.pyからデータセットをインポート
 from py.dataset import questions
 
@@ -27,13 +26,20 @@ app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
 app_env = os.environ.get('APP_ENV', 'production')
 
 if app_env == 'production':
-    redis_host = os.environ.get('REDISHOST', 'localhost')
+    redis_host = os.environ.get('REDISHOST')
     redis_port = int(os.environ.get('REDISPORT', 6379))
+    if not redis_host:
+        raise ValueError('REDISHOST must be set in production')
+    
+    secret_key = os.environ.get('SECRET_KEY')
+    if not secret_key:
+        raise ValueError('SECRET_KEY must be set in production')    
+    
     app.config.update(
         DEBUG=False,
         SESSION_TYPE='redis',  # セッションデータをRedisに保存
         SESSION_REDIS = redis.from_url(f'redis://{redis_host}:{redis_port}'),  # Redisの接続情報を設定
-        SECRET_KEY=os.environ.get('SECRET_KEY', 'default-secret-key'),  # 環境変数から取得
+        SECRET_KEY=os.environ.get('SECRET_KEY'),  # 環境変数から取得
 
         SESSION_PERMANENT = False, # セッションが永続的でないように設定
         PERMANENT_SESSION_LIFETIME = timedelta(days=1) # セッションの有効期限を1日に設定
