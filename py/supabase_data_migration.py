@@ -1,0 +1,348 @@
+import os
+import sys
+from supabase import create_client
+from py.dataset import questions
+from dotenv import load_dotenv
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('migration.log'),
+        logging.StreamHandler()
+    ]
+)
+
+# 外部キー制約のチェック関数
+def check_foreign_keys(questions_data, choices_data):
+    """テーブル間の関係が正しく設定されているか確認"""
+    try:
+        question_ids = {q["id"] for q in questions_data}
+        for choice in choices_data:
+            if choice["question_id"] not in question_ids:
+                raise ValueError(
+                    f"Question ID {choice['question_id']} not found for choice {choice['id']}"
+                )
+        logging.info("Foreign key checks passed successfully")
+    except Exception as e:
+        logging.error(f"Foreign key check failed: {str(e)}")
+        raise
+
+
+def verify_data_consistency():
+    """データセットの基本的な整合性をチェックし、概要を出力する"""
+    try:
+        logging.info("Verifying data consistency...")
+        
+        # データセットの基本チェック
+        total_questions = len(questions)
+        unique_categories = set(q['category'] for q in questions if q['category'])
+        choice_counts = {q['id']: len(q['choices']) for q in questions}
+        
+        # 結果をログに出力
+        logging.info(f"Total questions: {total_questions}")
+        logging.info(f"Unique categories: {unique_categories}")
+        logging.info(f"Choice counts per question: {choice_counts}")
+        
+        return True
+    except Exception as e:
+        logging.error(f"Data consistency verification failed: {str(e)}")
+        raise
+
+# データの整合性チェックの追加: 各questionのIDがユニークであることを確認
+def validate_data():
+    """データの整合性を検証する拡張版の関数"""
+    try:
+        # 各questionのIDがユニークであることを確認
+        question_ids = set()
+        for q in questions:
+            # ID値の型チェックを追加
+            if not isinstance(q["id"], int):
+                raise ValueError(f"Question ID must be integer, found {type(q['id'])} for question {q['id']}")
+            
+            # ID重複チェック（既存）
+            if q["id"] in question_ids:
+                raise ValueError(f"Duplicate question ID found: {q['id']}")
+            question_ids.add(q["id"])
+            
+            # 必須フィールドの存在チェックを追加
+            required_fields = ["text", "choices", "correct_choice_id", "explanation"]
+            for field in required_fields:
+                if field not in q or not q[field]:
+                    raise ValueError(f"Required field '{field}' missing or empty in question {q['id']}")
+            
+            # correct_choice_idの有効性確認（既存）
+            choice_ids = {c["id"] for c in q["choices"]}
+            if q["correct_choice_id"] not in choice_ids:
+                raise ValueError(f"Invalid correct_choice_id for question {q['id']}")
+            
+            # 選択肢の数が適切か確認
+            if len(q["choices"]) < 2:
+                raise ValueError(f"Question {q['id']} has fewer than 2 choices")
+                
+        logging.info("Data validation completed successfully")
+        return True
+
+    except Exception as e:
+        logging.error(f"Data validation failed: {str(e)}")
+        raise
+        
+def batch_insert(table_name, data, batch_size=100):
+    """データを指定されたバッチサイズで分割して挿入する"""
+    try:
+        for i in range(0, len(data), batch_size):
+            batch = data[i:i + batch_size]
+            logging.info(f"Inserting batch {i//batch_size + 1} into {table_name} table...")
+            result = supabase.table(table_name).insert(batch).execute()
+            logging.info(f"Successfully inserted batch {i//batch_size + 1} ({len(batch)} records)")
+
+            # resultを参照する処理を追加
+            logging.debug(f"Insert result: {result}") 
+                       
+        return True
+    except Exception as e:
+        logging.error(f"Error inserting batch into {table_name}: {str(e)}")
+        raise
+
+def update_sequences():
+    """シーケンスを現在の最大IDに更新"""
+    try:
+        # choicesテーブルのシーケンスを更新
+        max_choice_id_result = supabase.rpc(
+            'get_max_id',
+            {'table_name': 'choices'}
+        ).execute()
+        
+        if max_choice_id_result.data:
+            max_choice_id = max_choice_id_result.data + 1
+            supabase.rpc(
+                'set_sequence_value',
+                {'sequence_name': 'choices_id_seq', 'value': max_choice_id}
+            ).execute()
+            
+        logging.info("Sequences updated successfully")
+    except Exception as e:
+        logging.error(f"Error updating sequences: {str(e)}")
+        raise
+
+def migrate_data(dry_run=False):
+    """
+    dry_run=True の場合は検証のみを行い、実際のデータ挿入は行わない
+    """    
+    
+# データの移行処理
+    try:
+        # データ削除処理を最初に配置
+        if not dry_run:
+            logging.info("Checking existing data...")
+            questions_exists = supabase.table("questions").select("*").execute()
+            choices_exists = supabase.table("choices").select("*").execute()
+            
+            if len(questions_exists.data) > 0 or len(choices_exists.data) > 0:
+                logging.warning("Tables contain existing data")
+                user_input = input("Do you want to clear existing data? (y/n): ")
+                if user_input.lower() == 'y':
+                    logging.info("Clearing existing data...")
+                    # 外部キー制約があるため、choicesを先に削除
+                    supabase.table("choices").delete().neq('id', 0).execute()
+                    supabase.table("questions").delete().neq('id', 0).execute()
+                    logging.info("Existing data cleared")
+                else:
+                    logging.info("Migration cancelled by user")
+                    return
+                
+        # 移行前の最終確認
+        logging.info(f"準備完了: {len(questions_data)}件の質問と{len(choices_data)}件の選択肢を移行します")
+        if not dry_run:
+            user_input = input("移行を開始しますか？ (y/n): ")
+            if user_input.lower() != 'y':
+                logging.info("移行がキャンセルされました")
+                return
+                        
+        # データの検証
+        logging.info("Starting data verification...")
+        verify_data_consistency()        
+        
+        logging.info("Validating data...")        
+        validate_data()
+        
+        # トランザクション的な処理のために配列にデータを格納
+        questions_data = []
+        choices_data = []
+        choice_id_counter = 1  # 選択肢用の連番カウンター
+        
+        for q in questions:
+            question_data = {
+                "id": q["id"],
+                "text": q["text"],
+                "image": q["image"] if q["image"] and q["image"] != "" else None,
+                "correct_choice_id": q["correct_choice_id"],
+                "explanation": q["explanation"],
+                "category": q["category"] if q["category"] != "" else None
+            }
+            questions_data.append(question_data)
+            
+            # 選択肢の処理
+            for choice in q["choices"]:
+                choice_data = {
+                    "id": choice_id_counter,
+                    "question_id": q["id"],
+                    "text": choice["text"]
+                }
+                
+                # correct_choice_idの更新
+                if q["correct_choice_id"] == choice["id"]:
+                    question_data["correct_choice_id"] = choice_id_counter
+                
+                choices_data.append(choice_data)
+                choice_id_counter += 1
+                                    
+        # 外部キー制約のチェック
+        check_foreign_keys(questions_data, choices_data)
+
+        # トランザクション的な処理
+        logging.info("Checking existing data...")
+        data = supabase.table("questions").select("*").execute()
+        if len(data.data) > 0:
+            logging.warning("Questions table is not empty")
+            user_input = input("Do you want to proceed? (y/n): ")
+            if user_input.lower() != 'y':
+                logging.info("Migration cancelled by user")
+                return
+            
+        if dry_run:
+            logging.info("Dry run completed successfully. No data was inserted.")
+            return True        
+
+        # バッチ処理によるデータ挿入
+        logging.info("Starting questions insertion...")
+        if batch_insert("questions", questions_data, batch_size=50):
+            logging.info(f"Successfully inserted all questions ({len(questions_data)} records)")
+
+        logging.info("Starting choices insertion...")
+        if batch_insert("choices", choices_data, batch_size=100):
+            logging.info(f"Successfully inserted all choices ({len(choices_data)} records)")
+
+        logging.info("Data migration completed successfully!")
+        
+    except ValueError as ve:
+        logging.error(f"Data validation failed: {str(ve)}")
+        raise
+    except Exception as e:
+        logging.error(f"Error during migration: {str(e)}")
+        raise
+    
+def migrate_incremental_data(dry_run=False):
+    """既存のデータを保持したまま、新しいデータのみを追加する"""
+    try:
+        # 既存のデータのIDを取得
+        existing_question_ids = set()
+        existing_questions = supabase.table("questions").select("id").execute()
+        for q in existing_questions.data:
+            existing_question_ids.add(q['id'])
+
+        # 新しいデータのみをフィルタリング
+        new_questions_data = []
+        new_choices_data = []
+        
+        # 最後の選択肢IDを取得して、そこから連番を継続
+        last_choice = supabase.table("choices").select("id").order("id.desc").limit(1).execute()
+        choice_id_counter = last_choice.data[0]['id'] + 1 if last_choice.data else 1
+
+        # 新しい質問のみを処理
+        for q in questions:
+            if q['id'] not in existing_question_ids:
+                question_data = {
+                    "id": q["id"],
+                    "text": q["text"],
+                    "image": q["image"] if q["image"] and q["image"] != "" else None,
+                    "correct_choice_id": None,  # 後で更新
+                    "explanation": q["explanation"],
+                    "category": q["category"] if q["category"] != "" else None
+                }
+                new_questions_data.append(question_data)
+
+                # 選択肢の処理
+                for choice in q["choices"]:
+                    choice_data = {
+                        "id": choice_id_counter,
+                        "question_id": q["id"],
+                        "text": choice["text"]
+                    }
+                    
+                    # correct_choice_idの更新
+                    if q["correct_choice_id"] == choice["id"]:
+                        question_data["correct_choice_id"] = choice_id_counter
+                    
+                    new_choices_data.append(choice_data)
+                    choice_id_counter += 1
+
+        if not new_questions_data:
+            logging.info("新しい質問データはありません")
+            return
+
+        if dry_run:
+            logging.info(f"追加予定: 質問 {len(new_questions_data)}件、選択肢 {len(new_choices_data)}件")
+            return
+
+        # データの挿入
+        if new_questions_data:
+            logging.info("新しい質問を追加中...")
+            batch_insert("questions", new_questions_data, batch_size=50)
+
+        if new_choices_data:
+            logging.info("新しい選択肢を追加中...")
+            batch_insert("choices", new_choices_data, batch_size=100)
+
+        logging.info("増分更新が完了しました")
+
+    except Exception as e:
+        logging.error(f"増分更新中にエラーが発生: {str(e)}")
+        raise
+    
+def main():
+    try:
+        # .envファイルから環境変数を読み込み
+        env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+        load_dotenv(dotenv_path=env_path)
+        
+        # Supabase接続情報を環境変数から取得
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") # SERVICE_ROLE_KEY に変更      
+        
+        if not url or not key:
+            raise ValueError("Supabase credentials not found in environment variables")
+        
+        global supabase
+        try:
+            supabase = create_client(url, key)
+            # 接続テストを追加
+            test_response = supabase.table("questions").select("count").limit(1).execute()
+            logging.info("Successfully connected to Supabase")
+            if test_response.data is None:
+                raise ConnectionError("Failed to get response from Supabase")
+            logging.info(f"Successfully connected to Supabase. Test response: {test_response.data}")            
+        except Exception as e:
+            logging.error(f"Failed to connect to Supabase: {str(e)}")
+            sys.exit(1)
+        
+        # 更新モードの選択
+        update_mode = input("更新モードを選択してください（1: 全データ再構築, 2: 増分更新）: ")
+        
+        if update_mode == "1":
+            # 完全な再構築
+            migrate_data()
+        elif update_mode == "2":
+            # 増分更新
+            migrate_incremental_data()
+        else:
+            logging.error("無効な選択です")
+            return
+                
+    except Exception as e:
+        logging.error(f"Migration failed: {str(e)}", exc_info=True)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
