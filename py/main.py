@@ -4,8 +4,6 @@ from flask_session import Session  # Flask-Sessionを追加、ユーザーから
 from flask_cors import CORS  # CORSをインポート
 import random
 import json
-# dataset.csvからデータセットをインポート
-import csv
 # ファイルパスの指定のためosをインポート
 import os
 from datetime import timedelta
@@ -101,7 +99,7 @@ def set_quiz_range():
         session['quiz_range'] = selected_range
         app.logger.info(f"Quiz range set to: {session['quiz_range']}")  # session['quiz_range']にどのデータ範囲が保存されたか確認するログ
         # 選択された範囲に基づいて質問をフィルタリング
-        filtered_questions = [q for q in questions if q['millennium'] == selected_range]
+        filtered_questions = [q for q in questions if q['category'] == selected_range]
         # フィルタリングされた質問の総数をセッションに保存
         session['total_questions'] = len(filtered_questions)
         #global TOTAL_QUESTIONS
@@ -200,7 +198,7 @@ def get_random_question():
         return jsonify({'error': '出題範囲が設定されていません。'}), 400
 
      # quiz_rangeに基づいて質問をフィルタリング
-    filtered_questions = [q for q in questions if q['millennium'] == quiz_range]
+    filtered_questions = [q for q in questions if q['category'] == quiz_range]
 
     if not filtered_questions:
         return jsonify({'error': '選択された範囲の問題が見つかりません。'}), 404
@@ -339,7 +337,7 @@ def submit_answer():
         # print(f"Updated answered_questions: {session['answered_questions']}")  
 
         quiz_range = session.get('quiz_range')
-        filtered_questions = [q for q in questions if q['millennium'] == quiz_range]
+        filtered_questions = [q for q in questions if q['category'] == quiz_range]
         # クイズの終了条件を判定
         # session['answered_questions']を使うことで実際に表示された質問数
         is_quiz_finished = session['answered_question_count'] >= len(filtered_questions)

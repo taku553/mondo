@@ -23,7 +23,7 @@ with open(csv_file_path, 'r', encoding='utf-8') as csvfile:
             'choices': choices,
             'correct_choice_id': correct_choice_id,
             'explanation': explanation,
-            'millennium': row['millennium']
+            'category': row['category']
         })
 
 # Pythonファイルとして保存

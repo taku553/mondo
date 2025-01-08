@@ -1,4 +1,4 @@
-#!/Users/takahashitakuya/Desktop/history_flow_quiz/venv/bin/python3.12
+#!/Users/takahashitakuya/Desktop/history_flow_quiz/venv/bin/python3.11
 # -*- coding: utf-8 -*-
 import re
 import sys
