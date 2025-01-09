@@ -26,7 +26,7 @@ app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
 app_env = os.environ.get('APP_ENV', 'production')
 
 if app_env == 'production':
-    redis_url = os.environ.get('REDIS_URL')
+    redis_url = os.environ.get('REDIS_URL', 'redis://red-ctv7rel2ng1s73dp0na0:6379')
     redis_host = os.environ.get('REDISHOST')
     redis_port = int(os.environ.get('REDISPORT', 6379))
     if not redis_host:
@@ -34,7 +34,17 @@ if app_env == 'production':
     
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
-        raise ValueError('SECRET_KEY must be set in production')    
+        raise ValueError('SECRET_KEY must be set in production')
+    
+    # Redis接続テストを追加
+    try:
+        redis_client = redis.from_url(redis_url)
+        redis_client.ping()  # 接続テスト
+        app.logger.info("Successfully connected to Redis")
+    except redis.ConnectionError as e:
+        app.logger.error(f"Redis connection failed: {str(e)}")
+        # エラー発生時にフォールバック設定を使用するか、エラーを発生させる
+        raise RuntimeError(f"Failed to connect to Redis: {str(e)}")
     
     app.config.update(
         DEBUG=False,
