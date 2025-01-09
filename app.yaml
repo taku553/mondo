@@ -1,6 +1,6 @@
 runtime: python
 env: flex
-entrypoint: gunicorn py.main:app
+entrypoint: gunicorn wsgi:app
 
 env_variables:
   FLASK_APP: "py.main.py"

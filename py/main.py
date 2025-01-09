@@ -26,6 +26,7 @@ app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
 app_env = os.environ.get('APP_ENV', 'production')
 
 if app_env == 'production':
+    redis_url = os.environ.get('REDIS_URL')
     redis_host = os.environ.get('REDISHOST')
     redis_port = int(os.environ.get('REDISPORT', 6379))
     if not redis_host:
