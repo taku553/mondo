@@ -27,11 +27,9 @@ app_env = os.environ.get('APP_ENV', 'production')
 
 if app_env == 'production':
     redis_url = os.environ.get('REDIS_URL', 'redis://red-ctv7rel2ng1s73dp0na0:6379')
-    redis_host = os.environ.get('REDISHOST')
-    redis_port = int(os.environ.get('REDISPORT', 6379))
-    if not redis_host:
-        raise ValueError('REDISHOST must be set in production')
-    
+    if not redis_url:
+        raise ValueError('REDIS_URL must be set in production')
+        
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
         raise ValueError('SECRET_KEY must be set in production')
@@ -49,9 +47,8 @@ if app_env == 'production':
     app.config.update(
         DEBUG=False,
         SESSION_TYPE='redis',  # セッションデータをRedisに保存
-        SESSION_REDIS = redis.from_url(f'redis://{redis_host}:{redis_port}'),  # Redisの接続情報を設定
-        SECRET_KEY=os.environ.get('SECRET_KEY'),  # 環境変数から取得
-
+        SESSION_REDIS = redis_client,
+        SECRET_KEY=secret_key,  # 環境変数から取得
         SESSION_PERMANENT = False, # セッションが永続的でないように設定
         PERMANENT_SESSION_LIFETIME = timedelta(days=1) # セッションの有効期限を1日に設定
         # 他の本番環境用の設定
