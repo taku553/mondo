@@ -840,6 +840,7 @@ body[hidden] {
   margin: calc(1em + 1vw) auto 0 auto;
   font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
   font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
   background-color: #ffde59; /* 黄色の背景 */
   border: none;
   padding: calc( 7px + 1vw) calc(10px + 1vw); /* レスポンシブなパディング */
@@ -918,6 +919,7 @@ body[hidden] {
   text-align: center;
   font-size: calc(1em + 1vw); /* レスポンシブなフォントサイズ */
   font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
 }
 
 /*解説文のスタイリング*/
@@ -1041,7 +1043,7 @@ body[hidden] {
   font-weight: 800;
   background-color: #ffde59; /* 黄色の背景 */
   border: none;
-  padding: calc( 8px + 1vw) calc(10px + 1vw); /* レスポンシブなパディング */
+  padding: calc( 8px + 1vw) calc(6px + 1vw); /* レスポンシブなパディング */
   border-radius: calc(2px + 0.8vw);
   cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
