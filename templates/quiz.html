@@ -12,10 +12,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
     <!--フォントリンク-->
-    <!--noto sans jp-->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
     <!-- noto sefrif jp-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,19 +29,8 @@
         })(document);
     </script>
 
-    <!-- フォントをプリロード -->
-    <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
     <!--ページのURL-->
     <a href="quiz.html"></a>
-    <style>
-        @font-face {
-            font-family: 'GenSekiGothic JP H';
-            src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap; /* フォールバックフォントで即表示し、利用可能になればスワップ */
-        }
-    </style>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRFNLZKC9G"></script>
@@ -58,7 +43,7 @@
     </script>
 </head>
 <body hidden>
-    <main>
+    <main id="q_main">
         <!--クイズのコンテナ-->
         <section>
             <div class="q_e_container">

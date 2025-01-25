@@ -43,18 +43,6 @@ function resetAll() {
 document.addEventListener('DOMContentLoaded', function() {
   //ホーム画面ロード時にリセット処理を行う。
   resetAll();
-  // フォントの読み込みエラーハンドリング
-  document.fonts.load('12px "GenSekiGothic JP H"').then(function (fonts) {
-    // フォントが正しく読み込まれたかを確認
-    if (fonts.length === 0) {
-      console.error('フォントが読み込めませんでした。');
-      // ここでエラー処理を行う
-    } else {
-      console.log('フォントが正しく読み込まれました。');
-    }
-  }).catch(function (error) {
-    console.error('フォントの読み込み中にエラーが発生しました:', error);
-  });
 
   // ドロップダウンメニューによる通信
   //Secect2の初期化

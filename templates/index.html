@@ -23,10 +23,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&display=swap" rel="stylesheet">
 
-    <!--noto sans jp-->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
 
     <!-- adobe fonts のプロジェクトを読み込む-->
     <script>
@@ -39,23 +35,11 @@
           h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
         })(document);
     </script>
-
-    <!-- フォントをプリロード -->
-    <link rel="preload" href="{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}" as="font" type="font/ttf" crossorigin="anonymous">
+    
     
     <!--ページのURL-->
     <a href="index.html"></a>
 
-    <!--フォントの宣言-->
-    <style>
-        @font-face {
-            font-family: 'GenSekiGothic JP H';
-            src: url("{{ url_for('static', filename='fonts/GenSekiGothic JP H.ttc') }}") format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap; /* フォールバックフォントで即表示し、利用可能になればスワップ */
-        }
-    </style>
 
     <!-- google adsence -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1905179670404848"
@@ -84,7 +68,7 @@
             <div class="q_explain">
 
                 <div class="rounded_border">
-                    <p class="q_ex">歴史の流れに焦点を当てる選択式クイズ。歴史全体の流れを知り、理解を深めましょう。</p>
+                    <p class="q_ex">いろんな事象の流れに焦点を当てた選択式クイズ。どんなクイズになるのやら。</p>
                 </div>
                 <!--クイズの遊び方&注意点-->
                 <div class="how_to">

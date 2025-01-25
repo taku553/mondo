@@ -7,7 +7,7 @@
 
 /*ページ全体のデフォルトフォント*/
 body {
-  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Osaka', sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
 }
 
 /*メイン画面のスタイリング*/
@@ -107,7 +107,7 @@ span.qt1_furigana {
 /*説明文のスタイル*/
 .q_ex{
   margin: 0 auto;
-  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
+  font-family: source-han-sans-japanese, 'Osaka', 'Hiragino Sans', sans-serif;
   font-size: calc(0.5em + 1vw);
   font-weight: 600;
   text-align: center;
@@ -128,7 +128,7 @@ span.qt1_furigana {
 #howto_button{
     border: calc(1px + 0.2vw) solid black; /* 黒色の直線の罫線 */
     border-radius: calc(2px + 1vw);    /* 角の丸み */
-    padding: calc(4px +  1vw) calc(10px + 7vw);      /* 内側の余白 */
+    padding: calc(4px +  1vw) calc(10px + 5vw);      /* 内側の余白 */
     margin: 0 auto;         /* 外側の余白 */
     background-color: #ffff;   /*枠内の背景色*/
     cursor: pointer;   /* ホバー時にポインタカーソルを表示 */
@@ -137,7 +137,7 @@ span.qt1_furigana {
 /*遊び方ボタンのフォント*/
 .how_to_f{
     display: inline-block;
-    font-family: 'Noto Sans JP', 'GenSekiGothic JP H', sans-serif;
+    font-family: source-han-sans-japanese, sans-serif;
     font-weight: 800;
     font-size: calc(0.6em + 1vw);
     /*background-color: aqua;*/
@@ -375,7 +375,7 @@ body .select2-container--default .select2-selection--single .select2-selection__
 }
 /* リスト内要素のスタイリング */
 body .select2-container--default .select2-results>.select2-results__options{
-  font-family: 'Noto Sans JP';
+  font-family: source-han-sans-japanese;
   font-size: calc(0.6em + 0.5vw);
   font-weight: 500;
 }
@@ -412,10 +412,11 @@ body .select2-dropdown{
     display: flex;
     justify-content: center;
     align-items: center;
-    width: calc(7em + 13vw);
+    width: calc(6em + 8vw);
     height: calc(2.5em + 1vw);
     font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
-    font-family: 'GenSekiGothic JP H', sans-serif;
+    font-family: source-han-sans-japanese, sans-serif;
+    font-weight: 800;
     background-color: #ffde59; /* 黄色の背景 */
     border: none;
     padding: 2vw; /* レスポンシブなパディング */
@@ -476,7 +477,7 @@ body .select2-dropdown{
   
 .toggle-title {
   font-size: calc(0.7em + 1vw);
-  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
+  font-family: source-han-sans-japanese, 'Osaka', 'Hiragino Sans', sans-serif;
   font-weight: 500;
 }
 
@@ -631,13 +632,13 @@ body .select2-dropdown{
   transform: translateX(-50%);
   text-align: center;
   margin-top: calc(2em + 5vh);
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
 }
 
 
 /*------------プライバシーポリシー画面のスタイリング:praivacy_policy.html--------------*/
 .p_p{
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
 }
 .p_p_title{
@@ -665,8 +666,8 @@ body .select2-dropdown{
   margin-top: calc(3em + 1vw);
   text-decoration: underline;
   text-align: center;
-  font-family: 'Noto sans JP', 'Hiragino Sans', sans-serif;
-  font-weight: 500;
+  font-family: source-han-sans-japanese, 'Hiragino Sans', sans-serif;
+  font-weight: 700;
 }
 /*------------クイズ出題画面のスタイリング:quiz.html--------------*/
 
@@ -675,10 +676,16 @@ body[hidden] {
   display: none;
 }
 
+#q_main{
+  width: 90%;
+  margin: 0 auto;
+}
+
 /*クイズのコンテナ*/
 .q_e_container{
-  width: 100%;
+  width: calc(10em + 44vw);
   height: auto;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   background-color: beige;
@@ -810,7 +817,7 @@ body[hidden] {
 .confirm-b-f{
   text-align: center;
   font-size: calc(1em + 0.7vw);
-  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
+  font-family: source-han-sans-japanese, 'Osaka', 'Hiragino Sans', sans-serif;
   font-weight: 500;
   color: #fff;
 }
@@ -829,14 +836,14 @@ body[hidden] {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 30%;
-  margin: 20px auto 0 auto;
+  width: calc(8em + 5vw);
+  margin: calc(1em + 1vw) auto 0 auto;
   font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
   background-color: #ffde59; /* 黄色の背景 */
   border: none;
-  padding: 2.5vw 2vw; /* レスポンシブなパディング */
-  border-radius: 1.5vw;
+  padding: calc( 7px + 1vw) calc(10px + 1vw); /* レスポンシブなパディング */
+  border-radius: calc(2px + 0.8vw);
   cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
 
@@ -851,56 +858,66 @@ body[hidden] {
 
 /*再挑戦ボタンを示すテキスト*/
 .q_window_restart_f{
-  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-size: calc(0.4em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 700;
 }
 /*再挑戦ボタンのスタイリング*/
 #q_window_restart_b{
-  width: calc(9em + 13vw);
+  width: calc(8em + 5vw);
   height: 10%;
   font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
   background-color: #ffde59; /* 黄色の背景 */
   border: none;
-  padding: 3vw; /* レスポンシブなパディング */
-  border-radius: 1.5vw;
+  padding: calc( 7px + 1vw) calc(10px + 1vw); /* レスポンシブなパディング */
+  border-radius: calc(2px + 0.8vw);
   cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
 
 /*ホームへ戻るボタンを示すテキスト*/
 .q_window_home_f{
-  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-size: calc(0.4em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 700;
   margin-top: 3em;
 }
 /*ホームへ戻るボタンのスタイリング*/
 #q_window_home_b{
-  width: calc(9em + 13vw);
+  width: calc(8em + 5vw);
   height: 10%;
   font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
   background-color: #ffde59; /* 黄色の背景 */
   border: none;
-  padding: 3vw; /* レスポンシブなパディング */
-  border-radius: 1.5vw;
+  padding: calc( 7px + 1vw) calc(10px + 1vw); /* レスポンシブなパディング */
+  border-radius: calc(2px + 0.8vw);
   cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
 
 
 /*-----------------結果画面のスタイリング:result.html-------------------*/
 
+/*結果画面のコンテナ*/
+#r_main{
+  width: 90%;
+  margin: 0 auto;
+}
+
 /*「結果」見出しのスタイリング*/
 .result_f{
   text-align: center;
   font-size: calc(1.5em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
 }
 
 /*正答数テキストのスタイリング*/
 #correct-answers{
   text-align: center;
   font-size: calc(1em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-family: source-han-sans-japanese, sans-serif;
 }
 
 /*解説文のスタイリング*/
@@ -923,10 +940,11 @@ body[hidden] {
 
 /*それぞれの解説ブロック*/
 .question-and-explanation {
-  width: 80%;
+  width: 70%;
+  max-width: 800px;
   margin: 0 auto calc(2em + 1vw) auto;
-  border: 0.5vw solid black;
-  border-radius: 1.5vw;
+  border: calc(1px + 0.2vw) solid black;
+  border-radius: calc(2px + 1vw);
   padding: calc(1em + 1vw);
 }
 
@@ -934,8 +952,9 @@ body[hidden] {
 .question-order{
   width: calc(85% + 1vw);
   margin: 0 auto 3% auto;
-  font-family: 'Noto Sans JP', 'Osaka', 'Hiragino Sans', sans-serif;
-  font-size: calc(1em + 1vw);
+  font-family: source-han-sans-japanese, 'Osaka', 'Hiragino Sans', sans-serif;
+  font-weight: 500;
+  font-size: calc(1em + 0.7vw);
   /*background-color: pink;*/
 }
 
@@ -945,7 +964,7 @@ body[hidden] {
   margin: 0 auto 6% auto;
   height: auto;
   font-family: 'Noto Serif JP','ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
-  font-size: calc(0.7em + 1vw);
+  font-size: calc(0.7em + 0.5vw);
   font-weight: 500;
   line-height: 1.6em;
   letter-spacing: 0.05em;
@@ -973,8 +992,8 @@ body[hidden] {
   width: calc(85% + 1vw);
   margin: 0 auto 6% auto;
   height: auto;
-  font-family: 'Noto Sans JP', 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
-  font-size: calc(0.8em + 1vw);
+  font-family: source-han-sans-japanese, 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-size: calc(0.8em + 0.6vw);
   font-weight: 600;
   line-height: 1.6em;
   letter-spacing: 0.05em;
@@ -990,7 +1009,7 @@ body[hidden] {
   height: auto;
   border-radius: calc(3px + 1vw);
   font-family: source-han-sans-japanese, sans-serif;
-  font-size: calc(0.8em + 1vw);
+  font-size: calc(0.8em + 0.6vw);
   font-weight: 500;
   line-height: calc(1.6em + 0.7vw);
   letter-spacing: 0.05em;
@@ -1009,37 +1028,41 @@ body[hidden] {
 
 /*再挑戦ボタンを示すテキスト*/
 .restart_f{
-  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-size: calc(0.3em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
 }
 /*再挑戦ボタンのスタイリング*/
 #restart_b{
-  width: calc(9em + 13vw);
-  height: 10%;
-  font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  width: calc(8em + 6vw);
+  height: auto;
+  font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
   background-color: #ffde59; /* 黄色の背景 */
   border: none;
-  padding: 3vw; /* レスポンシブなパディング */
-  border-radius: 1.5vw;
+  padding: calc( 8px + 1vw) calc(10px + 1vw); /* レスポンシブなパディング */
+  border-radius: calc(2px + 0.8vw);
   cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
 
 /*ホームへ戻るボタンを示すテキスト*/
 .home_f{
-  font-size: calc(0.7em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  font-size: calc(0.3em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
   margin-top: 3em;
 }
 /*ホームへ戻るボタンのスタイリング*/
 #home_b{
-  width: calc(9em + 13vw);
-  height: 10%;
-  font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
-  font-family: 'GenSekiGothic JP H', sans-serif;
+  width: calc(8em + 6vw);
+  height: auto;
+  font-size: calc(0.5em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
   background-color: #ffde59; /* 黄色の背景 */
   border: none;
-  padding: 3vw; /* レスポンシブなパディング */
-  border-radius: 1.5vw;
+  padding: calc( 8px + 1vw) calc(10px + 1vw); /* レスポンシブなパディング */
+  border-radius: calc(2px + 0.8vw);
   cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
