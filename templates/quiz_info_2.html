@@ -28,7 +28,7 @@
 <body>
     <main class="main">
         <div class="quiz-detail-container">
-            {% for quiz in quizzes %}
+            {% for quiz in quizzes if quiz.id == 2 %}
                 <!-- ロゴ -->
                 <div class="logo-container">
                     <a href="/" target="_self" rel="noopener noreferrer">
