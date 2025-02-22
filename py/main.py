@@ -13,7 +13,7 @@ from logging.handlers import RotatingFileHandler
 # redisをインポート
 import redis
 # dataset.pyからデータセットをインポート
-from py.dataset import questions
+from py.dataset import questions, quiz_metadata
 
 # ロギングの設定
 logging.basicConfig(level=logging.INFO)
@@ -93,7 +93,33 @@ def handle_exception(e):
 def home():
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
-    return render_template('index.html', css_url=css_url)
+    return render_template('index.html', css_url=css_url, quizzes=quiz_metadata)
+
+# ------ クイズの概要ページhtmlファイルをレンダリングするためのルートハンドラー ------
+@app.route('/quiz_info_1')
+def quiz_info_1():
+    # cssファイルのurlを生成
+    css_url = url_for('static', filename='styles.css')
+    return render_template('quiz_info_1.html', css_url=css_url)
+
+@app.route('/quiz_info_2')
+def quiz_info_2():
+    # cssファイルのurlを生成
+    css_url = url_for('static', filename='styles.css')
+    return render_template('quiz_info_2.html', css_url=css_url)
+
+# ------ タグの検索結果ページhtmlファイルをレンダリングするためのルートハンドラー ------
+@app.route('/tag_search')
+def tag_search():
+    tag = request.args.get('tag', '').strip()  # 余分な空白を削除
+    
+    # quiz_metadataからタグに一致するクイズをフィルタリング
+    filtered_quizzes = [
+        quiz for quiz in quiz_metadata if tag in quiz.get('tags', [])
+    ]
+ 
+    css_url = url_for('static', filename='styles.css')
+    return render_template('tag_search.html', tag=tag, quizzes=filtered_quizzes, css_url=css_url)
 
 # ------ プライバシーポリシー画面のhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/privacy_policy')

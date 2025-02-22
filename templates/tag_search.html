@@ -1,0 +1,87 @@
+<!-- tag_search.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タグ検索結果</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
+    
+    <!-- jQueryスクリプト -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- adobe fonts -->
+    <script>
+        (function(d) {
+          var config = {
+            kitId: 'hdm6oce',
+            scriptTimeout: 3000,
+            async: true
+          },
+          h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+        })(document);
+    </script>
+</head>
+<body>
+    <main class="main">
+        <div class="logo-container">
+            <a href="/" target="_self" rel="noopener noreferrer">
+                <div class="detail-logo">
+                    <img class="logo" src="{{ url_for('static', filename='logo.svg') }}" alt="logo">
+                </div>                    
+            </a>
+        </div>
+
+        <div class="container">
+            <h1 class="tag-search-title"><span id="current-tag"></span>：</h1>
+            <div class="grid">
+                {% if quizzes %}
+                    {% for quiz in quizzes %}
+                        <a href="{{ url_for('quiz_info_' ~ quiz.id|string) }}" class="card">
+                            <img src="{{ url_for('static', filename=quiz.image) }}" 
+                                 alt="画像" class="quiz_info_images">
+                            <div class="card-content">
+                                {% for tag in quiz.tags %}
+                                    <span class="tag" data-tag-id="{{ loop.index }}">{{ tag }}</span>
+                                {% endfor %}
+                                <h2 class="card-title">{{ quiz.title }}</h2>
+                                <div class="card-date">{{ quiz.date }}</div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-results">このタグに一致するクイズが見つかりませんでした。</p>
+                {% endif %}
+            </div>
+            <div class="pagination" id="tag-pagination">
+                <!-- Pagination buttons will be dynamically inserted here -->
+            </div>
+            <div class="detail-buttons">
+                <button id="q_window_home_b">ホームへ戻る</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="sns_icon">
+            <a href="https://x.com/taku_nuc" target="_blank" rel="noopener noreferrer">
+                <img class="x" src="{{ url_for('static', filename='sns_logo/x-logo/logo-black.png') }}" alt="x">
+            </a>
+            <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
+                <img class="Instagram" src="{{ url_for('static', filename='sns_logo/Instagram/03 Black Glyph/Instagram_Glyph_Black.svg') }}" alt="Instagram">
+            </a>
+        </div>
+        <div class="p-p-info">
+            <a href="{{ url_for('privacy_policy') }}" target="_self">
+            プライバシーポリシー
+            </a>
+        </div>
+        <div class="copyrights">
+            <small>&copy; ngrjaku 2024</small>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='tag_search.js') }}"></script>
+</body>
+</html>

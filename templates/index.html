@@ -68,7 +68,7 @@
             <div class="q_explain">
 
                 <div class="rounded_border">
-                    <p class="q_ex">いろんな事象の流れに焦点を当てた選択式クイズ。どんなクイズになるのやら。</p>
+                    <p class="q_ex">なんでもクイズにしちゃえばいい。</p>
                 </div>
                 <!--クイズの遊び方&注意点-->
                 <div class="how_to">
@@ -113,7 +113,7 @@
                     <!--スライド-->
                     <div class="slide active">
                         <ul class="howto_t">
-                            <li class="ht_t_style">歴史の流れに焦点を当てる選択式クイズです。
+                            <li class="ht_t_style">四択クイズです。
                                 ホームか画面から出題範囲を選択し、スタートボタンを押すとクイズが始まります。
                             </li>
                             <li class="ht_t_style">スタートすると出題画面に移ります。一問に対し、計四つ選択肢が表示されるので、当てはまるものを選択してください。
@@ -156,6 +156,38 @@
             </div>
         </div>
 
+
+        <!--クイズ一覧-->
+        <div class="container">
+            <h1 class="quiz_list_f">一覧</h1>
+            
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="タグ名で絞り込む">
+            </div>
+    
+            <div class="grid">
+                {% for quiz in quizzes %}
+                <a href="{{ url_for('quiz_info_' ~ quiz.id|string) }}" class="card">
+                    <img src="{{ url_for('static', filename=quiz.image) }}" alt="画像" class="quiz_info_images">
+                    <div class="card-content">
+                        {% for tag in quiz.tags %}
+                            <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                        <h2 class="card-title">{{ quiz.title }}</h2>
+                        <div class="card-date">{{ quiz.date }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+    
+            <div class="pagination">
+                <button class="active">1</button>
+                <button>1</button>
+                <span class="dots">...</span>
+                <button>1</button>
+            </div>
+        </div>
+
         <!--クイズを遊ぶ際の注意、トグルで-->
         <div class="toggle-caution">
             <input type="checkbox" id="toggle-checkbox" class="toggle-checkbox">
@@ -167,7 +199,7 @@
             </label>
             <div class="toggle-content">
               <ul class="content-ul">
-                <li class="content-p">事実の正確さには十分配慮していますが、素人による制作なので誤りがある場合もあります。より正確な内容はご自身でお調べ下さい。</br>あくまで歴史の流れをざっくりと理解する目的で楽しんでいただければ幸いです。
+                <li class="content-p">事実の正確さには十分配慮していますが、素人による制作なので誤りがある場合もあります。より正確な内容はご自身でお調べ下さい。</br>あくまで事象の流れをざっくりと理解する目的で楽しんでいただければ幸いです。
                 </li>
                 <li class="content-p">アプリの不具合については入念にチェックしていますが、それでも予想しないエラーが起こることはあります。その場合は大変お手数ですが<a href="https://x.com/taku_nuc" class="contact_x" target="_blank" rel="noopener noreferrer">私のXアカウントからDMにてお知らせください。</a>
                 </li>    

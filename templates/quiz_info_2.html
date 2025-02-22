@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二千年紀</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
+
+    <!-- ページのURL -->
+     <a href="quiz_info_2.html"></a>
+    
+    <!-- jQueryスクリプト -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- adobe fonts のプロジェクトを読み込む-->
+    <script>
+        (function(d) {
+          var config = {
+            kitId: 'hdm6oce',
+            scriptTimeout: 3000,
+            async: true
+          },
+          h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+        })(document);
+    </script>
+</head>
+<body>
+    <main class="main">
+        <div class="quiz-detail-container">
+            <!-- ロゴ、画像、タイトル -->
+            <div class="logo-container">
+                <a href="/" target="_self" rel="noopener noreferrer">
+                    <div class="detail-logo">
+                        <img class="logo" src="{{ url_for('static', filename='logo.svg') }}" alt="logo">
+                    </div>                    
+                </a>
+            </div>
+            <div class="image-container">
+                <img src="{{url_for('static', filename='images/quiz_info/second_millenium.png')}}" alt="画像" class="quiz_info_image">
+            </div>
+            <div class="quiz-detail-header">
+                <h1 class="quiz-detail-title">世界史：第二千年紀</h1>
+            </div>
+
+            <!-- タグと日付 -->
+            <div class="tag-date-container">
+                <div class="tags">
+                    <span class="detail-tag">世界史</span>
+                    <span class="detail-tag">古代史</span>
+                    <span class="detail-tag">紀元前</span>
+                </div>
+                <span class="creation-date">2025/XX/XX</span>
+            </div>
+
+            <!-- クイズ情報 -->
+            <div class="quiz-info-box">
+                <ul class="info-list">
+                    <li>ジャンル：世界史</li>
+                    <li>出題範囲：紀元前一七〇〇〇年前、紀元前約三五〇〇年〜紀元前二〇〇〇年</li>
+                    <li>問題数：3問</li>
+                </ul>
+            </div>
+
+            <!-- クイズ概要 -->
+            <div class="quiz-description">
+                <p>紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。挑戦してみてください。</p>
+            </div>
+
+            <!-- 非表示のセレクト要素 -->
+            <select id="quiz_range" class="hidden">
+                <option value="second">第二千年紀</option>
+            </select>
+
+            <!-- ボタン類 -->
+            <div class="detail-buttons">
+                <button id="q_info_start_b">
+                    <span class="start_b_location">スタート</span>
+                </button>
+                <button id="q_window_home_b">ホームへ戻る</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="sns_icon">
+            <a href="https://x.com/taku_nuc" target="_blank" rel="noopener noreferrer">
+                <img class="x" src="{{ url_for('static', filename='sns_logo/x-logo/logo-black.png') }}" alt="x">
+            </a>
+            <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
+                <img class="Instagram" src="{{ url_for('static', filename='sns_logo/Instagram/03 Black Glyph/Instagram_Glyph_Black.svg') }}" alt="Instagram">
+            </a>
+        </div>
+        <div class="p-p-info">
+            <a href="{{ url_for('privacy_policy') }}" target="_self">
+            プライバシーポリシー
+            </a>
+        </div>
+        <div class="copyrights">
+            <small >&copy; ngrjaku 2024</small>
+        </div>
+      </footer>
+
+    <!-- JavaScriptファイル -->
+    <script src="{{ url_for('static', filename='quiz_info.js') }}"></script>
+</body>
+</html>
