@@ -28,57 +28,62 @@
 <body>
     <main class="main">
         <div class="quiz-detail-container">
-            <!-- ロゴ、画像、タイトル -->
-            <div class="logo-container">
-                <a href="/" target="_self" rel="noopener noreferrer">
-                    <div class="detail-logo">
-                        <img class="logo" src="{{ url_for('static', filename='logo.svg') }}" alt="logo">
-                    </div>                    
-                </a>
-            </div>
-            <div class="image-container">
-                <img src="{{url_for('static', filename='images/quiz_info/first_millenium.png')}}" alt="画像" class="quiz_info_image">
-            </div>
-            <div class="quiz-detail-header">
-                <h1 class="quiz-detail-title">世界史：第一千年紀</h1>
-            </div>
-
-            <!-- タグと日付 -->
-            <div class="tag-date-container">
-                <div class="tags">
-                    <span class="detail-tag">世界史</span>
-                    <span class="detail-tag">古代史</span>
-                    <span class="detail-tag">紀元前</span>
+            {% for quiz in quizzes %}
+                <!-- ロゴ -->
+                <div class="logo-container">
+                    <a href="/" target="_self" rel="noopener noreferrer">
+                        <div class="detail-logo">
+                            <img class="logo" src="{{ url_for('static', filename='logo.svg') }}" alt="logo">
+                        </div>                    
+                    </a>
                 </div>
-                <span class="creation-date">2025/XX/XX</span>
-            </div>
+                <!-- 画像 -->
 
-            <!-- クイズ情報 -->
-            <div class="quiz-info-box">
-                <ul class="info-list">
-                    <li>ジャンル：世界史</li>
-                    <li>出題範囲：紀元前一七〇〇〇年前、紀元前約三五〇〇年〜紀元前二〇〇〇年</li>
-                    <li>問題数：3問</li>
-                </ul>
-            </div>
+                <div class="image-container">
+                    <img src="{{ url_for('static', filename=quiz.image) }}" alt="画像" class="quiz_info_images">
+                </div>
+                <!-- タイトル -->
+                <div class="quiz-detail-header">
+                    <h1 class="quiz-detail-title">{{ quiz.title }}</h1>
+                </div>
 
-            <!-- クイズ概要 -->
-            <div class="quiz-description">
-                <p>紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。挑戦してみてください。</p>
-            </div>
+                <!-- タグと日付 -->
+                <div class="tag-date-container">
+                    <div class="grid_info">                        
+                        {% for tag in quiz.tags %}
+                                <span class="detail-tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    <span class="creation-date">{{ quiz.date }}</span>
+                </div>
 
-            <!-- 非表示のセレクト要素 -->
-            <select id="quiz_range" class="hidden">
-                <option value="first">第一千年紀</option>
-            </select>
+                <!-- クイズ情報 -->
+                <div class="quiz-info-box">
+                    <ul class="info-list">
+                        <li>ジャンル：世界史</li>
+                        <li>出題範囲：紀元前一七〇〇〇年前、紀元前約三五〇〇年〜紀元前二〇〇〇年</li>
+                        <li>問題数：3問</li>
+                    </ul>
+                </div>
 
-            <!-- ボタン類 -->
-            <div class="detail-buttons">
-                <button id="q_info_start_b">
-                    <span class="start_b_location">スタート</span>
-                </button>
-                <button id="q_window_home_b">ホームへ戻る</button>
-            </div>
+                <!-- クイズ概要 -->
+                <div class="quiz-description">
+                    <p>紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。挑戦してみてください。</p>
+                </div>
+
+                <!-- 非表示のセレクト要素 -->
+                <select id="quiz_range" class="hidden">
+                    <option value="first">第一千年紀</option>
+                </select>
+
+                <!-- ボタン類 -->
+                <div class="detail-buttons">
+                    <button id="q_info_start_b">
+                        <span class="start_b_location">スタート</span>
+                    </button>
+                    <button id="q_window_home_b">ホームへ戻る</button>
+                </div>
+            {% endfor %}
         </div>
     </main>
 

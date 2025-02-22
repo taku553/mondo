@@ -100,13 +100,13 @@ def home():
 def quiz_info_1():
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
-    return render_template('quiz_info_1.html', css_url=css_url)
+    return render_template('quiz_info_1.html', css_url=css_url, quizzes=quiz_metadata)
 
 @app.route('/quiz_info_2')
 def quiz_info_2():
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
-    return render_template('quiz_info_2.html', css_url=css_url)
+    return render_template('quiz_info_2.html', css_url=css_url, quizzes=quiz_metadata)
 
 # ------ タグの検索結果ページhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/tag_search')

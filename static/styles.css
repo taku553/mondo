@@ -830,8 +830,14 @@ body .select2-dropdown{
   align-items: end;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: calc(2em + 4vw);
   margin-bottom: 2rem;
+}
+
+.grid_info{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(80px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;   
 }
 
 .tags {
@@ -855,7 +861,7 @@ body .select2-dropdown{
 
 .creation-date {
   color: #666;
-  font-size: 0.9rem;
+  font-size: calc(0.5em + 0.5vw);
 }
 
 /* クイズ情報ボックスのスタイル */
@@ -913,7 +919,7 @@ body .select2-dropdown{
 }
 
 
-/*------------タグ検索結果ページのスタイリング:praivacy_policy.html--------------*/
+/*------------タグ検索結果ページのスタイリング:tag_search.html--------------*/
 .tag-search-title {
   font-size: calc(1.2em + 1vw);
   font-weight: bold;
@@ -928,6 +934,7 @@ body .select2-dropdown{
 }
 
 /* タグをクリック可能にするためのスタイル */
+/*
 .detail-tag {
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -936,6 +943,7 @@ body .select2-dropdown{
 .detail-tag:hover {
   background-color: #ffd700;
 }
+*/
 
 
 /*------------プライバシーポリシー画面のスタイリング:praivacy_policy.html--------------*/
