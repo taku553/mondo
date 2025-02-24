@@ -1,5 +1,5 @@
 # Flaskとその他のモジュールをインポート
-from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app
+from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app, abort
 from flask_session import Session  # Flask-Sessionを追加、ユーザーからの解答データ（セッションデータ）を管理するflaskのパッケージ
 from flask_cors import CORS  # CORSをインポート
 import random
@@ -96,17 +96,19 @@ def home():
     return render_template('index.html', css_url=css_url, quizzes=quiz_metadata)
 
 # ------ クイズの概要ページhtmlファイルをレンダリングするためのルートハンドラー ------
-@app.route('/quiz_info_1')
-def quiz_info_1():
-    # cssファイルのurlを生成
+@app.route('/quiz_info/<int:quiz_id>')
+def quiz_info(quiz_id):
+    # quiz_metadataから該当するクイズ情報を取得
+    quiz = next((q for q in quiz_metadata if q['id'] == quiz_id), None)
+    
+    # クイズが見つからない場合は404エラー
+    if quiz is None:
+        abort(404)
+    
+    # cssファイルのURLを生成
     css_url = url_for('static', filename='styles.css')
-    return render_template('quiz_info_1.html', css_url=css_url, quizzes=quiz_metadata)
+    return render_template('quiz_info.html', css_url=css_url, quiz=quiz)
 
-@app.route('/quiz_info_2')
-def quiz_info_2():
-    # cssファイルのurlを生成
-    css_url = url_for('static', filename='styles.css')
-    return render_template('quiz_info_2.html', css_url=css_url, quizzes=quiz_metadata)
 
 # ------ タグの検索結果ページhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/tag_search')

@@ -81,7 +81,7 @@ quiz_metadata = [
     {
         'id': 1,
         'title': '世界史：第一千年紀',
-        'image': 'images/quiz_info/first_millenium.png',
+        'image': 'images/quiz_info/optimized/optimized_first_millenium.jpg',
         'tags': ['世界史', '古代史', '紀元前'],
         'description': '紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。',
         'date': '2025/02/22',
@@ -93,7 +93,7 @@ quiz_metadata = [
     {
         'id': 2,
         'title': '世界史：第二千年紀',
-        'image': 'images/quiz_info/second_millenium.png',
+        'image': 'images/quiz_info/optimized/optimized_second_millenium.jpg',
         'tags': ['世界史', '古代史', '紀元前'],
         'description': '紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。',
         'date': '2025/02/22',

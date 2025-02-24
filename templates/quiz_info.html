@@ -3,13 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第二千年紀</title>
+    <title>{{ quiz.title }}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
 
     <!-- ページのURL -->
-     <a href="quiz_info_2.html"></a>
+     <a href="quiz_info{{ quiz.id }}.html"></a>
     
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRFNLZKC9G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BRFNLZKC9G');
+    </script>
+
     <!-- jQueryスクリプト -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -28,7 +38,6 @@
 <body>
     <main class="main">
         <div class="quiz-detail-container">
-            {% for quiz in quizzes if quiz.id == 2 %}
                 <!-- ロゴ -->
                 <div class="logo-container">
                     <a href="/" target="_self" rel="noopener noreferrer">
@@ -49,7 +58,7 @@
 
                 <!-- タグと日付 -->
                 <div class="tag-date-container">
-                    <div class="grid_info">                        
+                    <div class="grid_info">
                         {% for tag in quiz.tags %}
                                 <span class="detail-tag">{{ tag }}</span>
                         {% endfor %}
@@ -60,20 +69,20 @@
                 <!-- クイズ情報 -->
                 <div class="quiz-info-box">
                     <ul class="info-list">
-                        <li>ジャンル：世界史</li>
-                        <li>出題範囲：紀元前一七〇〇〇年前、紀元前約三五〇〇年〜紀元前二〇〇〇年</li>
-                        <li>問題数：4問</li>
+                        <li>ジャンル：{{ quiz.subject }}</li>
+                        <li>出題範囲：{{ quiz.period }}</li>
+                        <li>問題数：{{ quiz.total_questions }}問</li>
                     </ul>
                 </div>
 
                 <!-- クイズ概要 -->
                 <div class="quiz-description">
-                    <p>紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。挑戦してみてください。</p>
+                    <p>{{ quiz.description }}</p>
                 </div>
 
                 <!-- 非表示のセレクト要素 -->
                 <select id="quiz_range" class="hidden">
-                    <option value="first">第一千年紀</option>
+                    <option value="{{ quiz.category }}">{{ quiz.title }}</option>
                 </select>
 
                 <!-- ボタン類 -->
@@ -83,7 +92,6 @@
                     </button>
                     <button id="q_window_home_b">ホームへ戻る</button>
                 </div>
-            {% endfor %}
         </div>
     </main>
 

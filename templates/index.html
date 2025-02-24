@@ -23,6 +23,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&display=swap" rel="stylesheet">
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRFNLZKC9G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BRFNLZKC9G');
+    </script>    
 
     <!-- adobe fonts のプロジェクトを読み込む-->
     <script>
@@ -105,9 +114,11 @@
             <!--ポップアップウィンドウ-->
             <div class="popup_window">
                 <!--ポップアップのタイトル-->
-                <span class="popup_how_to">遊び方</span>
-                <!--ポップアップを閉じる「バツボタン」を乗算記号を使って表示-->
-                <span class="close"><img src="{{ url_for('static', filename='fonts/close/close.svg') }}" alt="close" class="close_f" /></span>
+                <!-- <div class="howto_and_close"> -->
+                    <span class="popup_how_to">遊び方</span>
+                    <!--ポップアップを閉じる「バツボタン」を乗算記号を使って表示-->
+                    <span class="close"><img src="{{ url_for('static', filename='fonts/close/close.svg') }}" alt="close" class="close_f" /></span>
+                <!-- </div> -->
                 <!--ウィンドウ内のコンテンツ-->
                 <div class="popup_contents">
                     <!--スライド-->
@@ -167,8 +178,11 @@
     
             <div class="grid">
                 {% for quiz in quizzes %}
-                <a href="{{ url_for('quiz_info_' ~ quiz.id|string) }}" class="card">
-                    <img src="{{ url_for('static', filename=quiz.image) }}" alt="画像" class="quiz_info_images">
+                <a href="{{ url_for('quiz_info',  quiz_id=quiz.id) }}" class="card">
+                    <img src="{{ url_for('static', filename=quiz.image) }}" 
+                    alt="{{ quiz.title }}"
+                    loading="lazy"
+                    class="quiz_info_images">
                     <div class="card-content">
                         {% for tag in quiz.tags %}
                             <span class="tag">{{ tag }}</span>

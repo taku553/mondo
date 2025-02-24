@@ -5,6 +5,7 @@ Flask-SQLAlchemy==3.1.1
 gotrue==2.11.1
 gunicorn==23.0.0
 httpx==0.26.0
+Pillow==11.0.0
 postgrest==0.19.1
 python-dotenv==1.0.1
 redis==5.2.1

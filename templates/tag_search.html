@@ -8,6 +8,16 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
     
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRFNLZKC9G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BRFNLZKC9G');
+    </script>
+
     <!-- jQueryスクリプト -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -38,7 +48,7 @@
             <div class="grid">
                 {% if quizzes %}
                     {% for quiz in quizzes %}
-                        <a href="{{ url_for('quiz_info_' ~ quiz.id|string) }}" class="card">
+                        <a href="{{ url_for('quiz_info', quiz_id=quiz.id) }}" class="card">
                             <img src="{{ url_for('static', filename=quiz.image) }}" 
                                  alt="画像" class="quiz_info_images">
                             <div class="card-content">
