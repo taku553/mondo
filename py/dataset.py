@@ -83,24 +83,48 @@ quiz_metadata = [
         'title': '世界史：第一千年紀',
         'image': 'images/quiz_info/optimized/optimized_first_millenium.jpg',
         'tags': ['世界史', '古代史', '紀元前'],
-        'description': '紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。',
+        'description': '紀元前約3500年〜紀元前2000年ごろまでの主要な世界史をまとめたクイズです。',
         'date': '2025/02/22',
         'category': 'first',
         'total_questions': 3,
         'subject': '世界史',
-        'period': '紀元前一七〇〇〇年前、紀元前約三五〇〇年〜紀元前二〇〇〇年'
+        'period': '紀元前約3500年〜紀元前2000年'
     },
     {
         'id': 2,
         'title': '世界史：第二千年紀',
         'image': 'images/quiz_info/optimized/optimized_second_millenium.jpg',
         'tags': ['世界史', '古代史', '紀元前'],
-        'description': '紀元前1000年〜紀元後0年（西暦0年）までの主要な世界史をまとめたクイズです。',
+        'description': '紀元前2001年〜紀元前1000年ごろまでの主要な世界史をまとめたクイズです。',
         'date': '2025/02/22',
         'category': 'second',
         'total_questions': 4,
         'subject': '世界史',
-        'period': '紀元前一七〇〇〇年前、紀元前約三五〇〇年〜紀元前二〇〇〇年'
-    },    
+        'period': '紀元前約2001年〜紀元前1000年'
+    },
+    {
+        'id': 3,
+        'title': '世界史：第三千年紀',
+        'image': 'images/quiz_info/optimized/optimized_third-millenium.jpg',
+        'tags': ['世界史', '古代史', '紀元前'],
+        'description': '紀元前1001年〜紀元前1年（西暦1年）ごろまでの主要な世界史をまとめたクイズです。',
+        'date': '2025/02/26',
+        'category': 'third',
+        'total_questions': 9,
+        'subject': '世界史',
+        'period': '紀元前約1001年〜紀元前1年（西暦1年）'
+    }, 
+    {
+        'id': 4,
+        'title': 'チェス：オープニング',
+        'image': 'images/quiz_info/optimized/optimized_chess_opening.jpg',
+        'tags': ['チェス', 'オープニング'],
+        'description': 'チェスのオープニングをまとめたクイズです。',
+        'date': '2025/02/26',
+        'category': 'opening',
+        'total_questions': 7,
+        'subject': 'チェス',
+        'period': 'オープニング'
+    },      
     # 他のクイズメタデータ...
 ]
