@@ -1,5 +1,5 @@
 # Flaskとその他のモジュールをインポート
-from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app, abort, send_from_directory
+from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app, abort, send_from_directory, make_response
 from flask_session import Session  # Flask-Sessionを追加、ユーザーからの解答データ（セッションデータ）を管理するflaskのパッケージ
 from flask_cors import CORS  # CORSをインポート
 import random
@@ -131,10 +131,21 @@ def privacy_policy():
     return render_template('privacy_policy.html', css_url=css_url)
 
 
-# ------ obots.txtを提供するためのルートハンドラー ------
+# ------ robots.txtを提供するためのルートハンドラー ------
 @app.route('/robots.txt')
 def serve_robots():
-    return send_from_directory(app.root_path, 'robots.txt')
+    # アプリケーションのルートディレクトリ（pyディレクトリの親）
+    root_dir = os.path.dirname(app.root_path)
+    # root_pathに関するデバッグ情報をログに記録
+    app.logger.info(f"Looking for robots.txt in: {root_dir}")
+    try:
+        return send_from_directory(root_dir, 'robots.txt')
+    except Exception as e:
+        app.logger.error(f"Error serving robots.txt: {str(e)}")
+        #ファイルが見つからない場合、最小限のrobots.txtを動的に生成
+        response = make_response("User-agent: *\nAllow: /\n")
+        response.headers["Content-Type"] = "text/plain"
+        return response
 
 # ------ ドロップダウンメニューで選択された項目対応したデータ列の範囲を決定するエンドポイント ------
 @app.route('/set_quiz_range', methods=['POST'])
