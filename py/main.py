@@ -1,5 +1,5 @@
 # Flaskとその他のモジュールをインポート
-from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app, abort
+from flask import Flask, request, jsonify, session, render_template, url_for, redirect, current_app, abort, send_from_directory
 from flask_session import Session  # Flask-Sessionを追加、ユーザーからの解答データ（セッションデータ）を管理するflaskのパッケージ
 from flask_cors import CORS  # CORSをインポート
 import random
@@ -130,6 +130,11 @@ def privacy_policy():
     css_url = url_for('static', filename='styles.css')
     return render_template('privacy_policy.html', css_url=css_url)
 
+
+# ------ obots.txtを提供するためのルートハンドラー ------
+@app.route('/robots.txt')
+def serve_robots():
+    return send_from_directory(app.root_path, 'robots.txt')
 
 # ------ ドロップダウンメニューで選択された項目対応したデータ列の範囲を決定するエンドポイント ------
 @app.route('/set_quiz_range', methods=['POST'])

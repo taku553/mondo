@@ -1100,6 +1100,7 @@ body[hidden] {
   font-size: calc(0.8em + 1vw);
   font-weight: 500;
   color: black;
+  cursor: pointer;
 }
 
 /*アクティブ化した選択肢ボタンの色変更*/
