@@ -19,7 +19,9 @@ from py.dataset import questions, quiz_metadata
 logging.basicConfig(level=logging.INFO)
 
 # Flaskアプリケーションを初期化
-app = Flask(__name__, template_folder=os.path.join('../templates'), static_folder='../static')
+app = Flask(__name__, 
+            template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../templates')), 
+            static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../static')))
 app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
 
 # 環境変数から設定を読み込む
@@ -93,6 +95,29 @@ def handle_exception(e):
 # これで自動認識によるメンテナンス性とカテゴリの手動更新によるエラーが減少する。
 valid_categories = list(set(q['category'] for q in questions if q['category']))
 
+
+# キャッシュヘッダーを追加
+@app.after_request
+def add_header(response):
+    # 静的ファイルに対するキャッシュ設定
+    if 'static/' in request.path:
+        # 画像ファイルは長めのキャッシュ期間を設定
+        if any(ext in request.path for ext in ['.jpg', '.jpeg', '.png', '.gif', '.svg']):
+            response.cache_control.max_age = 3600  # 1時間
+        else:  # CSS, JSなど
+            response.cache_control.max_age = 300  # 5分間
+    return response
+
+# 静的ファイルのエラーハンドリングを追加
+@app.errorhandler(404)
+def handle_404(e):
+    # 静的ファイルの404エラー処理
+    if 'static/' in request.path:
+        app.logger.warning(f"Static file not found: {request.path}")
+        if '.jpg' in request.path or '.png' in request.path or '.svg' in request.path:
+            # 画像ファイルの場合、プレースホルダー画像を返す選択肢もある
+            return send_from_directory(app.static_folder, 'images/placeholder.jpg'), 200
+    return jsonify(error=str(e)), 404
         
 # ------ ホーム画面のhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/')
