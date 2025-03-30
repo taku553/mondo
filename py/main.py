@@ -87,6 +87,12 @@ CORS(app)  # CORSをアプリケーションに適用
 def handle_exception(e):
     # すべての例外をキャッチしてJSONレスポンスとして返す
     return jsonify(error=str(e)), 500
+
+# dataset.pyからすべての有効なカテゴリを抽出
+# dataset.pyのquestionsリストからカテゴリを抽出指導的にカテゴリリストを生成。
+# これで自動認識によるメンテナンス性とカテゴリの手動更新によるエラーが減少する。
+valid_categories = list(set(q['category'] for q in questions if q['category']))
+
         
 # ------ ホーム画面のhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/')
@@ -153,7 +159,7 @@ def set_quiz_range():
     print("set_quiz_range called")  # set_quiz_range()関数が呼び出されてるか確かめるプリント
     data = request.json
     selected_range = data.get('range')
-    if selected_range in ['first', 'second', 'third', 'opening', 'Familiar_Elements_Part1']: # 有効な年代のみを受け付ける
+    if selected_range in valid_categories: # 有効な年代のみを受け付ける
         session['quiz_range'] = selected_range
         app.logger.info(f"Quiz range set to: {session['quiz_range']}")  # session['quiz_range']にどのデータ範囲が保存されたか確認するログ
         # 選択された範囲に基づいて質問をフィルタリング
