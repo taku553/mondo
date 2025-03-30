@@ -14,12 +14,15 @@ from logging.handlers import RotatingFileHandler
 import redis
 # dataset.pyからデータセットをインポート
 from py.dataset import questions, quiz_metadata
+# ガベージコレクションをインポート
+import gc
 
 # ロギングの設定
 logging.basicConfig(level=logging.INFO)
 
 # Flaskアプリケーションを初期化
 app = Flask(__name__, 
+            # 絶対パスにしている理由は、デプロイサービスrenderでは指摘ファイルの参照に絶対パスが推奨されるから。
             template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../templates')), 
             static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../static')))
 app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
@@ -108,6 +111,24 @@ def add_header(response):
             response.cache_control.max_age = 300  # 5分間
     return response
 
+# 静的ファイル配信の詳細設定
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    app.logger.info(f"Serving static file: {filename}")
+    try:
+        # 静的ファイルのフルパスを取得
+        static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static'))
+        response = send_from_directory(static_dir, filename)
+        # キャッシュ制御
+        if any(ext in filename for ext in ['.jpg', '.jpeg', '.png', '.gif', '.svg']):
+            response.cache_control.max_age = 3600  # 1時間
+        else:
+            response.cache_control.max_age = 300  # 5分間
+        return response
+    except Exception as e:
+        app.logger.error(f"Error serving static file {filename}: {str(e)}")
+        abort(404)
+
 # 静的ファイルのエラーハンドリングを追加
 @app.errorhandler(404)
 def handle_404(e):
@@ -118,6 +139,11 @@ def handle_404(e):
             # 画像ファイルの場合、プレースホルダー画像を返す選択肢もある
             return send_from_directory(app.static_folder, 'images/placeholder.jpg'), 200
     return jsonify(error=str(e)), 404
+
+@app.after_request
+def cleanup_after_request(response):
+    gc.collect()  # メモリを解放
+    return response
         
 # ------ ホーム画面のhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/')
