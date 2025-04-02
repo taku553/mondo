@@ -1,9 +1,10 @@
 import os
 import sys
 from supabase import create_client
-from py.dataset import questions
+from py.dataset import questions, quiz_metadata
 from dotenv import load_dotenv
 import logging
+import datetime
 
 logging.basicConfig(
     level=logging.INFO,
@@ -133,37 +134,10 @@ def migrate_data(dry_run=False):
     
 # データの移行処理
     try:
-        # データ削除処理を最初に配置
-        if not dry_run:
-            logging.info("Checking existing data...")
-            questions_exists = supabase.table("questions").select("*").execute()
-            choices_exists = supabase.table("choices").select("*").execute()
-            
-            if len(questions_exists.data) > 0 or len(choices_exists.data) > 0:
-                logging.warning("Tables contain existing data")
-                user_input = input("Do you want to clear existing data? (y/n): ")
-                if user_input.lower() == 'y':
-                    logging.info("Clearing existing data...")
-                    # 外部キー制約があるため、choicesを先に削除
-                    supabase.table("choices").delete().neq('id', 0).execute()
-                    supabase.table("questions").delete().neq('id', 0).execute()
-                    logging.info("Existing data cleared")
-                else:
-                    logging.info("Migration cancelled by user")
-                    return
-                
-        # 移行前の最終確認
-        logging.info(f"準備完了: {len(questions_data)}件の質問と{len(choices_data)}件の選択肢を移行します")
-        if not dry_run:
-            user_input = input("移行を開始しますか？ (y/n): ")
-            if user_input.lower() != 'y':
-                logging.info("移行がキャンセルされました")
-                return
-                        
         # データの検証
         logging.info("Starting data verification...")
         verify_data_consistency()        
-        
+
         logging.info("Validating data...")        
         validate_data()
         
@@ -172,6 +146,7 @@ def migrate_data(dry_run=False):
         choices_data = []
         choice_id_counter = 1  # 選択肢用の連番カウンター
         
+
         for q in questions:
             question_data = {
                 "id": q["id"],
@@ -201,6 +176,33 @@ def migrate_data(dry_run=False):
         # 外部キー制約のチェック
         check_foreign_keys(questions_data, choices_data)
 
+        # 移行前の最終確認
+        logging.info(f"準備完了: {len(questions_data)}件の質問と{len(choices_data)}件の選択肢を移行します")
+        if not dry_run:
+            user_input = input("移行を開始しますか？ (y/n): ")
+            if user_input.lower() != 'y':
+                logging.info("移行がキャンセルされました")
+                return
+            
+        # データ削除処理を最初に配置
+        if not dry_run:
+            logging.info("Checking existing data...")
+            questions_exists = supabase.table("questions").select("*").execute()
+            choices_exists = supabase.table("choices").select("*").execute()
+            
+            if len(questions_exists.data) > 0 or len(choices_exists.data) > 0:
+                logging.warning("Tables contain existing data")
+                user_input = input("Do you want to clear existing data? (y/n): ")
+                if user_input.lower() == 'y':
+                    logging.info("Clearing existing data...")
+                    # 外部キー制約があるため、choicesを先に削除
+                    supabase.table("choices").delete().neq('id', 0).execute()
+                    supabase.table("questions").delete().neq('id', 0).execute()
+                    logging.info("Existing data cleared")
+                else:
+                    logging.info("Migration cancelled by user")
+                    return
+                
         # トランザクション的な処理
         logging.info("Checking existing data...")
         data = supabase.table("questions").select("*").execute()
@@ -300,6 +302,145 @@ def migrate_incremental_data(dry_run=False):
     except Exception as e:
         logging.error(f"増分更新中にエラーが発生: {str(e)}")
         raise
+
+# quiz_metadataテーブルの移行スクリプト
+def migrate_quiz_metadata(dry_run=False):
+    """
+    quiz_metadata辞書リストをsupabaseのquiz_metadataテーブルに移行する
+    dry_run=True の場合は検証のみを行い、実際のデータ挿入は行わない
+    """
+    try:
+        from py.dataset import quiz_metadata
+        
+        # 日付形式をISO形式の文字列に変換（JSONシリアル化可能な形式）
+        processed_metadata = []
+        for meta in quiz_metadata:
+            meta_copy = meta.copy()  # 元のデータを変更しないようにコピー
+            if 'date' in meta and meta['date']:
+                # YYYY/MM/DD形式を日付オブジェクトに変換
+                try:
+                    date_parts = meta['date'].split('/')
+                    # datetime.dateオブジェクトではなく、ISO形式の文字列に変換
+                    meta_copy['date'] = f"{date_parts[0]}-{date_parts[1]}-{date_parts[2]}"
+                except Exception as e:
+                    logging.warning(f"日付形式の変換に失敗: {meta['date']}, エラー: {str(e)}")        
+            processed_metadata.append(meta_copy)
+
+        # データの検証
+        # データ挿入時にはprocessed_metadataを使用
+        logging.info("クイズメタデータの検証を開始...")
+        
+        if not processed_metadata:
+            logging.warning("quiz_metadataが空です")
+            return False
+            
+        # メタデータの基本的な整合性チェック
+        required_fields = ["id", "title", "category"]
+        for meta in processed_metadata:
+            for field in required_fields:
+                if field not in meta or not meta[field]:
+                    raise ValueError(f"必須フィールド '{field}' がメタデータ {meta.get('id', '不明')} に存在しないか空です")
+            
+            # IDが整数であることを確認
+            if not isinstance(meta["id"], int):
+                raise ValueError(f"メタデータID '{meta['id']}' は整数である必要があります")
+                
+            # tagsが配列であることを確認
+            if "tags" in meta and not isinstance(meta["tags"], list):
+                raise ValueError(f"メタデータ {meta['id']} のtags属性はリスト形式である必要があります")
+        
+        # IDの重複チェック
+        meta_ids = set()
+        for meta in processed_metadata:
+            if meta["id"] in meta_ids:
+                raise ValueError(f"重複するメタデータID '{meta['id']}' が見つかりました")
+            meta_ids.add(meta["id"])
+            
+        logging.info(f"検証完了: {len(processed_metadata)}件のクイズメタデータを移行します")
+        
+        # ドライラン確認
+        if dry_run:
+            logging.info("ドライラン完了。データは挿入されていません。")
+            return True
+            
+        # 既存データ確認
+        data = supabase.table("quiz_metadata").select("*").execute()
+        if len(data.data) > 0:
+            logging.warning("quiz_metadataテーブルは空ではありません")
+            user_input = input("既存のデータをクリアしますか？ (y/n): ")
+            if user_input.lower() == 'y':
+                logging.info("既存のメタデータをクリア中...")
+                supabase.table("quiz_metadata").delete().neq('id', 0).execute()
+                logging.info("既存のメタデータがクリアされました")
+            else:
+                user_input = input("それでも続行しますか？ (y/n): ")
+                if user_input.lower() != 'y':
+                    logging.info("移行がキャンセルされました")
+                    return False
+        
+        # データ挿入
+        logging.info("クイズメタデータの挿入を開始...")
+        result = batch_insert("quiz_metadata", processed_metadata, batch_size=50)
+        
+        if result:
+            logging.info(f"メタデータの移行完了: {len(processed_metadata)}件追加されました")
+            return True
+            
+    except Exception as e:
+        logging.error(f"クイズメタデータの移行中にエラーが発生: {str(e)}")
+        raise
+        
+    return False
+
+def migrate_incremental_quiz_metadata(dry_run=False):
+    """
+    既存のメタデータを保持したまま、新しいメタデータのみを追加する
+    """
+    try:
+        from py.dataset import quiz_metadata
+        
+        # 既存のメタデータIDを取得
+        existing_meta_ids = set()
+        existing_meta = supabase.table("quiz_metadata").select("id").execute()
+        for m in existing_meta.data:
+            existing_meta_ids.add(m['id'])
+            
+        # 新しいメタデータのみをフィルタリング
+        new_metadata_original = [meta for meta in quiz_metadata if meta['id'] not in existing_meta_ids]
+        
+        # 日付形式をISO形式の文字列に変換
+        new_metadata = []
+        for meta in new_metadata_original:
+            meta_copy = meta.copy()
+            if 'date' in meta_copy and meta_copy['date']:
+                try:
+                    date_parts = meta_copy['date'].split('/')
+                    meta_copy['date'] = f"{date_parts[0]}-{date_parts[1]}-{date_parts[2]}"
+                except Exception as e:
+                    logging.warning(f"日付形式の変換に失敗: {meta_copy['date']}, エラー: {str(e)}")
+            new_metadata.append(meta_copy)        
+        
+        if not new_metadata:
+            logging.info("新しいクイズメタデータはありません")
+            return True
+            
+        if dry_run:
+            logging.info(f"追加予定: メタデータ {len(new_metadata)}件")
+            return True
+            
+        # 新メタデータの挿入
+        logging.info("新しいメタデータを追加中...")
+        result = batch_insert("quiz_metadata", new_metadata, batch_size=50)
+        
+        if result:
+            logging.info(f"メタデータの増分更新完了: {len(new_metadata)}件追加されました")
+            return True
+            
+    except Exception as e:
+        logging.error(f"メタデータの増分更新中にエラーが発生: {str(e)}")
+        raise
+        
+    return False
     
 def main():
     try:
@@ -327,18 +468,29 @@ def main():
             logging.error(f"Failed to connect to Supabase: {str(e)}")
             sys.exit(1)
         
-        # 更新モードの選択
+        # データタイプと更新モードの選択
+        data_type = input("移行するデータを選択してください（1: 問題データ, 2: メタデータ, 3: 両方）: ")
         update_mode = input("更新モードを選択してください（1: 全データ再構築, 2: 増分更新）: ")
         
-        if update_mode == "1":
-            # 完全な再構築
-            migrate_data()
-        elif update_mode == "2":
-            # 増分更新
-            migrate_incremental_data()
-        else:
-            logging.error("無効な選択です")
-            return
+        # 問題データの移行
+        if data_type == "1" or data_type == "3":
+            if update_mode == "1":
+                migrate_data()
+            elif update_mode == "2":
+                migrate_incremental_data()
+            else:
+                logging.error("無効な選択です")
+                return
+                
+        # メタデータの移行
+        if data_type == "2" or data_type == "3":
+            if update_mode == "1":
+                migrate_quiz_metadata()
+            elif update_mode == "2":
+                migrate_incremental_quiz_metadata()
+            else:
+                logging.error("無効な選択です")
+                return
                 
     except Exception as e:
         logging.error(f"Migration failed: {str(e)}", exc_info=True)

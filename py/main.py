@@ -22,9 +22,9 @@ logging.basicConfig(level=logging.INFO)
 
 # Flaskアプリケーションを初期化
 app = Flask(__name__, 
-            # 絶対パスにしている理由は、デプロイサービスrenderでは指摘ファイルの参照に絶対パスが推奨されるから。
-            template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../templates')), 
-            static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../static')))
+    # 絶対パスにしている理由は、デプロイサービスrenderでは指摘ファイルの参照に絶対パスが推奨されるから。
+    template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../templates')), 
+    static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../static')))
 app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
 
 # 環境変数から設定を読み込む
