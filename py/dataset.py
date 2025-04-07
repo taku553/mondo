@@ -672,7 +672,7 @@ quiz_metadata = [
         'image': 'images/quiz_info/optimized/optimized_familiar_elements_part3.jpg',
         'tags': ['化学', '元素'],
         'description': '身近な応用例のある元素に関するクイズその3です。全10問。まだまだ続きます。',
-        'date': '2025/04/05',
+        'date': '2025/04/08',
         'category': 'Familiar_Elements_Part3',
         'total_questions': 10,
         'subject': '身近な応用例のある元素：その３',
