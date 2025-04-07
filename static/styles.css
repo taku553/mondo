@@ -1027,9 +1027,9 @@ body[hidden] {
 
 /*クイズのコンテナ*/
 .q_e_container{
-  width: calc(10em + 44vw);
+  width: calc(9em + 44vw);
   height: auto;
-  margin: 0 auto;
+  margin: calc(1em + 1vw) auto;
   display: flex;
   flex-direction: column;
   background-color: beige;
