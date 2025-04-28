@@ -534,15 +534,22 @@ def result():
             # これに文章を格納する
             # ユーザーが選んだ選択肢の文章を取得
             user_choice_text = next((c['text'] for c in question['choices'] if c['id'] == user_answer['user_choice']), 'Unknown')
+            
+            # 正答の選択肢の文章を取得（追加部分）
+            correct_choice_text = next((c['text'] for c in question['choices'] if c['id'] == user_answer['correct_choice']), 'Unknown')            
+            
             # 画像の情報を取得
             image_url = question.get('image', '')
             # 画像パスから /static/ を削除。これにより、結果画面に画像を表示させる際にパスが正しく設定され画像表示される
             if image_url.startswith('static/'):
                 image_url = image_url[len('static/'):]
+                
             answered_question_info = {
                 'text': question['text'],
                 'image': image_url,
                 'user_choice_text': user_choice_text,
+                'correct_choice_text': correct_choice_text,  # 正答の選択肢の文章を追加
+                'result': user_answer['result'],  # 正誤結果を追加しておくと便利
                 'explanation': next((q['explanation'] for q in session.get('answered_questions', []) if q['question_id'] == question['id']), question['explanation']),
                 'display_order': user_answer['display_order'] + 1  # 表示順序を1から始めるよう修正
             }

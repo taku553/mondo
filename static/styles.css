@@ -1248,7 +1248,7 @@ body[hidden] {
   height: auto;
 }
 
-/*選択肢の文章*/
+/*選択肢のテキスト*/
 .choice_t{
   width: calc(85% + 1vw);
   margin: 0 auto 6% auto;
@@ -1260,6 +1260,19 @@ body[hidden] {
   letter-spacing: 0.05em;
   color: #e83828;
   /*background-color: yellow;*/
+}
+
+/*正解のテキスト*/
+.correct_t{
+  width: calc(85% + 1vw);
+  margin: 0 auto 6% auto;
+  height: auto;
+  font-family: source-han-sans-japanese, 'ヒラギノ明朝 ProN','Hiragino Mincho ProN',sans-serif;
+  font-size: calc(0.8em + 0.6vw);
+  font-weight: 600;
+  line-height: 1.6em;
+  letter-spacing: 0.05em;
+  color: #00a760;
 }
 
 /*解説文*/

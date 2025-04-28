@@ -69,6 +69,7 @@
                     {% endif %}
                 </div>
                 <p class="choice_t">あなたの解答： {{ question.user_choice_text }}</p>
+                <p class="correct_t">正解： {{ question.correct_choice_text }}</p>
                 <p class="explanation"> 解説： {{ question.explanation | safe }}</p>
             </div>
             {% endfor %}
