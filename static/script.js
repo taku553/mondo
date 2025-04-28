@@ -44,15 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
   //ホーム画面ロード時にリセット処理を行う。
   resetAll();
 
-  // ドロップダウンメニューによる通信
-  //Secect2の初期化
-  $('.js-example-basic-single').select2({
-    width: 'calc(7em + 6vw)', // または '100%' など、任意の値を設定
-    minimumResultsForSearch: Infinity, // 検索ボックスを非表示
-    containerCssClass: 'custom-select2-container',
-    dropdownCssClass: 'custom-select2-dropdown'      
-    // 必要に応じて追加のオプションを設定
-  });
 
   // タグクリックイベント (index.html用)
   document.querySelectorAll('.tag').forEach(tag => {
@@ -62,34 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = `/tag_search?tag=${encodeURIComponent(tagName)}`;
     });
   });  
-
-  // スタートボタンのイベントリスナー
-  $('#start_b_f').on('click', function(e) {
-      e.preventDefault();
-      isQuitting = true;  // 意図的なナビゲーションを示すフラグをセット
-      var selectedRange = $('#quiz_range').val();
-      if (!selectedRange) {
-          alert('出題範囲を選択してください。');
-          return;
-      }
-      // 選択された範囲をサーバーに送信
-      $.ajax({
-          url: `${BASE_URL}/set_quiz_range`,
-          method: 'POST',
-          data: JSON.stringify({ range: selectedRange }),
-          contentType: 'application/json',
-          success: function(response) {
-              if (response.status === 'success') {
-                  window.location.href = '/quiz';
-              } else {
-                  alert('出題範囲の設定に失敗しました。もう一度お試しください。');
-              }
-          },
-          error: function() {
-              alert('サーバーとの通信に失敗しました。もう一度お試しください。');
-          }
-      });
-  });
 });
 
 
