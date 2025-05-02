@@ -52,12 +52,80 @@ function setDisabledState(choiceElement, isDisabled) {
     }
 }
 
+// セッション有効性をチェックする関数
+async function checkSessionValidity() {
+    try {
+        const response = await fetch(`${BASE_URL}/check_session`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        
+        if (!data.valid) {
+            // セッションが無効な場合の処理
+            showSessionExpiredMessage();
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('セッション確認中にエラーが発生しました:', error);
+        return false;
+    }
+}
+
+// セッション切れメッセージを表示する関数
+function showSessionExpiredMessage() {
+    // バックドロップとポップアップを作成
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('session-expired-backdrop');
+    document.body.appendChild(backdrop);
+
+    const popup = document.createElement('div');
+    popup.classList.add('session-expired-popup');
+
+    const messageElement = document.createElement('p');
+    messageElement.innerHTML = 'セッションの有効期限が切れました。<br>再度クイズを開始するにはホームに戻ってください。';
+    messageElement.className = 'error-message';
+    popup.appendChild(messageElement);
+
+    // ホームに戻るボタン
+    const homeButton = document.createElement('button');
+    homeButton.id = 'session-expired-home-button';
+    homeButton.addEventListener('click', () => {
+        isQuitting = true;  // 意図的なナビゲーションを示すフラグをセット
+        window.onbeforeunload = null; // beforeunloadイベントハンドラーを解除
+        window.location.href = '/'; // ホームページにリダイレクト
+    });
+    
+    const homeTextElement = document.createElement('span');
+    homeTextElement.textContent = 'ホームに戻る';
+    homeTextElement.className = 'session-confirm-b-f';
+    homeButton.appendChild(homeTextElement);
+
+    popup.appendChild(homeButton);
+    document.body.appendChild(popup);
+
+    // デバッグ用ログ
+    console.log('セッション切れメッセージを表示しました');    
+}
+
+
 
 // 1. 問題データの取得と表示：
 // 非同期リクエストで問題をサーバーから取得し、結果を関数"displayQuestion"に渡す関数
 // 非同期関数として修正
 async function getAndDisplayQuestion() {
     console.log('getAndDisplayQuestion called'); // 呼び出しの確認用ログ
+
+    // セッション有効性チェックを追加
+    if (!await checkSessionValidity()) {
+        return; // セッションが無効な場合は処理を終了
+    }
+
     setLoadingState(true);  // ローディング状態をonにする
     try {
         // サーバー（Flaskを使用）から問題データを取得するための非同期リクエスト
@@ -325,6 +393,11 @@ async function handleNextButtonClick(event) {
 
 // 解答データを送信するsubmitAnswer関数の定義、目的は解説文を正しく表示するため
 async function submitAnswer(choiceId, nextButton, questionId) {
+    // セッション有効性チェックを追加
+    if (!await checkSessionValidity()) {
+        return; // セッションが無効な場合は処理を終了
+    }
+    
     // questionIdを整数に変換
     const questionIdInt = parseInt(questionId, 10);
 
@@ -429,33 +502,39 @@ window.addEventListener('unload', handleUnload);
 // ページロード時に実行される関数
 function handlePageLoad() {
     console.log('handlePageLoad called');
-    const [navigationEntry] = performance.getEntriesByType('navigation');
-    if (navigationEntry && navigationEntry.type === 'reload') {
-        isReloading = true;
-        console.log('This page is reloaded');
-        // リロード時にセッションを保持するリクエストを送信
-        fetch(`${BASE_URL}/keep_session`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Reload': 'true'
-            },
-            body: JSON.stringify({})
-        }).then(() => {
-            // セッションの保持が成功したら、質問を取得
-            getAndDisplayQuestion();
-        }).catch(error => {
-            console.error('セッションの保持に失敗しました:', error);
-            // エラー時の処理（例：ホーム画面へリダイレクト）
-            window.location.href = '/';            
-        }).finally(() => {
-            // 処理が完了したらフラグをリセット
-            isReloading = false;
-        });
-    } else {
-        // 通常のページロード時は直接質問を取得
-        getAndDisplayQuestion();
-    }
+
+    // ページロード時にもセッション確認
+    checkSessionValidity().then(isValid => {
+        if (isValid) {    
+            const [navigationEntry] = performance.getEntriesByType('navigation');
+            if (navigationEntry && navigationEntry.type === 'reload') {
+                isReloading = true;
+                console.log('This page is reloaded');
+                // リロード時にセッションを保持するリクエストを送信
+                fetch(`${BASE_URL}/keep_session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Reload': 'true'
+                    },
+                    body: JSON.stringify({})
+                }).then(() => {
+                    // セッションの保持が成功したら、質問を取得
+                    getAndDisplayQuestion();
+                }).catch(error => {
+                    console.error('セッションの保持に失敗しました:', error);
+                    // エラー時の処理（例：ホーム画面へリダイレクト）
+                    window.location.href = '/';            
+                }).finally(() => {
+                    // 処理が完了したらフラグをリセット
+                    isReloading = false;
+                });
+            } else {
+                // 通常のページロード時は直接質問を取得
+                getAndDisplayQuestion();
+            }
+        }
+    });
 }
 
 

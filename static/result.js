@@ -53,10 +53,73 @@ window.addEventListener('beforeunload', handleBeforeUnload);
 window.addEventListener('unload', handleUnload);
 
 
+// セッション有効性をチェックする関数
+async function checkSessionValidity() {
+    try {
+        const response = await fetch(`${BASE_URL}/check_session`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        
+        if (!data.valid) {
+            // セッションが無効な場合の処理
+            showSessionExpiredMessage();
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('セッション確認中にエラーが発生しました:', error);
+        return false;
+    }
+}
+
+// セッション切れメッセージを表示する関数
+function showSessionExpiredMessage() {
+    // バックドロップとポップアップを作成
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('session-expired-backdrop');
+    document.body.appendChild(backdrop);
+
+    const popup = document.createElement('div');
+    popup.classList.add('session-expired-popup');
+
+    const messageElement = document.createElement('p');
+    messageElement.innerHTML = 'セッションの有効期限が切れました。<br>再度クイズを開始するにはホームに戻ってください。';
+    messageElement.className = 'error-message';
+    popup.appendChild(messageElement);
+
+    // ホームに戻るボタン
+    const homeButton = document.createElement('button');
+    homeButton.id = 'session-expired-home-button';
+    homeButton.addEventListener('click', () => {
+        isQuitting = true;  // 意図的なナビゲーションを示すフラグをセット
+        window.onbeforeunload = null; // beforeunloadイベントハンドラーを解除
+        window.location.href = '/'; // ホームページにリダイレクト
+    });
+    
+    const homeTextElement = document.createElement('span');
+    homeTextElement.textContent = 'ホームに戻る';
+    homeTextElement.className = 'session-confirm-b-f';
+    homeButton.appendChild(homeTextElement);
+
+    popup.appendChild(homeButton);
+    document.body.appendChild(popup);
+}
 
 // ページロード時に実行される関数
-function handlePageLoad() {
+async function handlePageLoad() {
     console.log('handlePageLoad called');
+
+    // セッション有効性チェックを追加
+    if (!await checkSessionValidity()) {
+        return; // セッションが無効な場合は処理を終了
+    }
+
     if (isReloading) {
         console.log('This page is reloaded');
         // リロード時にセッションを保持するリクエストを送信
