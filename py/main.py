@@ -70,7 +70,7 @@ else:
         # SESSION_FILE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sessions')), # セッションファイルの保存先ディレクトリを指定
         SESSION_REDIS = redis.from_url('redis://localhost:6379'),  # Redisの接続情報を設定
         SESSION_PERMANENT=False,
-        PERMANENT_SESSION_LIFETIME=timedelta(days=1)
+        PERMANENT_SESSION_LIFETIME=timedelta(seconds=30)
         # 他の開発環境用の設定
     )
     # 開発環境用のログ設定
@@ -296,10 +296,6 @@ def get_random_question():
 
     # セッションに保存された現在の質問をチェック
     current_question = session.get('current_question')
-
-    # if current_question:
-    #     # セッションに保存された質問がある場合、JSONとしてパースしてから返す
-    #     return jsonify(json.loads(current_question))
     
     
     if is_reload and current_question:
@@ -617,6 +613,13 @@ def reset_all_route():
     except Exception as e:
         app.logger.error(f"Error in reset_all: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# セッションの有効性を確認するエンドポイント
+@app.route('/check_session', methods=['GET'])
+def check_session():
+    # セッションが有効かどうかを確認
+    session_valid = 'quiz_range' in session and session['quiz_range'] is not None
+    return jsonify({'valid': session_valid})
 
 # スクリプトが直接実行された場合にアプリケーションが開始
 if __name__ == '__main__':
