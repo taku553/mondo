@@ -70,7 +70,7 @@ else:
         # SESSION_FILE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sessions')), # セッションファイルの保存先ディレクトリを指定
         SESSION_REDIS = redis.from_url('redis://localhost:6379'),  # Redisの接続情報を設定
         SESSION_PERMANENT=False,
-        PERMANENT_SESSION_LIFETIME=timedelta(seconds=30)
+        PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)
         # 他の開発環境用の設定
     )
     # 開発環境用のログ設定
