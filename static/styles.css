@@ -340,6 +340,74 @@ li.ht_t_style{
     background-color: black;
   }
 
+/* ドロップダウンメニューのスタイリング */
+/* コンテナ */
+.quiz-range-selector{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto calc(1em + 1vw) auto;
+  width: 100%;
+  height: 100%;
+  /*background-color: yellow;*/
+}
+
+/* 選択ボックス */
+.js-example-basic-single{
+  width: calc(7em + 6vw);
+  border: calc(1px + 0.2vw) solid #000;
+  border-radius: calc(2px + 1vw);
+  padding: calc(0.4em + 1vw);
+  background-color: #ffff;
+}
+
+/* select2要素のスタイリング */
+ body .select2-container--default .select2-selection--single{
+  border: calc(0.8px + 0.1vw) solid #1f1f1f;
+  border-radius: calc(2px + 0.5vw);
+  background-color: #ffff;
+}
+
+body .select2-container .select2-selection--single{
+  height: calc(25px + 1vw);
+}
+
+body .select2-container--default .select2-selection--single .select2-selection__rendered{
+  line-height: calc(24px + 1vw);
+  font-size: calc(0.7em + 0.2vw);
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+body .select2-container .select2-selection--single .select2-selection__rendered{
+  padding-left: calc(15px + 1vw);
+}
+
+body .select2-container--default .select2-selection--single .select2-selection__arrow{
+  height: calc(24px + 1vw);
+}
+/* リスト内要素のスタイリング */
+body .select2-container--default .select2-results>.select2-results__options{
+  font-family: source-han-sans-japanese;
+  font-size: calc(0.6em + 0.5vw);
+  font-weight: 500;
+}
+
+/* 矢印のカラー */
+/* 展開前 */
+body .select2-container--default .select2-selection--single .select2-selection__arrow b{
+  border-color: #3f3f3f transparent transparent transparent;
+}
+/* 展開後 */
+body .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+  border-color: transparent transparent #3f3f3f transparent;
+}
+
+
+/* ドロップダウン時の外側ボックスのスタイリング */
+body .select2-dropdown{
+  border: calc(0.8px + 0.1vw) solid #1f1f1f;
+}  
 
 /*スタートボタンのコンテナ*/
 .start_b{
@@ -349,6 +417,23 @@ li.ht_t_style{
     width: 100%;
     height: 100%;
     /*background-color: yellowgreen;*/
+}
+
+/* スタートボタン枠と文字 */
+#start_b_f{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(6em + 8vw);
+  height: calc(2.5em + 1vw);
+  font-size: calc(0.6em + 1vw); /* レスポンシブなフォントサイズ */
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 800;
+  background-color: #ffde59; /* 黄色の背景 */
+  border: none;
+  padding: 2vw; /* レスポンシブなパディング */
+  border-radius: calc(2px + 1vw);
+  cursor: pointer; /* ホバー時にポインタカーソルを表示したい場合 */
 }
 
 /* クイズ一覧のスタイリング*/
