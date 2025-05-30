@@ -153,7 +153,7 @@
             </div>
     
             <div class="grid">
-                {% for quiz in quizzes %}
+                {% for quiz in quizzes |  reverse %}
                 <a href="{{ url_for('quiz_info',  quiz_id=quiz.id) }}" class="card">
                     <img src="{{ url_for('static', filename=quiz.image) }}" 
                     alt="{{ quiz.title }}"
