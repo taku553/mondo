@@ -20,12 +20,24 @@ import gc
 # ロギングの設定
 logging.basicConfig(level=logging.INFO)
 
+# パス設定を一箇所で定義
+current_file = os.path.abspath(__file__)
+current_dir = os.path.dirname(current_file)
+project_root = os.path.dirname(current_dir)
+template_dir = os.path.join(project_root, 'templates')
+static_dir = os.path.join(project_root, 'static')
+
 # Flaskアプリケーションを初期化
 app = Flask(__name__, 
     # 絶対パスにしている理由は、デプロイサービスrenderでは指摘ファイルの参照に絶対パスが推奨されるから。
-    template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../templates')), 
-    static_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '../static')))
+    template_folder=template_dir, 
+    static_folder=static_dir)
 app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
+
+# デバッグ用：パスを確認
+app.logger.info(f"Project root: {project_root}")
+app.logger.info(f"Static dir: {static_dir}")
+app.logger.info(f"Static dir exists: {os.path.exists(static_dir)}")
 
 # 環境変数から設定を読み込む
 app_env = os.environ.get('APP_ENV', 'production')
@@ -116,18 +128,50 @@ def add_header(response):
 def serve_static(filename):
     app.logger.info(f"Serving static file: {filename}")
     try:
-        # 静的ファイルのフルパスを取得
-        static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static'))
-        response = send_from_directory(static_dir, filename)
+        # アプリで設定した静的ディレクトリを使用（統一）
+        response = send_from_directory(app.static_folder, filename)
         # キャッシュ制御
         if any(ext in filename for ext in ['.jpg', '.jpeg', '.png', '.gif', '.svg']):
             response.cache_control.max_age = 3600  # 1時間
         else:
             response.cache_control.max_age = 300  # 5分間
+            
+        # デバッグ情報
+        app.logger.info(f"Static folder: {app.static_folder}")
+        app.logger.info(f"Requested file: {filename}")
+        app.logger.info(f"Full path: {os.path.join(app.static_folder, filename)}")
+        app.logger.info(f"File exists: {os.path.exists(os.path.join(app.static_folder, filename))}")
+        
+        # レスポンスヘッダーを設定            
         return response
     except Exception as e:
         app.logger.error(f"Error serving static file {filename}: {str(e)}")
         abort(404)
+
+# デバッグエンドポイント（修正版）
+@app.route('/debug/static-check')
+def debug_static_check():
+    import os
+    image_path = os.path.join(app.static_folder, 'images', 'logo_for_ogp.png')
+    
+    try:
+        files_in_static = os.listdir(app.static_folder) if os.path.exists(app.static_folder) else []
+        images_dir = os.path.join(app.static_folder, 'images')
+        files_in_images = os.listdir(images_dir) if os.path.exists(images_dir) else []
+        
+        return jsonify({
+            'static_folder': app.static_folder,
+            'static_folder_exists': os.path.exists(app.static_folder),
+            'images_dir': images_dir,
+            'images_dir_exists': os.path.exists(images_dir),
+            'logo_exists': os.path.exists(image_path),
+            'logo_path': image_path,
+            'files_in_static': files_in_static,
+            'files_in_images': files_in_images,
+            'working_directory': os.getcwd()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 # 静的ファイルのエラーハンドリングを追加
 @app.errorhandler(404)
