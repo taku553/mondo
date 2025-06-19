@@ -123,30 +123,16 @@ def add_header(response):
             response.cache_control.max_age = 300  # 5分間
     return response
 
-# 静的ファイル配信の詳細設定
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    app.logger.info(f"Serving static file: {filename}")
-    try:
-        # アプリで設定した静的ディレクトリを使用（統一）
-        response = send_from_directory(app.static_folder, filename)
-        # キャッシュ制御
-        if any(ext in filename for ext in ['.jpg', '.jpeg', '.png', '.gif', '.svg']):
-            response.cache_control.max_age = 3600  # 1時間
-        else:
-            response.cache_control.max_age = 300  # 5分間
-            
-        # デバッグ情報
-        app.logger.info(f"Static folder: {app.static_folder}")
-        app.logger.info(f"Requested file: {filename}")
-        app.logger.info(f"Full path: {os.path.join(app.static_folder, filename)}")
-        app.logger.info(f"File exists: {os.path.exists(os.path.join(app.static_folder, filename))}")
-        
-        # レスポンスヘッダーを設定            
-        return response
-    except Exception as e:
-        app.logger.error(f"Error serving static file {filename}: {str(e)}")
-        abort(404)
+# 静的ファイルのエラーハンドリングを追加
+@app.errorhandler(404)
+def handle_404(e):
+    # 静的ファイルの404エラー処理
+    if 'static/' in request.path:
+        app.logger.warning(f"Static file not found: {request.path}")
+        # 画像ファイルが見つからない場合のログ出力のみ
+        return jsonify({'error': 'File not found'}), 404
+    return jsonify({'error': str(e)}), 404
+
 
 # デバッグエンドポイント（修正版）
 @app.route('/debug/static-check')
@@ -173,16 +159,22 @@ def debug_static_check():
     except Exception as e:
         return jsonify({'error': str(e)})
 
-# 静的ファイルのエラーハンドリングを追加
-@app.errorhandler(404)
-def handle_404(e):
-    # 静的ファイルの404エラー処理
-    if 'static/' in request.path:
-        app.logger.warning(f"Static file not found: {request.path}")
-        if '.jpg' in request.path or '.png' in request.path or '.svg' in request.path:
-            # 画像ファイルの場合、プレースホルダー画像を返す選択肢もある
-            return send_from_directory(app.static_folder, 'images/placeholder.jpg'), 200
-    return jsonify(error=str(e)), 404
+# OGP画像URLの確認用エンドポイントを追加
+@app.route('/debug/ogp-url')
+def debug_ogp_url():
+    try:
+        # url_forで生成されるURLを確認
+        ogp_url = url_for('static', filename='images/logo_for_ogp.png', _external=True)
+        
+        return jsonify({
+            'generated_url': ogp_url,
+            'file_exists': os.path.exists(os.path.join(app.static_folder, 'images', 'logo_for_ogp.png')),
+            'base_url': request.host_url,
+            'static_url_path': app.static_url_path
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 
 @app.after_request
 def cleanup_after_request(response):
