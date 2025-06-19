@@ -5,9 +5,29 @@
     <meta charset="UTF-8">
     <!--webページが画面幅に合わせて表示-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="歴史の流れに焦点を当てる選択式クイズ。歴史全体の流れを知り、理解を深めましょう。">
+    <meta name="description" content="クイズで知る、世界のこと。">
     <!--ページタイトル-->
     <title>ホーム</title>
+
+    <!-- OGP設定（トップページ用） -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="流れ鵲">
+    <meta property="og:title" content="ホーム">
+    <meta property="og:description" content="クイズで知る、世界のこと。">
+    <meta property="og:url" content="https://ngrjaku.com/">
+    <meta property="og:image" content="{{ url_for('static', filename='images/logo_for_ogp.png', _external=True) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="ロゴ">
+    <meta property="og:locale" content="ja_JP">
+    
+    <!-- Twitter Card設定 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@taku_nuc">
+    <meta name="twitter:title" content="流れ鵲 | ホーム">
+    <meta name="twitter:description" content="クイズで知る、世界のこと。">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/logo_for_ogp.png', _external=True) }}">
+
     <!--cssにリンク-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="svg/x-icon">
@@ -73,7 +93,7 @@
             <div class="q_explain">
 
                 <div class="rounded_border">
-                    <p class="q_ex">クイズでおぼえる、世界のこと。</p>
+                    <p class="q_ex">クイズで知る、世界のこと。</p>
                 </div>
                 <!--クイズの遊び方&注意点-->
                 <div class="how_to">
