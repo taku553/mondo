@@ -1117,6 +1117,7 @@ body[hidden] {
   justify-content: center;
   align-items: center;
   margin-top: calc(3em + 1vw);
+  margin-bottom: calc(2em + 1vw);
 }
 
 /*再挑戦ボタンを示すテキスト*/
@@ -1301,6 +1302,7 @@ body[hidden] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-bottom: calc(2em + 1vw);
 }
 
 /*再挑戦ボタンを示すテキスト*/
