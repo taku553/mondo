@@ -861,6 +861,7 @@ li.ht_t_style{
   flex-direction: column;
   align-items: center;
   gap: calc(1rem + 3vw);
+  margin-bottom: calc(2rem + 1vw);
 }
 
 #q_info_start_b{
