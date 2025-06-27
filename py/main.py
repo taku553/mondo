@@ -29,7 +29,7 @@ static_dir = os.path.join(project_root, 'static')
 
 # Flaskアプリケーションを初期化
 app = Flask(__name__, 
-    # 絶対パスにしている理由は、デプロイサービスrenderでは指摘ファイルの参照に絶対パスが推奨されるから。
+    # テンプレートと静的ファイルのディレクトリを指定
     template_folder=template_dir, 
     static_folder=static_dir)
 app.logger.setLevel(logging.DEBUG)  # Flaskのロガーレベルを設定
