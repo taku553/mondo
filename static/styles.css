@@ -678,6 +678,7 @@ li.ht_t_style{
 }
 
 /*-----------------プロフィールブロックのスタイリング-------------------*/
+
 .profile-block {
   width: 70%;
   max-width: 400px;
@@ -685,6 +686,15 @@ li.ht_t_style{
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.title_profile{
+  font-size: calc(1em + 1vw);
+  font-family: source-han-sans-japanese, sans-serif;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  margin-top: calc(4em + 1vw);
 }
 
 .profile-container {
