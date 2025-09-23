@@ -247,6 +247,38 @@
                 
             </div>
         </div>
+
+        <!-- プロフィールブロック -->
+        <div class="profile-block">
+            <div class="profile-container">
+                <div class="profile-image-container">
+                    <img src="{{ url_for('static', filename='images/profile_square.png') }}" alt="Taku" class="profile-image">
+                </div>
+                <h2 class="profile-name">Taku</h2>
+                <p class="profile-description">虚無トマトパスタおいしい。</p>
+                <div class="profile-sns-icons">
+                    <div class="sns-icon-item circle">
+                        <a href="https://x.com/taku_nuc" target="_blank" rel="noopener noreferrer"><img class="x" src="{{ url_for('static', filename='sns_logo/x-logo/logo-black.png') }}" alt="x">
+                        </a></div>
+                    <div class="sns-icon-item rectangle">
+                        <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
+                            <img class="Instagram" src="{{ url_for('static', filename='sns_logo/Instagram/03 Black Glyph/Instagram_Glyph_Black.png') }}" alt="Instagram">
+                        </a>
+                    </div>
+                    <div class="sns-icon-item circle">
+                        <a href="https://www.youtube.com/@taku_nuc" target="_blank" rel="noopener noreferrer">
+                            <img class="YouTube" src="{{ url_for('static', filename='sns_logo/YouTube_Icon/Digital/02_Almost_Black/yt_icon_almostblack_digital.png') }}" alt="YouTube">
+                        </a>
+                    </div>
+                    <div class="sns-icon-item rectangle">
+                        <a href="https://note.com/taku_nuc" target="_blank" rel="noopener noreferrer">
+                            <img class="note" src="{{ url_for('static', filename='sns_logo/note Visual Identity/main/icon.png') }}" alt="note">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- 広告スペース -->
         <!-- スマホ用の広告 -->
          <div id="im-d78fcc7a63d04dcba399276a1f4b8be6">
@@ -267,6 +299,12 @@
             <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
                 <img class="Instagram" src="{{ url_for('static', filename='sns_logo/Instagram/03 Black Glyph/Instagram_Glyph_Black.svg') }}" alt="Instagram">
             </a>
+            <a href="https://www.youtube.com/@taku_nuc" target="_blank" rel="noopener noreferrer">
+                <img class="YouTube" src="{{ url_for('static', filename='sns_logo/YouTube_Icon/Digital/02_Almost_Black/yt_icon_almostblack_digital.png') }}" alt="YouTube">
+            </a>
+            <a href="https://note.com/taku_nuc" target="_blank" rel="noopener noreferrer">
+                <img class="note" src="{{ url_for('static', filename='sns_logo/note Visual Identity/main/icon.png') }}" alt="note">
+            </a>                      
         </div>
         <div class="p-p-info">
             <a href="{{ url_for('privacy_policy') }}" target="_self">
