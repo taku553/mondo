@@ -1,4 +1,4 @@
-#!/Users/takahashitakuya/Desktop/history_flow_quiz/venv/bin/python3.13
+#!/Users/takahashitakuya/Desktop/mondo/venv/bin/python
 import sys
 from flask.cli import main
 if __name__ == '__main__':

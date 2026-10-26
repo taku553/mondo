@@ -11,7 +11,7 @@
 ## ディレクトリ構造
 
 ```
-/Users/takahashitakuya/Desktop/history_flow_quiz/py/quiz-data-importer
+/Users/takahashitakuya/Desktop/mondo/py/quiz-data-importer
 ├── main.py
 ├── README.md
 ├── sample_quiz.md

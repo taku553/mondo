@@ -11,10 +11,10 @@
 
     <!-- OGP設定（トップページ用） -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="流れ鵲 - 四択クイズ">
+    <meta property="og:site_name" content="Mondo - 四択クイズ">
     <meta property="og:title" content="ホーム">
     <meta property="og:description" content="クイズで知る、世界のこと。">
-    <meta property="og:url" content="https://ngrjaku.com/">
+    <meta property="og:url" content="https://mondo.com/">
     <meta property="og:image" content="{{ url_for('static', filename='images/logo_for_ogp.png', _external=True) }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -24,7 +24,7 @@
     <!-- Twitter Card設定 -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@taku_nuc">
-    <meta name="twitter:title" content="流れ鵲 - 四択クイズ | ホーム">
+    <meta name="twitter:title" content="Mondo - 四択クイズ | ホーム">
     <meta name="twitter:description" content="クイズで知る、世界のこと。">
     <meta name="twitter:image" content="{{ url_for('static', filename='images/logo_for_ogp.png', _external=True) }}">
 
@@ -83,11 +83,10 @@
 <body>
     <main class="main">
         <div class="q_container">
-            <span class="qt1_furigana">ながれじゃく</span>
             <!--クイズタイトル-->
             <div class="q_title">
                 <img class="logo" src="{{ url_for('static', filename='logo.svg') }}" alt="logo">
-                <h1 class="q_title1">流れ鵲</h1>
+                <h1 class="q_title1">Mondo</h1>
             </div>
             <!--クイズの概要-->
             <div class="q_explain">
@@ -220,33 +219,6 @@
             </div>
         </div>
 
-        
-        <!--タイトルの由来とロゴの紹介、トグルで-->
-        <div class="toggle-desidn-info">
-            <input type="checkbox" id="toggle-checkbox-tl" class="toggle-checkbox-tl">
-            <label for="toggle-checkbox-tl" class="toggle-label">
-                <div class="item-row">
-                    <span class="toggle-icon"></span>
-                    <span class="toggle-title">タイトルの由来とロゴ</span>
-                </div>
-            </label>
-            <div class="toggle-content">
-                <h1 class="title-in-toggle">流れ鵲</h1>
-                <p class="p-tl">「鵲（ジャク）」とはカササギというカラス目の鳥のこと。
-                    古代中国の伝説では、カラスは太陽に住むとされ、歳月や時間の象徴でした。
-                    ここから、「いままでの、そしてこれからの時間の流れを体験する」
-                    という意味を込めて「流れ鵲（ながれじゃく）」名付けています。
-                </p>
-                <div class="logo-in-toggle">
-                    <img class="toggle-lo-style" src="{{ url_for('static', filename='logo-transparency.svg') }}" alt="logo-in-toggle">
-                </div>
-                <p class="p-tl">カササギが雲の上に乗りながら時間の流れを感じる様子を
-                    表現しています。全身の金色は四字熟語の「金烏玉兎（きんうぎょくと）」
-                    を参考に、歳月や時間の流れを表す伝説上の動物「金烏」をモチーフにしています。
-                </p>
-                
-            </div>
-        </div>
 
         <!-- プロフィールブロック -->
         <h1 class="title_profile">プロフィール</h1>
@@ -313,7 +285,7 @@
             </a>
         </div>
         <div class="copyrights">
-            <small >&copy; ngrjaku 2024</small>
+            <small >&copy; mondo 2024</small>
         </div>
       </footer>
     

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# filepath: /Users/takahashitakuya/Desktop/history_flow_quiz/py/quiz-data-importer/main.py
+# filepath: /Users/takahashitakuya/Desktop/mondo/py/quiz-data-importer/main.py
 import sys
 import os
 import argparse

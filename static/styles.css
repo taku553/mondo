@@ -47,16 +47,6 @@ a{
 
 /*スタート画面のスタイリング*/
 
-/*タイトルの振り仮名*/
-span.qt1_furigana {
-  display: block;
-  font-family: "Shippori Mincho B1", serif;
-  font-weight: normal;
-  font-size: calc(0.1em + 1vw);
-  letter-spacing: calc(0.01em + 0.5vw);
-  margin-top: calc(1em + 1vw);
-  /*background-color: yellow;*/
-}
 
 /*ロゴとタイトルを水平方向に揃えるflexbox*/
 .q_title {
@@ -83,7 +73,7 @@ span.qt1_furigana {
   font-size: calc(0.8em + 2vw);
   font-family: "Shippori Mincho B1", serif;
   font-style: normal;
-  letter-spacing: calc(0.3em + 1vw);
+  letter-spacing: calc(0.1em + 0.5vw);
   /*background-color: aqua;*/
 }
 

@@ -4,7 +4,7 @@ This file contains instructions for Claude to better assist with this project.
 
 ## Project Overview
 
-「流れ鵲（ながれじゃく）」は歴史クイズWebアプリケーションです。Python/Flaskで構築され、時代別（第一～第三千年紀）やチェスのオープニングなどのカテゴリ別に四択クイズを提供します。
+「Mondo（ながれじゃく）」は歴史クイズWebアプリケーションです。Python/Flaskで構築され、時代別（第一～第三千年紀）やチェスのオープニングなどのカテゴリ別に四択クイズを提供します。
 
 ## Development Workflows
 
