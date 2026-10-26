@@ -25,7 +25,14 @@ python -m pylint py/*.py
 - `py/main.py`: メインのFlaskアプリケーションコード
 - `py/dataset.py`: クイズのデータセット定義
 - `templates/`: HTMLテンプレート
-- `static/`: CSS、JavaScript、画像などの静的ファイル
+- `public/static/`: CSS、JavaScript、画像などの静的ファイル（VercelのCDNから配信）
+- `api/index.py`: Vercelのサーバーレス関数のエントリーポイント
+- `vercel.json`: Vercelのデプロイ設定
+
+## Deployment
+
+- Vercelにデプロイ。セッションはUpstash Redis（環境変数 `REDIS_URL` または `KV_URL`）
+- 本番の必須環境変数: `SECRET_KEY`, `REDIS_URL`（`APP_ENV` 未設定時はproductionとして動作）
 
 ## Notes
 

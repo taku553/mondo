@@ -25,7 +25,8 @@ current_file = os.path.abspath(__file__)
 current_dir = os.path.dirname(current_file)
 project_root = os.path.dirname(current_dir)
 template_dir = os.path.join(project_root, 'templates')
-static_dir = os.path.join(project_root, 'static')
+# VercelのCDNから配信するため、静的ファイルはpublic/static/に配置する
+static_dir = os.path.join(project_root, 'public', 'static')
 
 # Flaskアプリケーションを初期化
 app = Flask(__name__, 
@@ -43,7 +44,8 @@ app.logger.info(f"Static dir exists: {os.path.exists(static_dir)}")
 app_env = os.environ.get('APP_ENV', 'production')
 
 if app_env == 'production':
-    redis_url = os.environ.get('REDIS_URL', 'redis://red-ctv7rel2ng1s73dp0na0:6379')
+    # Upstash Redis（Vercel Marketplace連携）はREDIS_URLまたはKV_URLにrediss://形式のURLを設定する
+    redis_url = os.environ.get('REDIS_URL') or os.environ.get('KV_URL')
     if not redis_url:
         raise ValueError('REDIS_URL must be set in production')
         
@@ -53,7 +55,8 @@ if app_env == 'production':
     
     # Redis接続テストを追加
     try:
-        redis_client = redis.from_url(redis_url)
+        # サーバーレス環境ではアイドル中に切断された接続が残るため、使用前に接続状態を確認する
+        redis_client = redis.from_url(redis_url, health_check_interval=30, socket_keepalive=True)
         redis_client.ping()  # 接続テスト
         app.logger.info("Successfully connected to Redis")
     except redis.ConnectionError as e:
@@ -71,7 +74,7 @@ if app_env == 'production':
         # 他の本番環境用の設定
     )
         
-    # App Engine環境用のログ設定
+    # 本番環境用のログ設定（Vercelでは標準出力のログがダッシュボードに表示される）
     app.logger.setLevel(logging.INFO)
     
 else:
@@ -227,8 +230,8 @@ def privacy_policy():
 # ------ robots.txtを提供するためのルートハンドラー ------
 @app.route('/robots.txt')
 def serve_robots():
-    # アプリケーションのルートディレクトリ（pyディレクトリの親）
-    root_dir = os.path.dirname(app.root_path)
+    # robots.txtはpublic/に配置（Vercel上ではCDNが直接配信するため、このルートはローカル開発用）
+    root_dir = os.path.join(project_root, 'public')
     # root_pathに関するデバッグ情報をログに記録
     app.logger.info(f"Looking for robots.txt in: {root_dir}")
     try:
