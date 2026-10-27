@@ -110,7 +110,7 @@ a{
     align-items: center; /* 垂直方向の中央揃え */
     width: 60%;
     height: 100%;
-    margin: 0 auto calc(2em + 4vw) auto;
+    margin: calc(5em + 4vw) auto calc(2em + 4vw) auto;
     /*background-color: blueviolet;*/
 }
 
