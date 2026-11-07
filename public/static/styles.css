@@ -31,7 +31,7 @@ body {
   gap: 0.6rem;
 }
 
-.account-page input, .account-page button {
+.account-page input, .account-page select, .account-page button {
   box-sizing: border-box;
   font: inherit;
   padding: 0.65rem;
@@ -54,6 +54,20 @@ body {
 
 .google-login {
   margin-top: 1.5rem;
+}
+
+.account-page section section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ccc;
+}
+
+.account-page input[type="checkbox"] {
+  width: auto;
+}
+
+#delete-password-field label {
+  display: block;
 }
 
 /*メイン画面のスタイリング*/

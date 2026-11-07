@@ -5,14 +5,20 @@ import test from "node:test";
 const source = await readFile(new URL("../public/static/account_ui.js", import.meta.url), "utf8");
 const { setupAccount } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
 
-function fixture() {
-  const ids = ["auth-message", "signed-out", "signed-in", "account-name", "email-form", "email", "password", "google-login", "logout"];
+function fixture(overrides = {}) {
+  const ids = ["auth-message", "signed-out", "signed-in", "account-name", "email-form", "email", "password", "google-login", "logout",
+    "password-section", "google-password-notice", "change-password-form", "current-password", "new-password", "confirm-password",
+    "delete-account-form", "delete-method", "delete-password-field", "delete-password", "delete-confirm", "password-policy", "change-policy"];
   const elements = Object.fromEntries(ids.map(id => [id, {
-    hidden: false, value: "", textContent: "", disabled: false,
-    addEventListener(type, handler) { this[type] = handler; }
+    hidden: false, value: "", textContent: "", disabled: false, checked: false,
+    addEventListener(type, handler) { this[type] = handler; },
+    replaceChildren() { this.options = []; this.value = ""; },
+    append(option) { this.options.push(option); if (!this.value) this.value = option.value; }
   }]));
   const formButtons = [{ disabled: false }, { disabled: false }];
   elements["email-form"].querySelectorAll = () => formButtons;
+  elements["change-password-form"].querySelectorAll = () => [{ disabled: false }];
+  elements["delete-account-form"].querySelectorAll = () => [{ disabled: false }];
   const calls = [];
   const firebase = {
     auth: {}, provider: {},
@@ -20,9 +26,16 @@ function fixture() {
     async createUserWithEmailAndPassword(...args) { calls.push(["register", ...args]); },
     async signInWithEmailAndPassword(...args) { calls.push(["login", ...args]); },
     async signInWithPopup(...args) { calls.push(["google", ...args]); },
-    async signOut(...args) { calls.push(["logout", ...args]); }
+    async signOut(...args) { calls.push(["logout", ...args]); },
+    emailCredential(email, password) { return { email, password }; },
+    async reauthenticateWithCredential(...args) { calls.push(["reauth-password", ...args]); },
+    async reauthenticateWithPopup(...args) { calls.push(["reauth-google", ...args]); },
+    async updatePassword(...args) { calls.push(["update-password", ...args]); },
+    async deleteUser(...args) { calls.push(["delete", ...args]); },
+    async validatePassword() { return { passwordPolicy: { customStrengthOptions: { minPasswordLength: 8 }, allowedNonAlphanumericCharacters: "!@#" } }; }
   };
-  setupAccount({ getElementById: id => elements[id] }, firebase);
+  Object.assign(firebase, overrides);
+  setupAccount({ getElementById: id => elements[id], createElement: () => ({}) }, firebase);
   return { elements, firebase, calls, formButtons };
 }
 
@@ -37,6 +50,102 @@ test("authentication state shows the correct screen and escapes user data as tex
   assert.equal(elements["signed-out"].hidden, true);
   assert.equal(elements["signed-in"].hidden, false);
   assert.equal(elements["account-name"].textContent, "<test@example.com>");
+});
+
+test("policy and provider-specific controls are displayed", async () => {
+  const { elements, firebase } = fixture();
+  await flush();
+  assert.match(elements["password-policy"].textContent, /最低8文字/);
+  assert.match(elements["change-policy"].textContent, /!@#/);
+  firebase.next({ email: "g@example.com", providerData: [{ providerId: "google.com" }] });
+  assert.equal(elements["password-section"].hidden, true);
+  assert.equal(elements["google-password-notice"].hidden, false);
+  assert.equal(elements["delete-method"].value, "google.com");
+  assert.equal(elements["delete-password-field"].hidden, true);
+  firebase.next({ email: "p@example.com", providerData: [{ providerId: "password" }] });
+  assert.equal(elements["password-section"].hidden, false);
+  assert.equal(elements["delete-password-field"].hidden, false);
+});
+
+test("password changes require matching passwords and reauthenticate first", async () => {
+  const { elements, firebase, calls } = fixture();
+  const user = { email: "p@example.com", providerData: [{ providerId: "password" }] };
+  firebase.next(user);
+  elements["current-password"].value = "old";
+  elements["new-password"].value = "new-password";
+  elements["confirm-password"].value = "wrong";
+  elements["change-password-form"].submit({ preventDefault() {} });
+  assert.equal(calls.length, 0);
+  assert.match(elements["auth-message"].textContent, /一致しません/);
+  elements["confirm-password"].value = "new-password";
+  elements["change-password-form"].submit({ preventDefault() {} });
+  await flush();
+  assert.deepEqual(calls, [
+    ["reauth-password", user, { email: "p@example.com", password: "old" }],
+    ["update-password", user, "new-password"]
+  ]);
+  assert.match(elements["auth-message"].textContent, /変更しました/);
+  assert.equal(elements["current-password"].value, "");
+});
+
+test("deletion requires consent and reauthenticates using the selected provider", async () => {
+  const { elements, firebase, calls } = fixture();
+  const user = { email: "both@example.com", providerData: [{ providerId: "password" }, { providerId: "google.com" }] };
+  firebase.next(user);
+  elements["delete-account-form"].submit({ preventDefault() {} });
+  assert.equal(calls.length, 0);
+  elements["delete-confirm"].checked = true;
+  elements["delete-method"].value = "google.com";
+  elements["delete-method"].change();
+  assert.equal(elements["delete-password-field"].hidden, true);
+  elements["delete-account-form"].submit({ preventDefault() {} });
+  await flush();
+  assert.deepEqual(calls, [["reauth-google", user, firebase.provider], ["delete", user]]);
+  assert.match(elements["auth-message"].textContent, /削除しました/);
+});
+
+test("failed reauthentication never changes or deletes the account", async () => {
+  const { elements, firebase, calls } = fixture();
+  const user = { email: "p@example.com", providerData: [{ providerId: "password" }] };
+  firebase.next(user);
+  firebase.reauthenticateWithCredential = async () => { throw { code: "auth/wrong-password" }; };
+  elements["delete-confirm"].checked = true;
+  elements["delete-password"].value = "wrong";
+  elements["delete-account-form"].submit({ preventDefault() {} });
+  await flush();
+  assert.deepEqual(calls, []);
+  assert.match(elements["auth-message"].textContent, /パスワードを確認/);
+  assert.equal(elements["delete-password"].value, "");
+});
+
+test("password-based account deletion reauthenticates before deleting", async () => {
+  const { elements, firebase, calls } = fixture();
+  const user = { email: "p@example.com", providerData: [{ providerId: "password" }] };
+  firebase.next(user);
+  elements["delete-confirm"].checked = true;
+  elements["delete-password"].value = "old";
+  elements["delete-account-form"].submit({ preventDefault() {} });
+  await flush();
+  assert.deepEqual(calls, [
+    ["reauth-password", user, { email: "p@example.com", password: "old" }],
+    ["delete", user]
+  ]);
+  firebase.next(null);
+  assert.match(elements["auth-message"].textContent, /削除しました/);
+});
+
+test("policy fetch failure is displayed without hiding sign-in", async () => {
+  const original = console.error;
+  console.error = () => {};
+  try {
+    const { elements, firebase } = fixture({ validatePassword: async () => { throw new Error("offline"); } });
+    firebase.next(null);
+    await flush();
+    assert.match(elements["password-policy"].textContent, /取得できません/);
+    assert.equal(elements["signed-out"].hidden, false);
+  } finally {
+    console.error = original;
+  }
 });
 
 test("email registration and login invoke their respective Firebase methods", async () => {

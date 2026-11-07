@@ -21,7 +21,8 @@
                 <label for="email">メールアドレス</label>
                 <input id="email" name="email" type="email" autocomplete="email" required>
                 <label for="password">パスワード</label>
-                <input id="password" name="password" type="password" autocomplete="current-password" required>
+                <input id="password" name="password" type="password" autocomplete="current-password" aria-describedby="password-policy" required>
+                <p id="password-policy" role="status">パスワード条件を確認しています。</p>
                 <div class="account-actions">
                     <button type="submit" name="action" value="login">ログイン</button>
                     <button type="submit" name="action" value="register">新規登録</button>
@@ -33,6 +34,34 @@
         <section id="signed-in" hidden aria-label="ログイン中のアカウント">
             <p>ログイン中: <span id="account-name"></span></p>
             <button type="button" id="logout">ログアウト</button>
+            <section id="password-section" hidden>
+                <h2>パスワード変更</h2>
+                <p id="change-policy">パスワード条件を確認しています。</p>
+                <form id="change-password-form">
+                    <label for="current-password">現在のパスワード</label>
+                    <input id="current-password" type="password" autocomplete="current-password" required>
+                    <label for="new-password">新しいパスワード</label>
+                    <input id="new-password" type="password" autocomplete="new-password" aria-describedby="change-policy" required>
+                    <label for="confirm-password">新しいパスワード（確認）</label>
+                    <input id="confirm-password" type="password" autocomplete="new-password" required>
+                    <button type="submit">パスワードを変更</button>
+                </form>
+            </section>
+            <p id="google-password-notice" hidden>Google アカウントのパスワードは Google のアカウント設定で変更してください。</p>
+            <section class="delete-account">
+                <h2>アカウント削除</h2>
+                <p>Firebase Authentication の Mondo アカウントを削除します。元に戻すことはできません。Google アカウント自体は削除されません。</p>
+                <form id="delete-account-form">
+                    <label for="delete-method">本人確認方法</label>
+                    <select id="delete-method"></select>
+                    <div id="delete-password-field" hidden>
+                        <label for="delete-password">現在のパスワード</label>
+                        <input id="delete-password" type="password" autocomplete="current-password">
+                    </div>
+                    <label><input id="delete-confirm" type="checkbox" required> アカウントの削除に同意します</label>
+                    <button type="submit">アカウントを削除</button>
+                </form>
+            </section>
         </section>
     </main>
 </body>
