@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アカウント | Mondo</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script type="module" src="{{ url_for('static', filename='account.js') }}"></script>
+</head>
+<body>
+    <main class="account-page">
+        <a class="account-back" href="{{ url_for('home') }}">← ホームに戻る</a>
+        <h1>アカウント</h1>
+        <p id="auth-message" role="status" aria-live="polite">認証を読み込んでいます。表示が変わらない場合は、通信状況を確認して再読み込みしてください。</p>
+        <noscript><p>ログインには JavaScript を有効にしてください。</p></noscript>
+
+        <section id="signed-out" hidden aria-label="ログインまたは新規登録">
+            <p>クイズはログインせずに遊べます。</p>
+            <form id="email-form">
+                <label for="email">メールアドレス</label>
+                <input id="email" name="email" type="email" autocomplete="email" required>
+                <label for="password">パスワード</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+                <div class="account-actions">
+                    <button type="submit" name="action" value="login">ログイン</button>
+                    <button type="submit" name="action" value="register">新規登録</button>
+                </div>
+            </form>
+            <button type="button" id="google-login" class="google-login">Google でログイン・新規登録</button>
+        </section>
+
+        <section id="signed-in" hidden aria-label="ログイン中のアカウント">
+            <p>ログイン中: <span id="account-name"></span></p>
+            <button type="button" id="logout">ログアウト</button>
+        </section>
+    </main>
+</body>
+</html>

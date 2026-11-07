@@ -38,14 +38,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600&display=swap" rel="stylesheet">
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRFNLZKC9G"></script>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-WNH8P7KQ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-    
-      gtag('config', 'G-BRFNLZKC9G');
-    </script>    
+    </script>
+    <!-- firebaseの設定 -->
+    <script type="module">
+      import { app } from "{{ url_for('static', filename='firebase_init.js') }}";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
+      const analytics = getAnalytics(app);
+    </script>
 
     <!-- adobe fonts のプロジェクトを読み込む-->
     <script>
@@ -80,6 +84,9 @@
 </head>
 <body>
     <main class="main">
+        <nav class="account-nav" aria-label="アカウント">
+            <a href="{{ url_for('account') }}">ログイン・アカウント</a>
+        </nav>
         <div class="q_container">
             <!--クイズタイトル-->
             <div class="q_title">

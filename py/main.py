@@ -98,6 +98,10 @@ Session(app)
 
 CORS(app)  # CORSをアプリケーションに適用
 
+# ユーザー作成クイズのAPI（Firebase認証必須）
+from py.routes.quiz_create import bp as quiz_create_bp
+app.register_blueprint(quiz_create_bp)
+
 
 # render_temlpate関数を使い、フロントエンドとバックエンドの連携
 # 再利用可能なコンポーネントを作成する
@@ -190,6 +194,10 @@ def home():
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
     return render_template('index.html', css_url=css_url, quizzes=quiz_metadata)
+
+@app.route('/account')
+def account():
+    return render_template('account.html')
 
 # ------ クイズの概要ページhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/quiz_info/<int:quiz_id>')
