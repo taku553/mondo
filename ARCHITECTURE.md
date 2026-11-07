@@ -26,4 +26,10 @@ flowchart TD
     Flask --> Redis
     User -->|CSS・JavaScript・画像| Assets
     User -->|fetch / Ajax| Function
+```
 
+## アカウント
+
+ホームからアカウント画面に移動し、Firebase Authentication のメール／パスワードまたは Google で登録・ログインできます。認証状態はブラウザーの Firebase Web SDK が管理し、Redis のクイズ進行セッションとは別です。ユーザー作成クイズの Firestore 連携はまだ実装されていません。
+
+Firebase コンソールで両方のログイン方法を有効化し、使用する本番・開発ドメインを Authentication の承認済みドメインに追加してください。Web SDK の公開設定は `public/static/firebase_init.js` にあります。サーバー用の認証情報は含めないでください。
