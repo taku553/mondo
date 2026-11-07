@@ -37,6 +37,7 @@
             <section id="password-section" hidden>
                 <h2>パスワード変更</h2>
                 <p id="change-policy">パスワード条件を確認しています。</p>
+                <p id="change-message" role="status" aria-live="polite"></p>
                 <form id="change-password-form">
                     <label for="current-password">現在のパスワード</label>
                     <input id="current-password" type="password" autocomplete="current-password" required>
@@ -51,15 +52,19 @@
             <section class="delete-account">
                 <h2>アカウント削除</h2>
                 <p>Firebase Authentication の Mondo アカウントを削除します。元に戻すことはできません。Google アカウント自体は削除されません。</p>
+                <p id="delete-message" role="status" aria-live="polite"></p>
                 <form id="delete-account-form">
-                    <label for="delete-method">本人確認方法</label>
-                    <select id="delete-method"></select>
+                    <p id="delete-method-summary" hidden></p>
+                    <div id="delete-method-choice" hidden>
+                        <label for="delete-method">本人確認方法</label>
+                        <select id="delete-method"></select>
+                    </div>
                     <div id="delete-password-field" hidden>
                         <label for="delete-password">現在のパスワード</label>
                         <input id="delete-password" type="password" autocomplete="current-password">
                     </div>
                     <label><input id="delete-confirm" type="checkbox" required> アカウントの削除に同意します</label>
-                    <button type="submit">アカウントを削除</button>
+                    <button id="delete-submit" type="submit">アカウントを削除</button>
                 </form>
             </section>
         </section>

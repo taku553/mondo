@@ -33,8 +33,13 @@ export function setupAccount(document, firebase) {
   const currentPassword = document.getElementById("current-password");
   const newPassword = document.getElementById("new-password");
   const confirmPassword = document.getElementById("confirm-password");
+  const changeMessage = document.getElementById("change-message");
   const deleteForm = document.getElementById("delete-account-form");
   const deleteMethod = document.getElementById("delete-method");
+  const deleteMethodChoice = document.getElementById("delete-method-choice");
+  const deleteMethodSummary = document.getElementById("delete-method-summary");
+  const deleteMessage = document.getElementById("delete-message");
+  const deleteSubmit = document.getElementById("delete-submit");
   const deletePasswordField = document.getElementById("delete-password-field");
   const deletePassword = document.getElementById("delete-password");
   const deleteConfirm = document.getElementById("delete-confirm");
@@ -45,16 +50,17 @@ export function setupAccount(document, firebase) {
   let initialStateReceived = false;
   let busy = false;
 
-  function showError(error) {
+  function showError(error, feedback = message) {
     console.error("Firebase Authentication error:", error);
-    message.textContent = errorMessages[error?.code] || "認証に失敗しました。しばらくしてからもう一度お試しください。";
+    feedback.textContent = errorMessages[error?.code] || "認証に失敗しました。しばらくしてからもう一度お試しください。";
   }
 
-  async function run(operation, successMessage = "") {
+  async function run(operation, successMessage = "", feedback = message, successTarget = feedback) {
     if (busy) return;
     busy = true;
     buttons.forEach(button => { button.disabled = true; });
-    message.textContent = "処理中です…";
+    message.textContent = "";
+    feedback.textContent = "処理中です…";
     try {
       await operation();
       password.value = "";
@@ -63,14 +69,16 @@ export function setupAccount(document, firebase) {
       confirmPassword.value = "";
       deletePassword.value = "";
       deleteConfirm.checked = false;
-      message.textContent = successMessage;
+      feedback.textContent = "";
+      successTarget.textContent = successMessage;
     } catch (error) {
       currentPassword.value = "";
       deletePassword.value = "";
-      showError(error);
+      showError(error, feedback);
     } finally {
       busy = false;
       buttons.forEach(button => { button.disabled = false; });
+      deleteSubmit.disabled = !deleteMethod.value;
     }
   }
 
@@ -117,7 +125,7 @@ export function setupAccount(document, firebase) {
     event.preventDefault();
     if (!currentUser || busy) return;
     if (newPassword.value !== confirmPassword.value) {
-      message.textContent = "新しいパスワードが一致しません。";
+      changeMessage.textContent = "新しいパスワードが一致しません。";
       return;
     }
     const user = currentUser;
@@ -125,17 +133,21 @@ export function setupAccount(document, firebase) {
       const credential = firebase.emailCredential(user.email, currentPassword.value);
       await firebase.reauthenticateWithCredential(user, credential);
       await firebase.updatePassword(user, newPassword.value);
-    }, "パスワードを変更しました。");
+    }, "パスワードを変更しました。", changeMessage);
   });
 
   deleteMethod.addEventListener("change", updateDeleteMethod);
   deleteForm.addEventListener("submit", event => {
     event.preventDefault();
-    if (!currentUser || busy || !deleteConfirm.checked) return;
+    if (!currentUser || busy) return;
+    if (!deleteConfirm.checked) {
+      deleteMessage.textContent = "アカウント削除への同意を確認してください。";
+      return;
+    }
     const user = currentUser;
     const method = deleteMethod.value;
     if (method !== "password" && method !== "google.com") {
-      message.textContent = "本人確認方法を選択してください。";
+      deleteMessage.textContent = "本人確認方法を選択してください。";
       return;
     }
     run(async () => {
@@ -145,7 +157,8 @@ export function setupAccount(document, firebase) {
         await firebase.reauthenticateWithPopup(user, firebase.provider);
       }
       await firebase.deleteUser(user);
-    }, "アカウントを削除しました。");
+      email.value = "";
+    }, "アカウントを削除しました。ブラウザに保存されたログイン情報は別途削除してください。", deleteMessage, message);
   });
 
   firebase.onAuthStateChanged(firebase.auth, user => {
@@ -159,13 +172,23 @@ export function setupAccount(document, firebase) {
     passwordSection.hidden = !hasPassword;
     googlePasswordNotice.hidden = !hasGoogle || hasPassword;
     deleteMethod.replaceChildren();
+    const availableMethods = [];
     for (const [value, label, enabled] of [["password", "メール／パスワード", hasPassword], ["google.com", "Google", hasGoogle]]) {
       if (enabled) {
+        availableMethods.push(label);
         const option = document.createElement("option");
         option.value = value;
         option.textContent = label;
         deleteMethod.append(option);
       }
+      deleteMethodChoice.hidden = availableMethods.length < 2;
+      deleteMethodSummary.hidden = availableMethods.length !== 1;
+      deleteMethodSummary.textContent = availableMethods.length === 1 ? `本人確認方法: ${availableMethods[0]}` : "";
+      deleteSubmit.disabled = busy || availableMethods.length === 0;
+      deleteMessage.textContent = user && availableMethods.length === 0
+        ? "利用できる本人確認方法がありません。管理者にお問い合わせください。"
+        : "";
+      changeMessage.textContent = "";
     }
     updateDeleteMethod();
     if (!initialStateReceived && !busy) message.textContent = "";

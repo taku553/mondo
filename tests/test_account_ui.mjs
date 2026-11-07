@@ -8,7 +8,8 @@ const { setupAccount } = await import(`data:text/javascript;base64,${Buffer.from
 function fixture(overrides = {}) {
   const ids = ["auth-message", "signed-out", "signed-in", "account-name", "email-form", "email", "password", "google-login", "logout",
     "password-section", "google-password-notice", "change-password-form", "current-password", "new-password", "confirm-password",
-    "delete-account-form", "delete-method", "delete-password-field", "delete-password", "delete-confirm", "password-policy", "change-policy"];
+    "delete-account-form", "delete-method", "delete-method-choice", "delete-method-summary", "delete-message", "delete-submit",
+    "delete-password-field", "delete-password", "delete-confirm", "password-policy", "change-policy", "change-message"];
   const elements = Object.fromEntries(ids.map(id => [id, {
     hidden: false, value: "", textContent: "", disabled: false, checked: false,
     addEventListener(type, handler) { this[type] = handler; },
@@ -18,7 +19,7 @@ function fixture(overrides = {}) {
   const formButtons = [{ disabled: false }, { disabled: false }];
   elements["email-form"].querySelectorAll = () => formButtons;
   elements["change-password-form"].querySelectorAll = () => [{ disabled: false }];
-  elements["delete-account-form"].querySelectorAll = () => [{ disabled: false }];
+  elements["delete-account-form"].querySelectorAll = () => [elements["delete-submit"]];
   const calls = [];
   const firebase = {
     auth: {}, provider: {},
@@ -61,10 +62,16 @@ test("policy and provider-specific controls are displayed", async () => {
   assert.equal(elements["password-section"].hidden, true);
   assert.equal(elements["google-password-notice"].hidden, false);
   assert.equal(elements["delete-method"].value, "google.com");
+  assert.equal(elements["delete-method-choice"].hidden, true);
+  assert.match(elements["delete-method-summary"].textContent, /Google/);
   assert.equal(elements["delete-password-field"].hidden, true);
   firebase.next({ email: "p@example.com", providerData: [{ providerId: "password" }] });
   assert.equal(elements["password-section"].hidden, false);
+  assert.match(elements["delete-method-summary"].textContent, /メール／パスワード/);
   assert.equal(elements["delete-password-field"].hidden, false);
+  firebase.next({ providerData: [] });
+  assert.equal(elements["delete-submit"].disabled, true);
+  assert.match(elements["delete-message"].textContent, /利用できる本人確認方法がありません/);
 });
 
 test("password changes require matching passwords and reauthenticate first", async () => {
@@ -76,7 +83,7 @@ test("password changes require matching passwords and reauthenticate first", asy
   elements["confirm-password"].value = "wrong";
   elements["change-password-form"].submit({ preventDefault() {} });
   assert.equal(calls.length, 0);
-  assert.match(elements["auth-message"].textContent, /一致しません/);
+  assert.match(elements["change-message"].textContent, /一致しません/);
   elements["confirm-password"].value = "new-password";
   elements["change-password-form"].submit({ preventDefault() {} });
   await flush();
@@ -84,7 +91,7 @@ test("password changes require matching passwords and reauthenticate first", asy
     ["reauth-password", user, { email: "p@example.com", password: "old" }],
     ["update-password", user, "new-password"]
   ]);
-  assert.match(elements["auth-message"].textContent, /変更しました/);
+  assert.match(elements["change-message"].textContent, /変更しました/);
   assert.equal(elements["current-password"].value, "");
 });
 
@@ -92,6 +99,9 @@ test("deletion requires consent and reauthenticates using the selected provider"
   const { elements, firebase, calls } = fixture();
   const user = { email: "both@example.com", providerData: [{ providerId: "password" }, { providerId: "google.com" }] };
   firebase.next(user);
+  assert.equal(elements["delete-method-choice"].hidden, false);
+  assert.equal(elements["delete-method-summary"].hidden, true);
+  assert.deepEqual(elements["delete-method"].options.map(option => option.value), ["password", "google.com"]);
   elements["delete-account-form"].submit({ preventDefault() {} });
   assert.equal(calls.length, 0);
   elements["delete-confirm"].checked = true;
@@ -114,7 +124,7 @@ test("failed reauthentication never changes or deletes the account", async () =>
   elements["delete-account-form"].submit({ preventDefault() {} });
   await flush();
   assert.deepEqual(calls, []);
-  assert.match(elements["auth-message"].textContent, /パスワードを確認/);
+  assert.match(elements["delete-message"].textContent, /パスワードを確認/);
   assert.equal(elements["delete-password"].value, "");
 });
 
@@ -122,6 +132,7 @@ test("password-based account deletion reauthenticates before deleting", async ()
   const { elements, firebase, calls } = fixture();
   const user = { email: "p@example.com", providerData: [{ providerId: "password" }] };
   firebase.next(user);
+  elements.email.value = user.email;
   elements["delete-confirm"].checked = true;
   elements["delete-password"].value = "old";
   elements["delete-account-form"].submit({ preventDefault() {} });
@@ -130,8 +141,23 @@ test("password-based account deletion reauthenticates before deleting", async ()
     ["reauth-password", user, { email: "p@example.com", password: "old" }],
     ["delete", user]
   ]);
+  assert.equal(elements.email.value, "");
   firebase.next(null);
   assert.match(elements["auth-message"].textContent, /削除しました/);
+});
+
+test("failed account deletion preserves the email and displays the error", async () => {
+  const { elements, firebase } = fixture();
+  firebase.next({ email: "p@example.com", providerData: [{ providerId: "password" }] });
+  elements.email.value = "p@example.com";
+  elements["delete-confirm"].checked = true;
+  elements["delete-password"].value = "old";
+  firebase.deleteUser = async () => { throw { code: "auth/network-request-failed" }; };
+  elements["delete-account-form"].submit({ preventDefault() {} });
+  await flush();
+  assert.equal(elements.email.value, "p@example.com");
+  assert.match(elements["delete-message"].textContent, /通信に失敗/);
+  assert.equal(elements["signed-in"].hidden, false);
 });
 
 test("policy fetch failure is displayed without hiding sign-in", async () => {
