@@ -50,7 +50,7 @@
 
                 <div class="image-container">
                     {% if quiz.image %}
-                    <img src="{{ url_for('static', filename=quiz.image) }}" alt="画像" class="quiz_info_images">
+                    <img src="{{ quiz.image if quiz.image.startswith('/') else url_for('static', filename=quiz.image) }}" alt="画像" class="quiz_info_images">
                     {% else %}
                     <div class="card-image quiz_info_images" aria-hidden="true"></div>
                     {% endif %}
@@ -73,15 +73,10 @@
                 <!-- クイズ情報 -->
                 <div class="quiz-info-box">
                     <ul class="info-list">
-                        <li>ジャンル：{{ quiz.subject }}</li>
-                        <li>出題範囲：{{ quiz.period }}</li>
-                        <li>問題数：{{ quiz.total_questions }}問</li>
+                        <li>ジャンル：{{ quiz.genre or '—' }}</li>
+                        <li>問題数：{{ quiz.question_count }}問</li>
+                        <li>説明：{{ quiz.summary or '—' }}</li>
                     </ul>
-                </div>
-
-                <!-- クイズ概要 -->
-                <div class="quiz-description">
-                    <p>{{ quiz.description }}</p>
                 </div>
 
                 

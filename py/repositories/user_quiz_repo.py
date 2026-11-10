@@ -1,6 +1,7 @@
 """ユーザー作成クイズのFirestore保存。
 
-1クイズにつき quizzes/{id}（紹介情報）と questions/{id}（問題文）を同じIDで対にして保存する。
+1クイズは quizzes/{id}（紹介情報）、questions/{id}-{n}（問題、n=1〜20の順番）、
+quiz_images/{id}（画像のbase64）に分けて保存する。旧形式（問題IDがクイズIDと同じ）も読み取れる。
 Admin SDK経由のアクセスのため、クライアント側のセキュリティルールは適用されない。
 所有者・管理者の判定はこのモジュールとルート側で行う。
 """
@@ -13,6 +14,8 @@ from py.auth.firebase import get_firestore_client
 
 QUIZZES = 'quizzes'
 QUESTIONS = 'questions'
+QUIZ_IMAGES = 'quiz_images'
+IMAGE_URL_PREFIX = '/api/quiz_images/'
 OFFICIAL_TAG = '公式'
 MODERATION_NONE = 'none'
 MODERATION_HIDDEN = 'hidden'
@@ -38,10 +41,38 @@ def _iso(value):
     return value.isoformat() if hasattr(value, 'isoformat') else value
 
 
-def _serialize(quiz_id, quiz, question):
+def _image_url(quiz_id):
+    return f'{IMAGE_URL_PREFIX}{quiz_id}'
+
+
+def _question_ref(db, quiz_id, number):
+    return db.collection(QUESTIONS).document(f'{quiz_id}-{number}')
+
+
+def _question_fields(quiz_id, number, question, author_uid, status, now):
+    return {
+        'quiz_id': quiz_id,
+        'order': number,
+        'source': 'user',
+        'author_uid': author_uid,
+        'status': status,
+        'text': question['text'],
+        'choices': question['choices'],
+        'correct_choice_id': question['correct_choice_id'],
+        'explanation': question['explanation'],
+        'image': '',
+        'created_at': now,
+        'updated_at': now,
+    }
+
+
+def _serialize(quiz_id, quiz, questions):
     return {
         'id': quiz_id,
         'title': quiz.get('title', ''),
+        'genre': quiz.get('genre', ''),
+        'summary': quiz.get('summary', ''),
+        'image': quiz.get('image', ''),
         'tags': quiz.get('tags', []),
         'status': quiz.get('status'),
         'author_uid': quiz.get('author_uid'),
@@ -49,35 +80,53 @@ def _serialize(quiz_id, quiz, question):
         'date': quiz.get('date', ''),
         'created_at': _iso(quiz.get('created_at')),
         'updated_at': _iso(quiz.get('updated_at')),
-        'text': question.get('text', ''),
-        'choices': question.get('choices', []),
-        'correct_choice_id': question.get('correct_choice_id'),
-        'explanation': question.get('explanation', ''),
+        'questions': [
+            {
+                'id': question['id'],
+                'text': question.get('text', ''),
+                'choices': question.get('choices', []),
+                'correct_choice_id': question.get('correct_choice_id'),
+                'explanation': question.get('explanation', ''),
+            }
+            for question in questions
+        ],
     }
 
 
-def _with_questions(db, quiz_snapshots):
-    snapshots = list(quiz_snapshots)
-    if not snapshots:
-        return []
-    question_refs = [db.collection(QUESTIONS).document(snapshot.id) for snapshot in snapshots]
-    questions = {snapshot.id: snapshot.to_dict() or {} for snapshot in db.get_all(question_refs)}
+def _group_questions(snapshots):
+    """問題をquiz_id別にまとめ、順番どおりに並べる。order がない旧データは1問目扱い。"""
+    grouped = {}
+    for snapshot in snapshots:
+        data = snapshot.to_dict() or {}
+        grouped.setdefault(data.get('quiz_id'), []).append({**data, 'id': snapshot.id})
+    for questions in grouped.values():
+        questions.sort(key=lambda question: (question.get('order', 1), question['id']))
+    return grouped
+
+
+def _with_questions(quiz_snapshots, grouped_questions):
     return [
-        _serialize(snapshot.id, snapshot.to_dict() or {}, questions.get(snapshot.id, {}))
-        for snapshot in snapshots
+        _serialize(snapshot.id, snapshot.to_dict() or {}, grouped_questions.get(snapshot.id, []))
+        for snapshot in quiz_snapshots
     ]
+
+
+def _questions_of(db, quiz_id):
+    query = db.collection(QUESTIONS).where(filter=FieldFilter('quiz_id', '==', quiz_id))
+    return list(query.stream())
 
 
 def create_quiz(author_uid, quiz, admin):
     db = _db()
     quiz_ref = db.collection(QUIZZES).document()
-    question_ref = db.collection(QUESTIONS).document(quiz_ref.id)
     now = firestore.SERVER_TIMESTAMP
     today = datetime.now(JST).strftime('%Y/%m/%d')
     batch = db.batch()
     batch.set(quiz_ref, {
         'title': quiz['title'],
-        'image': '',
+        'genre': quiz['genre'],
+        'summary': quiz['summary'],
+        'image': _image_url(quiz_ref.id),
         'tags': normalize_tags(quiz['tags'], admin),
         'date': today,
         'status': quiz['status'],
@@ -87,34 +136,41 @@ def create_quiz(author_uid, quiz, admin):
         'created_at': now,
         'updated_at': now,
     })
-    batch.set(question_ref, {
-        'quiz_id': quiz_ref.id,
-        'source': 'user',
-        'author_uid': author_uid,
-        'status': quiz['status'],
-        'text': quiz['text'],
-        'choices': quiz['choices'],
-        'correct_choice_id': quiz['correct_choice_id'],
-        'explanation': quiz['explanation'],
-        'image': '',
-        'created_at': now,
-        'updated_at': now,
-    })
+    batch.set(db.collection(QUIZ_IMAGES).document(quiz_ref.id), {'data': quiz['image'], 'created_at': now})
+    for number, question in enumerate(quiz['questions'], 1):
+        batch.set(_question_ref(db, quiz_ref.id, number),
+                  _question_fields(quiz_ref.id, number, question, author_uid, quiz['status'], now))
     batch.commit()
     return quiz_ref.id
 
 
 def list_by_author(author_uid):
     db = _db()
-    query = db.collection(QUIZZES).where(filter=FieldFilter('author_uid', '==', author_uid))
-    return _with_questions(db, query.stream())
+    quizzes = db.collection(QUIZZES).where(filter=FieldFilter('author_uid', '==', author_uid)).stream()
+    questions = db.collection(QUESTIONS).where(filter=FieldFilter('author_uid', '==', author_uid)).stream()
+    return _with_questions(quizzes, _group_questions(questions))
 
 
 def list_all_user_quizzes():
     """管理画面用。ユーザー作成クイズを全件返す（公式クイズは含めない）。"""
     db = _db()
-    query = db.collection(QUIZZES).where(filter=FieldFilter('source', '==', 'user'))
-    return _with_questions(db, query.stream())
+    quizzes = db.collection(QUIZZES).where(filter=FieldFilter('source', '==', 'user')).stream()
+    questions = db.collection(QUESTIONS).where(filter=FieldFilter('source', '==', 'user')).stream()
+    return _with_questions(quizzes, _group_questions(questions))
+
+
+def get_public_image(quiz_id):
+    """公開中・非表示でないユーザー作成クイズの画像（base64）を返す。該当しなければNone。"""
+    db = _db()
+    snapshot = db.collection(QUIZZES).document(quiz_id).get()
+    if not snapshot.exists:
+        return None
+    data = snapshot.to_dict() or {}
+    if (data.get('source') != 'user' or data.get('status') != 'published'
+            or data.get('moderation') == MODERATION_HIDDEN):
+        return None
+    image = db.collection(QUIZ_IMAGES).document(quiz_id).get()
+    return (image.to_dict() or {}).get('data') if image.exists else None
 
 
 def _owned_quiz(db, quiz_id, author_uid):
@@ -136,22 +192,28 @@ def update_quiz(quiz_id, author_uid, quiz, admin):
     if snapshot.to_dict().get('moderation') == MODERATION_HIDDEN:
         return MODERATED
     now = firestore.SERVER_TIMESTAMP
-    batch = db.batch()
-    batch.update(snapshot.reference, {
+    quiz_fields = {
         'title': quiz['title'],
+        'genre': quiz['genre'],
+        'summary': quiz['summary'],
         'tags': normalize_tags(quiz['tags'], admin),
         'status': quiz['status'],
         'updated_at': now,
-    })
-    # 問題側はクイズ側と公開状態を揃える（出題はpublishedの問題だけを使うため）
-    batch.set(db.collection(QUESTIONS).document(quiz_id), {
-        'status': quiz['status'],
-        'text': quiz['text'],
-        'choices': quiz['choices'],
-        'correct_choice_id': quiz['correct_choice_id'],
-        'explanation': quiz['explanation'],
-        'updated_at': now,
-    }, merge=True)
+    }
+    batch = db.batch()
+    if quiz['image']:
+        quiz_fields['image'] = _image_url(quiz_id)
+        batch.set(db.collection(QUIZ_IMAGES).document(quiz_id), {'data': quiz['image'], 'created_at': now})
+    batch.update(snapshot.reference, quiz_fields)
+
+    # 問題は作り直す。旧形式のID（クイズIDと同じ）も含め、新しいIDに無い古い問題を削除する
+    new_ids = {f'{quiz_id}-{number}' for number in range(1, len(quiz['questions']) + 1)}
+    for old in _questions_of(db, quiz_id):
+        if old.id not in new_ids:
+            batch.delete(old.reference)
+    for number, question in enumerate(quiz['questions'], 1):
+        batch.set(_question_ref(db, quiz_id, number),
+                  _question_fields(quiz_id, number, question, author_uid, quiz['status'], now))
     batch.commit()
     return UPDATED
 
@@ -163,9 +225,12 @@ def delete_quiz(quiz_id, author_uid):
         return False
     batch = db.batch()
     batch.delete(snapshot.reference)
-    batch.delete(db.collection(QUESTIONS).document(quiz_id))
+    batch.delete(db.collection(QUIZ_IMAGES).document(quiz_id))
+    for question in _questions_of(db, quiz_id):
+        batch.delete(question.reference)
     batch.commit()
     return True
+
 
 
 def set_moderation(quiz_id, moderation):

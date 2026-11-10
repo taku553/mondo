@@ -2,11 +2,17 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { app } from "./firebase_init.js";
 
 const OFFICIAL_TAG = "公式";
+const MAX_QUESTIONS = 20;
+const MAX_IMAGE_BYTES = 100 * 1024;
+const IMAGE_WIDTH = 800;
+const IMAGE_HEIGHT = 450;
 const auth = getAuth(app);
 const $ = id => document.getElementById(id);
 
 let editingId = null;
 let isAdmin = false;
+let pendingImage = null;
+let questionSeq = 0;
 
 async function api(path, options = {}) {
   const user = auth.currentUser;
@@ -30,40 +36,148 @@ function showMessage(text, isError = true) {
   message.style.color = isError ? "#b00020" : "#1b7f3b";
 }
 
+function updateQuestionCount() {
+  const count = document.querySelectorAll(".mq-question").length;
+  $("mq-question-count").textContent = `${count} / ${MAX_QUESTIONS}問`;
+  $("mq-add-question").disabled = count >= MAX_QUESTIONS;
+  document.querySelectorAll(".mq-question").forEach((block, index) => {
+    block.querySelector(".mq-question-legend").textContent = `問題${index + 1}`;
+    block.querySelector(".mq-q-remove").disabled = count <= 1;
+  });
+}
+
+function addQuestion(question = null) {
+  if (document.querySelectorAll(".mq-question").length >= MAX_QUESTIONS) return;
+  const fragment = $("mq-question-template").content.cloneNode(true);
+  const block = fragment.querySelector(".mq-question");
+  questionSeq += 1;
+  const groupName = `mq-correct-${questionSeq}`;
+  block.querySelectorAll(".mq-q-correct").forEach(radio => { radio.name = groupName; });
+  block.querySelector(".mq-q-remove").addEventListener("click", () => {
+    block.remove();
+    updateQuestionCount();
+  });
+  if (question) {
+    block.querySelector(".mq-q-text").value = question.text;
+    block.querySelector(".mq-q-explanation").value = question.explanation || "";
+    question.choices.forEach((choice, i) => {
+      block.querySelectorAll(".mq-q-choice")[i].value = choice.text;
+    });
+    const radio = block.querySelector(`.mq-q-correct[value="${question.correct_choice_id}"]`);
+    if (radio) radio.checked = true;
+  }
+  $("mq-questions").append(fragment);
+  updateQuestionCount();
+}
+
+function resetQuestions() {
+  $("mq-questions").replaceChildren();
+  addQuestion();
+}
+
+function setImagePreview(src) {
+  const preview = $("mq-image-preview");
+  preview.src = src || "";
+  preview.hidden = !src;
+}
+
+function loadImageElement(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+    image.onerror = () => { URL.revokeObjectURL(url); reject(new Error("画像を読み込めませんでした")); };
+    image.src = url;
+  });
+}
+
+function canvasToJpeg(canvas, quality) {
+  return new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("画像の変換に失敗しました"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+// 800×450に中央切り抜きし、100KB以下になるまで JPEG の品質を下げる
+async function processImage(file) {
+  const image = await loadImageElement(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = IMAGE_WIDTH;
+  canvas.height = IMAGE_HEIGHT;
+  const scale = Math.max(IMAGE_WIDTH / image.naturalWidth, IMAGE_HEIGHT / image.naturalHeight);
+  const drawWidth = image.naturalWidth * scale;
+  const drawHeight = image.naturalHeight * scale;
+  canvas.getContext("2d").drawImage(
+    image,
+    (IMAGE_WIDTH - drawWidth) / 2,
+    (IMAGE_HEIGHT - drawHeight) / 2,
+    drawWidth,
+    drawHeight,
+  );
+  for (let quality = 0.92; quality >= 0.5; quality -= 0.06) {
+    const blob = await canvasToJpeg(canvas, quality);
+    if (blob && blob.size <= MAX_IMAGE_BYTES) return blobToDataUrl(blob);
+  }
+  throw new Error("画像を100KB以下に圧縮できませんでした。別の画像を選んでください。");
+}
+
+function readQuestions() {
+  return [...document.querySelectorAll(".mq-question")].map(block => {
+    const correct = block.querySelector(".mq-q-correct:checked");
+    return {
+      text: block.querySelector(".mq-q-text").value,
+      choices: [...block.querySelectorAll(".mq-q-choice")].map(input => input.value),
+      correct_choice_id: correct ? Number(correct.value) : null,
+      explanation: block.querySelector(".mq-q-explanation").value,
+    };
+  });
+}
+
 function readForm() {
-  const correct = document.querySelector('input[name="mq-correct"]:checked');
   return {
     title: $("mq-title").value,
+    genre: $("mq-genre").value,
+    summary: $("mq-summary").value,
     tags: $("mq-tags").value.split(/[,、]/),
     status: $("mq-status").value,
-    text: $("mq-text").value,
-    explanation: $("mq-explanation").value,
-    choices: [0, 1, 2, 3].map(i => $(`mq-choice-${i}`).value),
-    correct_choice_id: correct ? Number(correct.value) : null,
+    questions: readQuestions(),
+    image: pendingImage,
   };
 }
 
 function resetForm() {
   editingId = null;
+  pendingImage = null;
   $("mq-form").reset();
   $("mq-form-title").textContent = "新しいクイズを作成";
   $("mq-submit").textContent = "保存";
   $("mq-status").value = "published";
+  setImagePreview(null);
+  resetQuestions();
   showMessage("");
 }
 
 function fillForm(quiz) {
   editingId = quiz.id;
+  pendingImage = null;
   $("mq-form-title").textContent = "クイズを編集";
   $("mq-submit").textContent = "更新";
   $("mq-title").value = quiz.title;
+  $("mq-genre").value = quiz.genre || "";
+  $("mq-summary").value = quiz.summary || "";
   $("mq-tags").value = quiz.tags.filter(tag => tag !== OFFICIAL_TAG).join(", ");
   $("mq-status").value = quiz.status;
-  $("mq-text").value = quiz.text;
-  $("mq-explanation").value = quiz.explanation;
-  quiz.choices.forEach((choice, i) => { $(`mq-choice-${i}`).value = choice.text; });
-  const radio = document.querySelector(`input[name="mq-correct"][value="${quiz.correct_choice_id}"]`);
-  if (radio) radio.checked = true;
+  $("mq-image-input").value = "";
+  setImagePreview(quiz.image);
+  $("mq-questions").replaceChildren();
+  quiz.questions.forEach(question => addQuestion(question));
+  updateQuestionCount();
   showMessage("");
   $("mq-form").scrollIntoView({ behavior: "smooth" });
 }
@@ -199,13 +313,48 @@ async function loadAdminList() {
   renderAdminList(data.quizzes);
 }
 
+function validateClientSide(body) {
+  if (!body.genre.trim()) return "ジャンルを入力してください";
+  if (!body.summary.trim()) return "説明を入力してください";
+  if (!editingId && !body.image) return "画像を選択してください";
+  if (body.questions.length < 1 || body.questions.length > MAX_QUESTIONS) return `問題は1〜${MAX_QUESTIONS}問で作成してください`;
+  for (const [index, question] of body.questions.entries()) {
+    const label = `問題${index + 1}`;
+    if (!question.text.trim()) return `${label}の問題文を入力してください`;
+    if (question.choices.some(choice => !choice.trim())) return `${label}の選択肢をすべて入力してください`;
+    if (!question.correct_choice_id) return `${label}の正解を選んでください`;
+  }
+  return null;
+}
+
+$("mq-image-input").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  pendingImage = null;
+  setImagePreview(null);
+  if (!file) return;
+  try {
+    pendingImage = await processImage(file);
+    setImagePreview(pendingImage);
+  } catch (error) {
+    event.target.value = "";
+    showMessage(error.message);
+  }
+});
+
+$("mq-add-question").addEventListener("click", () => addQuestion());
+
 $("mq-form").addEventListener("submit", async event => {
   event.preventDefault();
   showMessage("");
+  const body = readForm();
+  const problem = validateClientSide(body);
+  if (problem) {
+    showMessage(problem);
+    return;
+  }
   const submit = $("mq-submit");
   submit.disabled = true;
   try {
-    const body = readForm();
     if (editingId) {
       await api(`/api/my_quizzes/${editingId}`, { method: "PUT", body });
     } else {
@@ -223,6 +372,7 @@ $("mq-form").addEventListener("submit", async event => {
 });
 
 $("mq-reset").addEventListener("click", resetForm);
+resetQuestions();
 
 onAuthStateChanged(auth, async user => {
   $("mq-login-required").hidden = Boolean(user);

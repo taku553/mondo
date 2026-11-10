@@ -4,6 +4,7 @@
 読み取り結果はプロセス内に CACHE_SECONDS 秒キャッシュし、出題のたびにFirestoreへ問い合わせないようにする。
 """
 import time
+from collections import Counter
 
 from google.cloud.firestore import FieldFilter
 
@@ -40,12 +41,24 @@ def _published():
         visible_ids = {quiz['id'] for quiz in quizzes}
         questions = [question for question in _load_published('questions')
                      if question.get('quiz_id') in visible_ids]
+        question_counts = Counter(question['quiz_id'] for question in questions)
+        public_quizzes = []
+        for quiz in quizzes:
+            public = _public(quiz)
+            # 旧い公式データは genre の代わりに subject を持つ
+            public['genre'] = public.get('genre') or public.get('subject', '')
+            public['question_count'] = question_counts[quiz['id']]
+            public_quizzes.append(public)
         _cache.update(
             loaded_at=time.monotonic(),
-            quizzes=sorted((_public(quiz) for quiz in quizzes), key=lambda quiz: quiz['id']),
-            questions=sorted((_public(question) for question in questions), key=lambda question: question['id']),
+            quizzes=sorted(public_quizzes, key=lambda quiz: quiz['id']),
+            questions=sorted(
+                (_public(question) for question in questions),
+                key=lambda question: (question.get('quiz_id', ''), question.get('order', 1), question['id']),
+            ),
         )
     return _cache['quizzes'], _cache['questions']
+
 
 
 def invalidate_cache():

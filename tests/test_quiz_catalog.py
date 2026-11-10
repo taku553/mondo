@@ -59,6 +59,20 @@ class QuizCatalogTest(unittest.TestCase):
         self.assertNotIn('author_uid', quiz)
         self.assertNotIn('moderation', quiz)
 
+    def test_quiz_exposes_derived_question_count_and_genre_fallback(self):
+        quiz = quiz_catalog.get_quiz('official-001')
+        self.assertEqual(quiz['question_count'], 1)
+        self.assertEqual(quiz['genre'], '')
+
+        quiz_catalog.invalidate_cache()
+        self.db.documents['quizzes'][0][1]['genre'] = '江戸'
+        self.assertEqual(quiz_catalog.get_quiz('official-001')['genre'], '江戸')
+
+        quiz_catalog.invalidate_cache()
+        self.db.documents['quizzes'][0][1].pop('genre')
+        self.db.documents['quizzes'][0][1]['subject'] = '戦国'
+        self.assertEqual(quiz_catalog.get_quiz('official-001')['genre'], '戦国')
+
     def test_moderated_quiz_and_its_questions_are_hidden(self):
         self.assertIsNone(quiz_catalog.get_quiz('user-hidden'))
         self.assertEqual(quiz_catalog.get_published_questions('user-hidden'), [])

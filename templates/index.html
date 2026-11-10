@@ -184,7 +184,7 @@
                 {% for quiz in quizzes %}
                 <a href="{{ url_for('quiz_info',  quiz_id=quiz.id) }}" class="card" data-created-at="{{ quiz.created_at or '' }}">
                     {% if quiz.image %}
-                    <img src="{{ url_for('static', filename=quiz.image) }}" 
+                    <img src="{{ quiz.image if quiz.image.startswith('/') else url_for('static', filename=quiz.image) }}" 
                     alt="{{ quiz.title }}"
                     loading="lazy"
                     class="quiz_info_images">

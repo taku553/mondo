@@ -1,4 +1,6 @@
-from flask import Blueprint, g, jsonify, request
+import base64
+
+from flask import Blueprint, Response, g, jsonify, request
 
 from py.auth.admin import is_admin
 from py.auth.decorators import admin_required, login_required
@@ -8,6 +10,17 @@ from py.validators import validate_quiz
 bp = Blueprint('quiz_create', __name__, url_prefix='/api')
 
 MODERATIONS = (user_quiz_repo.MODERATION_NONE, user_quiz_repo.MODERATION_HIDDEN)
+IMAGE_CACHE_CONTROL = 'public, max-age=300'
+
+
+@bp.route('/quiz_images/<quiz_id>', methods=['GET'])
+def quiz_image(quiz_id):
+    encoded = user_quiz_repo.get_public_image(quiz_id)
+    if encoded is None:
+        return jsonify(error='not found'), 404
+    response = Response(base64.b64decode(encoded), mimetype='image/jpeg')
+    response.headers['Cache-Control'] = IMAGE_CACHE_CONTROL
+    return response
 
 
 @bp.route('/my_quizzes', methods=['GET'])
@@ -19,7 +32,7 @@ def list_my_quizzes():
 @bp.route('/my_quizzes', methods=['POST'])
 @login_required
 def create():
-    quiz, errors = validate_quiz(request.get_json(silent=True))
+    quiz, errors = validate_quiz(request.get_json(silent=True), require_image=True)
     if errors:
         return jsonify(errors=errors), 400
     quiz_id = user_quiz_repo.create_quiz(g.user_uid, quiz, is_admin(g.user_uid))
@@ -30,7 +43,7 @@ def create():
 @bp.route('/my_quizzes/<quiz_id>', methods=['PUT'])
 @login_required
 def update(quiz_id):
-    quiz, errors = validate_quiz(request.get_json(silent=True))
+    quiz, errors = validate_quiz(request.get_json(silent=True), require_image=False)
     if errors:
         return jsonify(errors=errors), 400
     result = user_quiz_repo.update_quiz(quiz_id, g.user_uid, quiz, is_admin(g.user_uid))

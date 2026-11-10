@@ -27,6 +27,22 @@
                         <input type="text" id="mq-title" maxlength="60" required>
                     </div>
                     <div class="mq-field">
+                        <label for="mq-genre">ジャンル（20文字以内）</label>
+                        <input type="text" id="mq-genre" maxlength="20" required>
+                    </div>
+                    <div class="mq-field">
+                        <label for="mq-summary">説明（100文字以内）</label>
+                        <textarea id="mq-summary" maxlength="100" rows="2" required></textarea>
+                    </div>
+                    <div class="mq-field">
+                        <label for="mq-image-input">画像（800×450px・100KB以下・JPEG推奨）</label>
+                        <input type="file" id="mq-image-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                        <div class="mq-image-preview-wrap">
+                            <img id="mq-image-preview" alt="" hidden>
+                        </div>
+                        <small class="mq-meta">選択した画像は800×450pxに切り抜き、100KB以下のJPEGに変換して保存します。</small>
+                    </div>
+                    <div class="mq-field">
                         <label for="mq-tags">タグ（カンマ区切り、最大5個）</label>
                         <input type="text" id="mq-tags" placeholder="例: 世界史, 戦争">
                         <small id="mq-tags-note" class="mq-meta"></small>
@@ -38,33 +54,14 @@
                             <option value="draft">非公開（自分だけに表示）</option>
                         </select>
                     </div>
-                    <div class="mq-field">
-                        <label for="mq-text">問題文（500文字以内）</label>
-                        <textarea id="mq-text" maxlength="500"></textarea>
+
+                    <div class="mq-questions-header">
+                        <h3>問題</h3>
+                        <span id="mq-question-count" class="mq-meta">1 / 20問</span>
                     </div>
-                    <fieldset class="mq-field">
-                        <legend>選択肢（正解のラジオボタンを選んでください）</legend>
-                        <div class="mq-choice-row">
-                            <input type="radio" name="mq-correct" value="1" aria-label="選択肢1を正解にする">
-                            <input type="text" id="mq-choice-0" maxlength="200" aria-label="選択肢1">
-                        </div>
-                        <div class="mq-choice-row">
-                            <input type="radio" name="mq-correct" value="2" aria-label="選択肢2を正解にする">
-                            <input type="text" id="mq-choice-1" maxlength="200" aria-label="選択肢2">
-                        </div>
-                        <div class="mq-choice-row">
-                            <input type="radio" name="mq-correct" value="3" aria-label="選択肢3を正解にする">
-                            <input type="text" id="mq-choice-2" maxlength="200" aria-label="選択肢3">
-                        </div>
-                        <div class="mq-choice-row">
-                            <input type="radio" name="mq-correct" value="4" aria-label="選択肢4を正解にする">
-                            <input type="text" id="mq-choice-3" maxlength="200" aria-label="選択肢4">
-                        </div>
-                    </fieldset>
-                    <div class="mq-field">
-                        <label for="mq-explanation">解説（2000文字以内・任意）</label>
-                        <textarea id="mq-explanation" maxlength="2000"></textarea>
-                    </div>
+                    <div id="mq-questions"></div>
+                    <button type="button" id="mq-add-question" class="mq-button secondary">問題を追加</button>
+
                     <p id="mq-message" class="mq-message" role="alert"></p>
                     <div class="mq-buttons">
                         <button type="submit" id="mq-submit" class="mq-button">保存</button>
@@ -72,6 +69,40 @@
                     </div>
                 </form>
             </section>
+
+            <template id="mq-question-template">
+                <fieldset class="mq-question">
+                    <legend class="mq-question-legend"></legend>
+                    <div class="mq-field">
+                        <label>問題文（500文字以内）</label>
+                        <textarea class="mq-q-text" maxlength="500" rows="2"></textarea>
+                    </div>
+                    <fieldset class="mq-field">
+                        <legend>選択肢（正解のラジオボタンを選んでください）</legend>
+                        <div class="mq-choice-row">
+                            <input type="radio" class="mq-q-correct" value="1" aria-label="選択肢1を正解にする">
+                            <input type="text" class="mq-q-choice" maxlength="200" aria-label="選択肢1">
+                        </div>
+                        <div class="mq-choice-row">
+                            <input type="radio" class="mq-q-correct" value="2" aria-label="選択肢2を正解にする">
+                            <input type="text" class="mq-q-choice" maxlength="200" aria-label="選択肢2">
+                        </div>
+                        <div class="mq-choice-row">
+                            <input type="radio" class="mq-q-correct" value="3" aria-label="選択肢3を正解にする">
+                            <input type="text" class="mq-q-choice" maxlength="200" aria-label="選択肢3">
+                        </div>
+                        <div class="mq-choice-row">
+                            <input type="radio" class="mq-q-correct" value="4" aria-label="選択肢4を正解にする">
+                            <input type="text" class="mq-q-choice" maxlength="200" aria-label="選択肢4">
+                        </div>
+                    </fieldset>
+                    <div class="mq-field">
+                        <label>解説（2000文字以内・任意）</label>
+                        <textarea class="mq-q-explanation" maxlength="2000" rows="2"></textarea>
+                    </div>
+                    <button type="button" class="mq-button danger mq-q-remove">この問題を削除</button>
+                </fieldset>
+            </template>
 
             <section class="mq-section">
                 <h2>自分のクイズ</h2>

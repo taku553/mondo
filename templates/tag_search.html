@@ -50,7 +50,7 @@
                     {% for quiz in quizzes %}
                         <a href="{{ url_for('quiz_info', quiz_id=quiz.id) }}" class="card">
                             {% if quiz.image %}
-                            <img src="{{ url_for('static', filename=quiz.image) }}" 
+                            <img src="{{ quiz.image if quiz.image.startswith('/') else url_for('static', filename=quiz.image) }}" 
                                  alt="画像" class="quiz_info_images">
                             {% else %}
                             <div class="card-image quiz_info_images" aria-hidden="true"></div>
