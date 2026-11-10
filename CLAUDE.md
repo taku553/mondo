@@ -23,7 +23,11 @@ python -m pylint py/*.py
 ## File Structure
 
 - `py/main.py`: メインのFlaskアプリケーションコード
-- `py/repositories/quiz_catalog.py`: Firestore から読み込むクイズ一覧・問題の取得
+- `py/repositories/quiz_catalog.py`: Firestore から読み込む公開クイズ一覧・問題の取得（moderation 非公開を除外）
+- `py/repositories/user_quiz_repo.py`: ユーザー作成クイズの保存・更新・削除・運営の非公開判定
+- `py/routes/quiz_create.py`: `/api/my_quizzes`（作成者）と `/api/admin/my_quizzes`（運営）
+- `templates/my_quizzes.html` と `public/static/my_quizzes.js`: クイズ作成・編集・管理画面
+- `public/static/quiz_list.js`: ホームのクイズ並び替え（作成日）・タグ検索・14件ごとのページ送り
 - `templates/`: HTMLテンプレート
 - `public/static/`: CSS、JavaScript、画像などの静的ファイル（VercelのCDNから配信）
 - `api/index.py`: Vercelのサーバーレス関数のエントリーポイント

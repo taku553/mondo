@@ -33,6 +33,7 @@
 
         <section id="signed-in" hidden aria-label="ログイン中のアカウント">
             <p>ログイン中: <span id="account-name"></span></p>
+            <a class="account-back" href="{{ url_for('my_quizzes') }}">クイズを作成・管理する</a>
             <button type="button" id="logout">ログアウト</button>
             <section id="password-section" hidden>
                 <h2>パスワード変更</h2>

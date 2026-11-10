@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズの作成・編集 | Mondo</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script type="module" src="{{ url_for('static', filename='my_quizzes.js') }}"></script>
+</head>
+<body>
+    <main class="my-quizzes-page">
+        <h1>クイズの作成・編集</h1>
+        <p><a href="{{ url_for('home') }}">ホームへ戻る</a></p>
+
+        <section id="mq-login-required" class="mq-section" hidden>
+            <p>クイズを作成・編集するにはログインが必要です。</p>
+            <p><a href="{{ url_for('account') }}">アカウント画面からログイン</a></p>
+        </section>
+
+        <div id="mq-content" hidden>
+            <section class="mq-section">
+                <h2 id="mq-form-title">新しいクイズを作成</h2>
+                <form id="mq-form" novalidate>
+                    <div class="mq-field">
+                        <label for="mq-title">タイトル（60文字以内）</label>
+                        <input type="text" id="mq-title" maxlength="60" required>
+                    </div>
+                    <div class="mq-field">
+                        <label for="mq-tags">タグ（カンマ区切り、最大5個）</label>
+                        <input type="text" id="mq-tags" placeholder="例: 世界史, 戦争">
+                        <small id="mq-tags-note" class="mq-meta"></small>
+                    </div>
+                    <div class="mq-field">
+                        <label for="mq-status">公開設定</label>
+                        <select id="mq-status">
+                            <option value="published">公開（誰でも遊べる）</option>
+                            <option value="draft">非公開（自分だけに表示）</option>
+                        </select>
+                    </div>
+                    <div class="mq-field">
+                        <label for="mq-text">問題文（500文字以内）</label>
+                        <textarea id="mq-text" maxlength="500"></textarea>
+                    </div>
+                    <fieldset class="mq-field">
+                        <legend>選択肢（正解のラジオボタンを選んでください）</legend>
+                        <div class="mq-choice-row">
+                            <input type="radio" name="mq-correct" value="1" aria-label="選択肢1を正解にする">
+                            <input type="text" id="mq-choice-0" maxlength="200" aria-label="選択肢1">
+                        </div>
+                        <div class="mq-choice-row">
+                            <input type="radio" name="mq-correct" value="2" aria-label="選択肢2を正解にする">
+                            <input type="text" id="mq-choice-1" maxlength="200" aria-label="選択肢2">
+                        </div>
+                        <div class="mq-choice-row">
+                            <input type="radio" name="mq-correct" value="3" aria-label="選択肢3を正解にする">
+                            <input type="text" id="mq-choice-2" maxlength="200" aria-label="選択肢3">
+                        </div>
+                        <div class="mq-choice-row">
+                            <input type="radio" name="mq-correct" value="4" aria-label="選択肢4を正解にする">
+                            <input type="text" id="mq-choice-3" maxlength="200" aria-label="選択肢4">
+                        </div>
+                    </fieldset>
+                    <div class="mq-field">
+                        <label for="mq-explanation">解説（2000文字以内・任意）</label>
+                        <textarea id="mq-explanation" maxlength="2000"></textarea>
+                    </div>
+                    <p id="mq-message" class="mq-message" role="alert"></p>
+                    <div class="mq-buttons">
+                        <button type="submit" id="mq-submit" class="mq-button">保存</button>
+                        <button type="button" id="mq-reset" class="mq-button secondary">入力をクリア</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="mq-section">
+                <h2>自分のクイズ</h2>
+                <div id="mq-my-list"></div>
+            </section>
+
+            <section id="mq-admin-section" class="mq-section" hidden>
+                <h2>管理者：ユーザー作成クイズ</h2>
+                <p class="mq-meta">不適切なクイズは非公開にできます。非公開にしたクイズは作成者も公開に戻せなくなります。</p>
+                <div id="mq-admin-list"></div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

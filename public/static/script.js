@@ -116,35 +116,3 @@ $(document).ready(function(){
       changeSlide(index);
     });
   });
-
-// タグ検索の実装
-const searchBox = document.querySelector('.search-box');
-const cards = document.querySelectorAll('.card');
-
-if (searchBox) {
-  searchBox.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase().trim();
-    
-    cards.forEach(card => {
-      const tags = Array.from(card.querySelectorAll('.tag'))
-        .map(tag => tag.textContent.toLowerCase().trim());
-      
-      if (searchTerm === '' || tags.some(tag => tag.includes(searchTerm))) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
-    });
-  });
-}
-
-// ページネーション機能
-const paginationButtons = document.querySelectorAll('.pagination button');
-
-paginationButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        paginationButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        // ここにページ切り替えのロジックを追加
-    });
-});

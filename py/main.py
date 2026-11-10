@@ -193,6 +193,12 @@ def home():
 def account():
     return render_template('account.html')
 
+# ------ クイズの作成・編集画面（管理画面）をレンダリングするためのルートハンドラー ------
+@app.route('/my_quizzes')
+def my_quizzes():
+    css_url = url_for('static', filename='styles.css')
+    return render_template('my_quizzes.html', css_url=css_url)
+
 # ------ クイズの概要ページhtmlファイルをレンダリングするためのルートハンドラー ------
 @app.route('/quiz_info/<quiz_id>')
 def quiz_info(quiz_id):

@@ -49,7 +49,11 @@
                 <!-- 画像 -->
 
                 <div class="image-container">
+                    {% if quiz.image %}
                     <img src="{{ url_for('static', filename=quiz.image) }}" alt="画像" class="quiz_info_images">
+                    {% else %}
+                    <div class="card-image quiz_info_images" aria-hidden="true"></div>
+                    {% endif %}
                 </div>
                 <!-- タイトル -->
                 <div class="quiz-detail-header">
@@ -60,7 +64,7 @@
                 <div class="tag-date-container">
                     <div class="grid_info">
                         {% for tag in quiz.tags %}
-                                <span class="detail-tag">{{ tag }}</span>
+                                <span class="detail-tag{% if tag == '公式' %} detail-tag-official{% endif %}">{{ tag }}</span>
                         {% endfor %}
                     </div>
                     <span class="creation-date">{{ quiz.date }}</span>

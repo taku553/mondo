@@ -10,31 +10,47 @@ from google.cloud.firestore import FieldFilter
 from py.auth.firebase import get_firestore_client
 
 CACHE_SECONDS = 300
+MODERATION_HIDDEN = 'hidden'
 _cache = {'loaded_at': None, 'quizzes': [], 'questions': []}
 
-# 画面やセッションで使わないタイムスタンプは返さない（JSON化できないため）
-_HIDDEN_FIELDS = ('created_at', 'updated_at')
+# 画面やセッションに出さない項目（作成者UIDや運営の判定は公開しない）
+_HIDDEN_FIELDS = ('author_uid', 'moderation', 'updated_at')
 
 
 def _load_published(collection):
     query = get_firestore_client().collection(collection).where(
         filter=FieldFilter('status', '==', 'published'))
-    documents = []
-    for snapshot in query.stream():
-        data = {key: value for key, value in snapshot.to_dict().items() if key not in _HIDDEN_FIELDS}
-        documents.append({**data, 'id': snapshot.id})
-    return sorted(documents, key=lambda document: document['id'])
+    return [{**snapshot.to_dict(), 'id': snapshot.id} for snapshot in query.stream()]
+
+
+def _public(document):
+    # created_atはISO文字列にして並び替えに使えるようにする（JSON化もできる）
+    return {
+        key: value.isoformat() if hasattr(value, 'isoformat') else value
+        for key, value in document.items()
+        if key not in _HIDDEN_FIELDS
+    }
 
 
 def _published():
     loaded_at = _cache['loaded_at']
     if loaded_at is None or time.monotonic() - loaded_at > CACHE_SECONDS:
+        quizzes = [quiz for quiz in _load_published('quizzes')
+                   if quiz.get('moderation') != MODERATION_HIDDEN]
+        visible_ids = {quiz['id'] for quiz in quizzes}
+        questions = [question for question in _load_published('questions')
+                     if question.get('quiz_id') in visible_ids]
         _cache.update(
             loaded_at=time.monotonic(),
-            quizzes=_load_published('quizzes'),
-            questions=_load_published('questions'),
+            quizzes=sorted((_public(quiz) for quiz in quizzes), key=lambda quiz: quiz['id']),
+            questions=sorted((_public(question) for question in questions), key=lambda question: question['id']),
         )
     return _cache['quizzes'], _cache['questions']
+
+
+def invalidate_cache():
+    """書き込み直後に呼び、同じプロセスでは次の読み取りで最新を取り直す。"""
+    _cache.update(loaded_at=None)
 
 
 def list_quizzes():

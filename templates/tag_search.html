@@ -49,11 +49,15 @@
                 {% if quizzes %}
                     {% for quiz in quizzes %}
                         <a href="{{ url_for('quiz_info', quiz_id=quiz.id) }}" class="card">
+                            {% if quiz.image %}
                             <img src="{{ url_for('static', filename=quiz.image) }}" 
                                  alt="画像" class="quiz_info_images">
+                            {% else %}
+                            <div class="card-image quiz_info_images" aria-hidden="true"></div>
+                            {% endif %}
                             <div class="card-content">
                                 {% for tag in quiz.tags %}
-                                    <span class="tag" data-tag-id="{{ loop.index }}">{{ tag }}</span>
+                                    <span class="tag{% if tag == '公式' %} tag-official{% endif %}" data-tag-id="{{ loop.index }}">{{ tag }}</span>
                                 {% endfor %}
                                 <h2 class="card-title">{{ quiz.title }}</h2>
                                 <div class="card-date">{{ quiz.date }}</div>

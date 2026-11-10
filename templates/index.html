@@ -168,21 +168,32 @@
         <!--クイズ一覧-->
         <div class="container">
             <h1 class="quiz_list_f">一覧</h1>
+
+            <div class="sort-row">
+                <select id="quiz-sort" class="sort-select" aria-label="並び替え">
+                    <option value="newest">新しい順</option>
+                    <option value="oldest">古い順</option>
+                </select>
+            </div>
             
             <div class="search-container">
                 <input type="text" class="search-box" placeholder="タグ名で絞り込む">
             </div>
     
             <div class="grid">
-                {% for quiz in quizzes |  reverse %}
-                <a href="{{ url_for('quiz_info',  quiz_id=quiz.id) }}" class="card">
+                {% for quiz in quizzes %}
+                <a href="{{ url_for('quiz_info',  quiz_id=quiz.id) }}" class="card" data-created-at="{{ quiz.created_at or '' }}">
+                    {% if quiz.image %}
                     <img src="{{ url_for('static', filename=quiz.image) }}" 
                     alt="{{ quiz.title }}"
                     loading="lazy"
                     class="quiz_info_images">
+                    {% else %}
+                    <div class="card-image quiz_info_images" aria-hidden="true"></div>
+                    {% endif %}
                     <div class="card-content">
                         {% for tag in quiz.tags %}
-                            <span class="tag">{{ tag }}</span>
+                            <span class="tag{% if tag == '公式' %} tag-official{% endif %}">{{ tag }}</span>
                         {% endfor %}
                         <h2 class="card-title">{{ quiz.title }}</h2>
                     </div>
@@ -191,12 +202,7 @@
                 {% endfor %}
             </div>
     
-            <div class="pagination">
-                <button class="active">1</button>
-                <button>1</button>
-                <span class="dots">...</span>
-                <button>1</button>
-            </div>
+            <div class="pagination" id="quiz-pagination"></div>
         </div>
 
         <!--クイズを遊ぶ際の注意、トグルで-->
@@ -296,6 +302,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js" integrity="sha512-0QbL0ph8Tc8g5bLhfVzSqxe9GERORsKhIn1IrpxDAgUsbBGz/V7iSav2zzW325XGd1OMLdL4UiqRJj702IeqnQ==" crossorigin="anonymous"></script>
     <!--自作-->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='quiz_list.js') }}"></script>
 
 </body>
 </html>

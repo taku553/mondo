@@ -564,6 +564,158 @@ li.ht_t_style{
   color: #666;
 }
 
+/* 公式タグ（既存のタグと区別するため青系） */
+.tag.tag-official {
+  background-color: #2f6fdb;
+  color: #fff;
+}
+
+.detail-tag.detail-tag-official {
+  background-color: #2f6fdb;
+  color: #fff;
+}
+
+/* 一覧の並び替え（右寄せ） */
+.sort-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.sort-select {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+}
+
+/* 管理画面（クイズの作成・編集） */
+.my-quizzes-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+.my-quizzes-page h1 {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.mq-section {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.mq-section h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.mq-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.mq-field input[type="text"],
+.mq-field textarea,
+.mq-field select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.mq-field textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.mq-choice-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.mq-choice-row input[type="text"] {
+  flex: 1;
+}
+
+.mq-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mq-button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #ffde59;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.mq-button.secondary {
+  background: #eee;
+}
+
+.mq-button.danger {
+  background: #f4c7c3;
+}
+
+.mq-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mq-message {
+  font-size: 14px;
+  margin: 8px 0;
+  color: #b00020;
+}
+
+.mq-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.mq-list-item:last-child {
+  border-bottom: none;
+}
+
+.mq-meta {
+  font-size: 12px;
+  color: #666;
+}
+
+.mq-badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eee;
+  color: #333;
+  margin-left: 6px;
+}
+
+.mq-badge.hidden {
+  background: #f4c7c3;
+}
+
 
 /* クイズを遊ぶ際の注意、トグルのスタイリング */
 .toggle-caution {
