@@ -3,7 +3,7 @@
   "regions": ["hnd1"],
   "functions": {
     "api/index.py": {
-      "excludeFiles": "{public/**,venv/**,py/quiz-data-importer/**,py/dataset.csv,**/__pycache__/**}"
+      "excludeFiles": "{public/**,venv/**,**/__pycache__/**}"
     }
   },
   "rewrites": [

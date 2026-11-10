@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest import mock
 
 os.environ["APP_ENV"] = "development"
 
@@ -9,7 +10,9 @@ from py.main import app
 class AccountPageTest(unittest.TestCase):
     def test_account_page_and_home_link(self):
         client = app.test_client()
-        home = client.get("/")
+        # ホーム画面はFirestoreのクイズ一覧を読むため、テストではそれをモックする
+        with mock.patch("py.repositories.quiz_catalog.list_quizzes", return_value=[]):
+            home = client.get("/")
         self.assertEqual(home.status_code, 200)
         self.assertIn(b'href="/account"', home.data)
 

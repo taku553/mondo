@@ -12,7 +12,6 @@ def validate_quiz(data):
 
     text = str(data.get('text', '')).strip()
     explanation = str(data.get('explanation', '')).strip()
-    category = str(data.get('category', '')).strip()
     choices = data.get('choices')
     correct = data.get('correct_choice_id')
 
@@ -34,7 +33,6 @@ def validate_quiz(data):
     return {
         'text': text,
         'explanation': explanation,
-        'category': category,
         'choices': [{'id': i + 1, 'text': t} for i, t in enumerate(cleaned)],
         'correct_choice_id': correct,
     }, []

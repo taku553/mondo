@@ -398,10 +398,8 @@ async function submitAnswer(choiceId, nextButton, questionId) {
         return; // セッションが無効な場合は処理を終了
     }
     
-    // questionIdを整数に変換
-    const questionIdInt = parseInt(questionId, 10);
-
-    console.log('questionId in submitAnswer:', questionIdInt, 'Type:', typeof questionIdInt);
+    // questionIdは文字列のまま送信する（Firestoreのドキュメント IDに合わせるため）
+    console.log('questionId in submitAnswer:', questionId, 'Type:', typeof questionId);
     console.log('activeChoice in submitAnswer:', choiceId, 'Type:', typeof choiceId);
     try {
         const response = await fetch(`${BASE_URL}/submit_answer`, {
@@ -410,7 +408,7 @@ async function submitAnswer(choiceId, nextButton, questionId) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                questionId: questionIdInt,
+                questionId: questionId,
                 activeChoice: parseInt(choiceId),
             }),
         });

@@ -12,8 +12,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 # redisをインポート
 import redis
-# dataset.pyからデータセットをインポート
-from py.dataset import questions, quiz_metadata
+# クイズ紹介情報と問題の参照窓口をインポート
+from py.repositories import quiz_catalog
 # ガベージコレクションをインポート
 import gc
 
@@ -112,12 +112,6 @@ def handle_exception(e):
     # すべての例外をキャッチしてJSONレスポンスとして返す
     return jsonify(error=str(e)), 500
 
-# dataset.pyからすべての有効なカテゴリを抽出
-# dataset.pyのquestionsリストからカテゴリを抽出指導的にカテゴリリストを生成。
-# これで自動認識によるメンテナンス性とカテゴリの手動更新によるエラーが減少する。
-valid_categories = list(set(q['category'] for q in questions if q['category']))
-
-
 # キャッシュヘッダーを追加
 @app.after_request
 def add_header(response):
@@ -193,17 +187,17 @@ def cleanup_after_request(response):
 def home():
     # cssファイルのurlを生成
     css_url = url_for('static', filename='styles.css')
-    return render_template('index.html', css_url=css_url, quizzes=quiz_metadata)
+    return render_template('index.html', css_url=css_url, quizzes=quiz_catalog.list_quizzes())
 
 @app.route('/account')
 def account():
     return render_template('account.html')
 
 # ------ クイズの概要ページhtmlファイルをレンダリングするためのルートハンドラー ------
-@app.route('/quiz_info/<int:quiz_id>')
+@app.route('/quiz_info/<quiz_id>')
 def quiz_info(quiz_id):
-    # quiz_metadataから該当するクイズ情報を取得
-    quiz = next((q for q in quiz_metadata if q['id'] == quiz_id), None)
+    # 該当するクイズ情報を取得
+    quiz = quiz_catalog.get_quiz(quiz_id)
     
     # クイズが見つからない場合は404エラー
     if quiz is None:
@@ -219,9 +213,9 @@ def quiz_info(quiz_id):
 def tag_search():
     tag = request.args.get('tag', '').strip()  # 余分な空白を削除
     
-    # quiz_metadataからタグに一致するクイズをフィルタリング
+    # タグに一致するクイズをフィルタリング
     filtered_quizzes = [
-        quiz for quiz in quiz_metadata if tag in quiz.get('tags', [])
+        quiz for quiz in quiz_catalog.list_quizzes() if tag in quiz.get('tags', [])
     ]
  
     css_url = url_for('static', filename='styles.css')
@@ -256,12 +250,13 @@ def serve_robots():
 def set_quiz_range():
     print("set_quiz_range called")  # set_quiz_range()関数が呼び出されてるか確かめるプリント
     data = request.json
-    selected_range = data.get('range')
-    if selected_range in valid_categories: # 有効な年代のみを受け付ける
-        session['quiz_range'] = selected_range
-        app.logger.info(f"Quiz range set to: {session['quiz_range']}")  # session['quiz_range']にどのデータ範囲が保存されたか確認するログ
-        # 選択された範囲に基づいて質問をフィルタリング
-        filtered_questions = [q for q in questions if q['category'] == selected_range]
+    selected_range = data.get('range')  # 公開済みクイズのquiz_id
+    quiz = quiz_catalog.get_quiz(selected_range) if selected_range else None
+    if quiz and quiz['status'] == 'published': # 公開済みのクイズのみを受け付ける
+        session['quiz_id'] = selected_range
+        app.logger.info(f"Quiz range set to: {session['quiz_id']}")  # session['quiz_id']にどのクイズが保存されたか確認するログ
+        # 選択されたクイズの問題を取得
+        filtered_questions = quiz_catalog.get_published_questions(selected_range)
         # フィルタリングされた質問の総数をセッションに保存
         session['total_questions'] = len(filtered_questions)
         #global TOTAL_QUESTIONS
@@ -280,8 +275,8 @@ def quiz():
     print("quiz called")  # quiz()関数が呼び出されてるか確かめるプリント
 
     # セッションに出題範囲が設定されていない場合、ホーム画面にリダイレクト
-    if 'quiz_range' not in session:
-        app.logger.warning("Attempted to access /quiz without setting quiz_range")
+    if 'quiz_id' not in session:
+        app.logger.warning("Attempted to access /quiz without setting quiz_id")
         return redirect(url_for('/'))  # url_forを使用してホーム画面にリダイレクト
     # 必要に応じてセッション変数を初期化
 
@@ -323,8 +318,8 @@ def keep_session():
     app.logger.info(f"Request headers: {request.headers}")
     app.logger.info(f"Request data: {request.json}")       
     # セッションを保持し、quiz_rangeが設定されていることを確認
-    if 'quiz_range' not in session or session['quiz_range'] is None:
-        # quiz_rangeが設定されていない場合、エラーを返す
+    if 'quiz_id' not in session or session['quiz_id'] is None:
+        # quiz_idが設定されていない場合、エラーを返す
         return jsonify({'error': '出題範囲が設定されていません。ホーム画面に戻ってください。'}), 400
     # セッションを保持するだけで何もしない
     return jsonify({'status': 'success'})
@@ -337,8 +332,8 @@ def get_random_question():
 
     is_reload = request.headers.get('X-Reload') == 'true'
 
-    # quiz_rangeが設定されていない場合、エラーを返す
-    if 'quiz_range' not in session or session['quiz_range'] is None:
+    # quiz_idが設定されていない場合、エラーを返す
+    if 'quiz_id' not in session or session['quiz_id'] is None:
         return jsonify({'error': '出題範囲が設定されていません。ホーム画面に戻ってください。'}), 400    
 
     # セッションに保存された現在の質問をチェック
@@ -350,13 +345,13 @@ def get_random_question():
         return jsonify(json.loads(session['current_question']))    
     
     # セッションに保存された出題範囲を取得
-    quiz_range = session.get('quiz_range')
+    quiz_range = session.get('quiz_id')
     app.logger.info(f"Current quiz range: {quiz_range}") # 現在設定されているクイズ範囲を出力
     if not quiz_range:
         return jsonify({'error': '出題範囲が設定されていません。'}), 400
 
-     # quiz_rangeに基づいて質問をフィルタリング
-    filtered_questions = [q for q in questions if q['category'] == quiz_range]
+    # quiz_rangeに基づいて質問をフィルタリング
+    filtered_questions = quiz_catalog.get_published_questions(quiz_range)
 
     if not filtered_questions:
         return jsonify({'error': '選択された範囲の問題が見つかりません。'}), 404
@@ -411,7 +406,7 @@ def submit_answer():
     try:
         # リクエストデータをロギング
         data = request.json
-        # 整数型：question_id
+        # 文字列型：question_id
         question_id = data['questionId']
         app.logger.debug('Received data: %s', data)
         # print('question_id in submit_answer:', question_id)
@@ -426,13 +421,13 @@ def submit_answer():
         # print(f"Received questionId: {question_id}, type: {type(question_id)}")
 
         # データ型確認
-        if not isinstance(question_id, int):
+        if not isinstance(question_id, str):
             # エラー処理
             return jsonify({'error': 'Invalid data type question_id'}), 400
 
 
-        # questionIdがquestions配列のインデックス範囲内にあるか検証する
-        if question_id not in [q['id'] for q in questions]:
+        # questionIdが公開済みの問題に存在するか検証する
+        if quiz_catalog.get_published_question(question_id) is None:
             return jsonify({'error': 'questionId is out of range'}), 400
 
         # セッション内容を出力
@@ -454,7 +449,7 @@ def submit_answer():
             return jsonify({'error': 'Invalid data type active_choice_id'}), 400
 
         # インデックスとして質問を取得
-        question = next((q for q in questions if q['id'] == question_id), None)
+        question = quiz_catalog.get_published_question(question_id)
         if question is None:
             return jsonify({'error': 'Invalid question ID'}), 400
         # "question = questions[question_id]"の記述はquestion_id整数に変換し
@@ -494,8 +489,8 @@ def submit_answer():
         # session['answerer_questions']の構造を確認するデバッグプリント
         # print(f"Updated answered_questions: {session['answered_questions']}")  
 
-        quiz_range = session.get('quiz_range')
-        filtered_questions = [q for q in questions if q['category'] == quiz_range]
+        quiz_range = session.get('quiz_id')
+        filtered_questions = quiz_catalog.get_published_questions(quiz_range)
         # クイズの終了条件を判定
         # session['answered_questions']を使うことで実際に表示された質問数
         is_quiz_finished = session['answered_question_count'] >= len(filtered_questions)
@@ -567,7 +562,7 @@ def result():
     
    # questionsリストをループ処理し、それぞれの問題文に対し個別にtry-except文を適用
     # これによりエラーが発生した質問だけを特定
-    for question in questions:
+    for question in quiz_catalog.list_published_questions():
         try:
             # セッションからこの質問に対するユーザーの解答を取得
             user_answer = next((q for q in session.get('answered_questions', []) if q['question_id'] == question['id']), None)
@@ -627,7 +622,7 @@ def result():
 
 # リスタートボタンとホームに戻るボタンが共通で使用する、引数と条件分岐付きの関数
 def reset_quiz(keep_quiz_range=False):
-    keys_to_keep = ['quiz_range', 'total_questions'] if keep_quiz_range else []
+    keys_to_keep = ['quiz_id', 'total_questions'] if keep_quiz_range else []
     for key in list(session.keys()):
         if key not in keys_to_keep:
             session.pop(key, None)
@@ -665,7 +660,7 @@ def reset_all_route():
 @app.route('/check_session', methods=['GET'])
 def check_session():
     # セッションが有効かどうかを確認
-    session_valid = 'quiz_range' in session and session['quiz_range'] is not None
+    session_valid = 'quiz_id' in session and session['quiz_id'] is not None
     return jsonify({'valid': session_valid})
 
 # スクリプトが直接実行された場合にアプリケーションが開始

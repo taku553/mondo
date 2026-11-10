@@ -2,9 +2,10 @@ import json
 import os
 
 import firebase_admin
-from firebase_admin import auth, credentials
+from firebase_admin import auth, credentials, firestore
 
 _app = None
+_db = None
 
 
 def _get_app():
@@ -16,6 +17,14 @@ def _get_app():
             raise RuntimeError('FIREBASE_CREDENTIALS must be set')
         _app = firebase_admin.initialize_app(credentials.Certificate(json.loads(raw)))
     return _app
+
+
+def get_firestore_client():
+    """同じAdminアプリに紐づくFirestoreクライアントを返す。Admin SDKのためセキュリティルールは適用されない。"""
+    global _db
+    if _db is None:
+        _db = firestore.client(app=_get_app())
+    return _db
 
 
 def verify_id_token(id_token):

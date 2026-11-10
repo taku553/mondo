@@ -15,14 +15,14 @@ flowchart TD
     Flask[Flask アプリケーション<br/>py/main.py]
     Templates[Jinja2 テンプレート<br/>templates/]
     Assets[CSS / JavaScript / 画像<br/>public/static/]
-    Dataset[クイズデータ<br/>py/dataset.py]
+    Firestore[(Firestore<br/>quizzes / questions)]
     Redis[(Upstash Redis<br/>Flask-Session)]
 
     User -->|HTML画面・APIリクエスト| CDN
     CDN -->|動的リクエスト| Function
     Function --> Flask
     Flask --> Templates
-    Flask --> Dataset
+    Flask --> Firestore
     Flask --> Redis
     User -->|CSS・JavaScript・画像| Assets
     User -->|fetch / Ajax| Function
@@ -30,7 +30,7 @@ flowchart TD
 
 ## アカウント
 
-ホームからアカウント画面に移動し、Firebase Authentication のメール／パスワードまたは Google で登録・ログインできます。認証状態はブラウザーの Firebase Web SDK が管理し、Redis のクイズ進行セッションとは別です。ユーザー作成クイズの Firestore 連携はまだ実装されていません。
+ホームからアカウント画面に移動し、Firebase Authentication のメール／パスワードまたは Google で登録・ログインできます。認証状態はブラウザーの Firebase Web SDK が管理し、Redis のクイズ進行セッションとは別です。ユーザー作成クイズは Firestore の `questions` コレクション（`source: user`, `status: published`）に保存し、作成直後に公開されます。作成・一覧・更新・削除は `/api/my_quizzes` を通じて Flask が Admin SDK で行い、所有者以外の更新・削除と、公式問題（`source: official`）の更新・削除は拒否します。Firestore のセキュリティルール（`firestore.rules`）はクライアントからの直接アクセスをすべて拒否します。旧 Supabase のデータは Firestore に移行済みのため、移行用のスクリプトは削除しました。
 
 Firebase コンソールで両方のログイン方法を有効化し、使用する本番・開発ドメインを Authentication の承認済みドメインに追加してください。Web SDK の公開設定は `public/static/firebase_init.js` にあります。サーバー用の認証情報は含めないでください。
 

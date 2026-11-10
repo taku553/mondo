@@ -23,7 +23,7 @@ python -m pylint py/*.py
 ## File Structure
 
 - `py/main.py`: メインのFlaskアプリケーションコード
-- `py/dataset.py`: クイズのデータセット定義
+- `py/repositories/quiz_catalog.py`: Firestore から読み込むクイズ一覧・問題の取得
 - `templates/`: HTMLテンプレート
 - `public/static/`: CSS、JavaScript、画像などの静的ファイル（VercelのCDNから配信）
 - `api/index.py`: Vercelのサーバーレス関数のエントリーポイント
@@ -32,7 +32,8 @@ python -m pylint py/*.py
 ## Deployment
 
 - Vercelにデプロイ。セッションはUpstash Redis（環境変数 `REDIS_URL` または `KV_URL`）
-- 本番の必須環境変数: `SECRET_KEY`, `REDIS_URL`（`APP_ENV` 未設定時はproductionとして動作）
+- 本番の必須環境変数: `SECRET_KEY`, `REDIS_URL`（`APP_ENV` 未設定時はproductionとして動作）, `FIREBASE_CREDENTIALS`（サービスアカウントJSON）, `ADMIN_UIDS`（公式クイズの作成者UID、カンマ区切り）
+- Firestore のデータ・ルールは Firebase プロジェクト `mondo-6f159` で管理。ルール反映は `firebase deploy --only firestore:rules --project mondo-6f159`
 
 ## Notes
 
