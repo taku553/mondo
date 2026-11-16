@@ -65,7 +65,7 @@
                 <p class="question_t">Q. {{ question.text }}</p>
                 <div id="r_qimg_container">
                     {% if question.image %}
-                        <img src="{{ url_for('static', filename=question.image) }}" alt="Question Image" class="r_qimg">
+                        <img src="{{ question.image }}" alt="Question Image" class="r_qimg">
                     {% endif %}
                 </div>
                 <p class="choice_t">あなたの解答： {{ question.user_choice_text }}</p>

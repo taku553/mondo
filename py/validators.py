@@ -21,6 +21,9 @@ IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 450
 MAX_IMAGE_BYTES = 100 * 1024
 SAVED_QUESTION_IMAGE_URL = re.compile(r'/api/question_images/[A-Za-z0-9_-]+')
+QUESTION_IMAGE_MAX_BYTES = 1_000_000
+QUESTION_IMAGE_FORMATS = {'JPEG': 'image/jpeg', 'PNG': 'image/png', 'GIF': 'image/gif', 'WEBP': 'image/webp'}
+QUESTION_IMAGE_DATA_URL = re.compile(r'data:[^;,]*;base64,([A-Za-z0-9+/=]+)')
 
 
 def validate_image(value):
@@ -45,15 +48,43 @@ def validate_image(value):
     return encoded, []
 
 
+def validate_question_image(value):
+    """問題画像のData URLを検証し、(画像のバイト列, Content-Type, エラー一覧)を返す。
+
+    変換はせず、アップロードされた元のバイト列をそのまま使う。
+    """
+    match = QUESTION_IMAGE_DATA_URL.fullmatch(value) if isinstance(value, str) else None
+    if match is None:
+        return None, None, ['image must be a base64 data URL']
+    try:
+        raw = base64.b64decode(match.group(1), validate=True)
+    except (binascii.Error, ValueError):
+        return None, None, ['image is not valid base64']
+    if len(raw) > QUESTION_IMAGE_MAX_BYTES:
+        return None, None, ['image must be 1MB or less']
+    try:
+        with Image.open(io.BytesIO(raw)) as image:
+            content_type = QUESTION_IMAGE_FORMATS.get(image.format)
+            width, height = image.size
+    except (UnidentifiedImageError, OSError):
+        return None, None, ['image could not be read']
+    if content_type is None:
+        return None, None, ['image must be JPEG, PNG, GIF or WebP']
+    # 縦横比は 9:16 〜 16:9 の範囲（整数の掛け算で比較する）
+    if not (9 * height <= 16 * width and 9 * width <= 16 * height):
+        return None, None, ['image aspect ratio must be between 9:16 and 16:9']
+    return raw, content_type, []
+
+
 def _validate_question_image(value, number, errors):
-    """問題画像を検証する。新しいJPEGなら(base64, None)、保存済みの画像URLなら(None, URL)を返す。"""
+    """問題画像を検証する。新しい画像なら((バイト列, Content-Type), None)、保存済みの画像URLなら(None, URL)を返す。"""
     if not value:
         return None, None
     if isinstance(value, str) and SAVED_QUESTION_IMAGE_URL.fullmatch(value):
         return None, value
-    encoded, image_errors = validate_image(value)
+    raw, content_type, image_errors = validate_question_image(value)
     errors.extend(f'question {number}: {message}' for message in image_errors)
-    return encoded, None
+    return ((raw, content_type) if raw is not None else None), None
 
 
 def _validate_question(raw, number, errors):
@@ -80,7 +111,7 @@ def _validate_question(raw, number, errors):
     is_int = isinstance(correct, int) and not isinstance(correct, bool)
     if not is_int or not 1 <= correct <= CHOICE_COUNT:
         errors.append(f'question {number}: correct_choice_id must be 1-{CHOICE_COUNT}')
-    image_data, image_url = _validate_question_image(raw.get('image'), number, errors)
+    image_file, image_url = _validate_question_image(raw.get('image'), number, errors)
 
     if len(errors) != error_count:
         return None
@@ -89,7 +120,7 @@ def _validate_question(raw, number, errors):
         'choices': [{'id': i + 1, 'text': t} for i, t in enumerate(cleaned)],
         'correct_choice_id': correct,
         'explanation': explanation,
-        'image_data': image_data,
+        'image_file': image_file,
         'image_url': image_url,
     }
 

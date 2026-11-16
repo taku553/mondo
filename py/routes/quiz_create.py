@@ -13,9 +13,10 @@ MODERATIONS = (user_quiz_repo.MODERATION_NONE, user_quiz_repo.MODERATION_HIDDEN)
 IMAGE_CACHE_CONTROL = 'public, max-age=300'
 
 
-def _jpeg_response(encoded):
-    response = Response(base64.b64decode(encoded), mimetype='image/jpeg')
+def _image_response(data, content_type):
+    response = Response(data, mimetype=content_type)
     response.headers['Cache-Control'] = IMAGE_CACHE_CONTROL
+    response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
 
 
@@ -24,15 +25,16 @@ def quiz_image(quiz_id):
     encoded = user_quiz_repo.get_public_image(quiz_id)
     if encoded is None:
         return jsonify(error='not found'), 404
-    return _jpeg_response(encoded)
+    return _image_response(base64.b64decode(encoded), 'image/jpeg')
 
 
 @bp.route('/question_images/<image_id>', methods=['GET'])
 def question_image(image_id):
-    encoded = user_quiz_repo.get_public_question_image(image_id)
-    if encoded is None:
+    image = user_quiz_repo.get_public_question_image(image_id)
+    if image is None:
         return jsonify(error='not found'), 404
-    return _jpeg_response(encoded)
+    data, content_type = image
+    return _image_response(data, content_type)
 
 
 @bp.route('/my_quizzes', methods=['GET'])

@@ -15,6 +15,13 @@ def _jpeg(size=(800, 450), quality=80, fmt='JPEG'):
     return IMAGE_PREFIX + base64.b64encode(buffer.getvalue()).decode('ascii')
 
 
+def _data_url(size, fmt, mime, noisy=False):
+    buffer = io.BytesIO()
+    image = Image.effect_noise(size, 100).convert('RGB') if noisy else Image.new('RGB', size, (30, 90, 200))
+    image.save(buffer, format=fmt)
+    return f'data:{mime};base64,' + base64.b64encode(buffer.getvalue()).decode('ascii')
+
+
 QUESTION = {
     'text': 'Q',
     'choices': ['a', 'b', 'c', 'd'],
@@ -73,10 +80,12 @@ class ValidateQuizTest(unittest.TestCase):
         self.assertTrue(validate_quiz({**VALID, 'tags': ['1', '2', '3', '4', '5', '6']})[1])
         self.assertTrue(validate_quiz({**VALID, 'tags': 'not-a-list'})[1])
 
-    def test_question_image_is_optional_new_jpeg_or_saved_url(self):
+    def test_question_image_is_optional_new_file_or_saved_url(self):
         quiz, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image=_jpeg())]})
         self.assertEqual(errors, [])
-        self.assertTrue(quiz['questions'][0]['image_data'])
+        raw, content_type = quiz['questions'][0]['image_file']
+        self.assertEqual(content_type, 'image/jpeg')
+        self.assertTrue(raw)
         self.assertIsNone(quiz['questions'][0]['image_url'])
 
         quiz, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image='/api/question_images/abc-_1')]})
@@ -85,13 +94,26 @@ class ValidateQuizTest(unittest.TestCase):
 
         quiz, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image=None)]})
         self.assertEqual(errors, [])
-        self.assertIsNone(quiz['questions'][0]['image_data'])
+        self.assertIsNone(quiz['questions'][0]['image_file'])
+
+    def test_question_image_accepts_portrait_landscape_and_png(self):
+        for size, fmt, mime in [((450, 800), 'JPEG', 'image/jpeg'), ((800, 450), 'PNG', 'image/png'), ((1000, 1000), 'PNG', 'image/png')]:
+            quiz, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image=_data_url(size, fmt, mime))]})
+            self.assertEqual(errors, [], size)
+            self.assertEqual(quiz['questions'][0]['image_file'][1], mime)
 
     def test_invalid_question_image_is_rejected_with_question_number(self):
-        _, errors = validate_quiz({**VALID, 'questions': [QUESTION, dict(QUESTION, image=_jpeg(size=(640, 360)))]})
-        self.assertEqual(errors, ['question 2: image must be 800x450px'])
+        _, errors = validate_quiz({**VALID, 'questions': [QUESTION, dict(QUESTION, image=_jpeg(size=(300, 900)))]})
+        self.assertEqual(errors, ['question 2: image aspect ratio must be between 9:16 and 16:9'])
         self.assertTrue(validate_quiz({**VALID, 'questions': [dict(QUESTION, image='https://example.com/a.jpg')]})[1])
         self.assertTrue(validate_quiz({**VALID, 'questions': [dict(QUESTION, image='/api/question_images/a/../b')]})[1])
+
+    def test_question_image_over_one_megabyte_or_unsupported_format_is_rejected(self):
+        large = _data_url((1600, 1200), 'PNG', 'image/png', noisy=True)
+        _, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image=large)]})
+        self.assertEqual(errors, ['question 1: image must be 1MB or less'])
+        bmp = _data_url((800, 450), 'BMP', 'image/bmp')
+        self.assertTrue(validate_quiz({**VALID, 'questions': [dict(QUESTION, image=bmp)]})[1])
 
 
 class ValidateImageTest(unittest.TestCase):

@@ -66,9 +66,10 @@ def _stage_question_images(db, batch, quiz_id, questions, saved_urls, now):
     """
     urls = []
     for question in questions:
-        if question.get('image_data'):
+        if question.get('image_file'):
+            raw, content_type = question['image_file']
             image_ref = db.collection(QUESTION_IMAGES).document()
-            batch.set(image_ref, {'data': question['image_data'], 'quiz_id': quiz_id, 'created_at': now})
+            batch.set(image_ref, {'data': raw, 'content_type': content_type, 'quiz_id': quiz_id, 'created_at': now})
             urls.append(_question_image_url(image_ref.id))
         elif question.get('image_url') in saved_urls:
             urls.append(question['image_url'])
@@ -211,13 +212,15 @@ def get_public_image(quiz_id):
 
 
 def get_public_question_image(image_id):
-    """公開中のユーザー作成クイズに含まれる問題画像（base64）を返す。該当しなければNone。"""
+    """公開中のユーザー作成クイズに含まれる問題画像を (バイト列, Content-Type) で返す。該当しなければNone。"""
     db = _db()
     snapshot = db.collection(QUESTION_IMAGES).document(image_id).get()
     if not snapshot.exists:
         return None
     data = snapshot.to_dict() or {}
-    return data.get('data') if _is_public_user_quiz(db, data.get('quiz_id')) else None
+    if not _is_public_user_quiz(db, data.get('quiz_id')):
+        return None
+    return data.get('data'), data.get('content_type', 'application/octet-stream')
 
 
 def _owned_quiz(db, quiz_id, author_uid):

@@ -240,11 +240,11 @@ class QuestionImageTest(unittest.TestCase):
             },
             'quiz_images': {},
             'question_images': {
-                'old1': {'data': 'OLD1', 'quiz_id': 'pub'},
-                'old2': {'data': 'OLD2', 'quiz_id': 'pub'},
-                'img-pub': {'data': 'X', 'quiz_id': 'pub'},
-                'img-draft': {'data': 'Y', 'quiz_id': 'draft'},
-                'img-orphan': {'data': 'Z'},
+                'old1': {'data': b'OLD1', 'content_type': 'image/png', 'quiz_id': 'pub'},
+                'old2': {'data': b'OLD2', 'content_type': 'image/png', 'quiz_id': 'pub'},
+                'img-pub': {'data': b'X', 'content_type': 'image/png', 'quiz_id': 'pub'},
+                'img-draft': {'data': b'Y', 'content_type': 'image/png', 'quiz_id': 'draft'},
+                'img-orphan': {'data': b'Z', 'content_type': 'image/png'},
             },
         })
         self.patch = unittest.mock.patch.object(repo, '_db', return_value=self.db)
@@ -252,15 +252,16 @@ class QuestionImageTest(unittest.TestCase):
         self.addCleanup(self.patch.stop)
 
     def test_create_stores_question_image_and_links_it(self):
-        question = {**QUIZ['questions'][0], 'image_data': 'NEW', 'image_url': None}
+        question = {**QUIZ['questions'][0], 'image_file': (b'NEW', 'image/png'), 'image_url': None}
         repo.create_quiz('owner', {**QUIZ, 'questions': [question]}, admin=False)
         ops = self.db.batches[-1]
         self.assertEqual(ops[2][1].id, 'auto-question_images')
-        self.assertEqual(ops[2][2]['data'], 'NEW')
+        self.assertEqual(ops[2][2]['data'], b'NEW')
+        self.assertEqual(ops[2][2]['content_type'], 'image/png')
         self.assertEqual(ops[3][2]['image'], '/api/question_images/auto-question_images')
 
     def test_update_keeps_saved_image_and_deletes_dropped_ones(self):
-        question = {**QUIZ['questions'][0], 'image_data': None, 'image_url': '/api/question_images/old1'}
+        question = {**QUIZ['questions'][0], 'image_file': None, 'image_url': '/api/question_images/old1'}
         repo.update_quiz('pub', 'owner', {**QUIZ, 'image': None, 'questions': [question]}, admin=False)
         ops = self.db.batches[-1]
         deleted = [op[1] for op in ops if op[0] == 'delete' and op[1].collection_name == 'question_images']
@@ -269,7 +270,7 @@ class QuestionImageTest(unittest.TestCase):
         self.assertEqual(question_set[2]['image'], '/api/question_images/old1')
 
     def test_update_ignores_image_url_not_saved_on_this_quiz(self):
-        question = {**QUIZ['questions'][0], 'image_data': None, 'image_url': '/api/question_images/img-pub'}
+        question = {**QUIZ['questions'][0], 'image_file': None, 'image_url': '/api/question_images/img-pub'}
         repo.update_quiz('pub', 'owner', {**QUIZ, 'image': None, 'questions': [question]}, admin=False)
         question_set = next(op for op in self.db.batches[-1] if op[0] == 'set' and op[1].id == 'pub-1')
         self.assertEqual(question_set[2]['image'], '')
@@ -281,7 +282,7 @@ class QuestionImageTest(unittest.TestCase):
         self.assertEqual(sorted(deleted), ['old1', 'old2'])
 
     def test_public_question_image_only_when_quiz_is_published(self):
-        self.assertEqual(repo.get_public_question_image('img-pub'), 'X')
+        self.assertEqual(repo.get_public_question_image('img-pub'), (b'X', 'image/png'))
         self.assertIsNone(repo.get_public_question_image('img-draft'))
         self.assertIsNone(repo.get_public_question_image('img-orphan'))
         self.assertIsNone(repo.get_public_question_image('missing'))

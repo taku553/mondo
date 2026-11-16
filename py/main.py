@@ -582,15 +582,14 @@ def result():
             # 正答の選択肢の文章を取得（追加部分）
             correct_choice_text = next((c['text'] for c in question['choices'] if c['id'] == user_answer['correct_choice']), 'Unknown')            
             
-            # 画像の情報を取得
-            image_url = question.get('image', '')
-            # 画像パスから /static/ を削除。これにより、結果画面に画像を表示させる際にパスが正しく設定され画像表示される
-            if image_url.startswith('static/'):
-                image_url = image_url[len('static/'):]
-                
+            # 画像の情報を取得。公式問題は static/ 相対パス、ユーザー作成問題は /api/question_images/... の配信URL
+            image_src = question.get('image') or ''
+            if image_src.startswith('static/'):
+                image_src = url_for('static', filename=image_src[len('static/'):])
+
             answered_question_info = {
                 'text': question['text'],
-                'image': image_url,
+                'image': image_src,
                 'user_choice_text': user_choice_text,
                 'correct_choice_text': correct_choice_text,  # 正答の選択肢の文章を追加
                 'result': user_answer['result'],  # 正誤結果を追加しておくと便利

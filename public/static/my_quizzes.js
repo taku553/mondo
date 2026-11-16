@@ -4,6 +4,7 @@ import { app } from "./firebase_init.js";
 const OFFICIAL_TAG = "公式";
 const MAX_QUESTIONS = 20;
 const MAX_IMAGE_BYTES = 100 * 1024;
+const QUESTION_IMAGE_MAX_BYTES = 1_000_000;
 const IMAGE_WIDTH = 800;
 const IMAGE_HEIGHT = 450;
 const auth = getAuth(app);
@@ -70,7 +71,7 @@ function addQuestion(question = null) {
     setQuestionImage(block, "");
     if (!file) return;
     try {
-      setQuestionImage(block, await processImage(file));
+      setQuestionImage(block, await readQuestionImage(file));
     } catch (error) {
       event.target.value = "";
       showMessage(error.message);
@@ -128,7 +129,20 @@ function blobToDataUrl(blob) {
   });
 }
 
-// 800×450に中央切り抜きし、100KB以下になるまで JPEG の品質を下げる
+// 問題画像は変換せず、1MB以下・縦横比9:16〜16:9の元ファイルを data URL のまま使う
+async function readQuestionImage(file) {
+  if (file.size > QUESTION_IMAGE_MAX_BYTES) {
+    throw new Error("問題画像は1MB以下の画像を選んでください。");
+  }
+  const image = await loadImageElement(file);
+  const { naturalWidth: w, naturalHeight: h } = image;
+  if (!(9 * h <= 16 * w && 9 * w <= 16 * h)) {
+    throw new Error("問題画像の縦横比は9:16〜16:9の範囲にしてください。");
+  }
+  return blobToDataUrl(file);
+}
+
+// 800×450に中央切り抜きし、100KB以下になるまで JPEG の品質を下げる（カバー画像用）
 async function processImage(file) {
   const image = await loadImageElement(file);
   const canvas = document.createElement("canvas");
