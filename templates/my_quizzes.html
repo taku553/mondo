@@ -100,6 +100,15 @@
                         <label>解説（2000文字以内・任意）</label>
                         <textarea class="mq-q-explanation" maxlength="2000" rows="2"></textarea>
                     </div>
+                    <div class="mq-field">
+                        <label>問題の画像（任意・800×450px・100KB以下に変換）</label>
+                        <input type="file" class="mq-q-image-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                        <input type="hidden" class="mq-q-image">
+                        <div class="mq-image-preview-wrap mq-q-image-wrap" hidden>
+                            <img class="mq-q-image-preview" alt="" src="">
+                        </div>
+                        <button type="button" class="mq-button secondary mq-q-image-remove" hidden>画像を削除</button>
+                    </div>
                     <button type="button" class="mq-button danger mq-q-remove">この問題を削除</button>
                 </fieldset>
             </template>

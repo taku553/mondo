@@ -46,6 +46,13 @@ function updateQuestionCount() {
   });
 }
 
+function setQuestionImage(block, src) {
+  block.querySelector(".mq-q-image").value = src || "";
+  block.querySelector(".mq-q-image-preview").src = src || "";
+  block.querySelector(".mq-q-image-wrap").hidden = !src;
+  block.querySelector(".mq-q-image-remove").hidden = !src;
+}
+
 function addQuestion(question = null) {
   if (document.querySelectorAll(".mq-question").length >= MAX_QUESTIONS) return;
   const fragment = $("mq-question-template").content.cloneNode(true);
@@ -57,6 +64,22 @@ function addQuestion(question = null) {
     block.remove();
     updateQuestionCount();
   });
+  const imageInput = block.querySelector(".mq-q-image-input");
+  imageInput.addEventListener("change", async event => {
+    const file = event.target.files[0];
+    setQuestionImage(block, "");
+    if (!file) return;
+    try {
+      setQuestionImage(block, await processImage(file));
+    } catch (error) {
+      event.target.value = "";
+      showMessage(error.message);
+    }
+  });
+  block.querySelector(".mq-q-image-remove").addEventListener("click", () => {
+    imageInput.value = "";
+    setQuestionImage(block, "");
+  });
   if (question) {
     block.querySelector(".mq-q-text").value = question.text;
     block.querySelector(".mq-q-explanation").value = question.explanation || "";
@@ -65,6 +88,7 @@ function addQuestion(question = null) {
     });
     const radio = block.querySelector(`.mq-q-correct[value="${question.correct_choice_id}"]`);
     if (radio) radio.checked = true;
+    setQuestionImage(block, question.image);
   }
   $("mq-questions").append(fragment);
   updateQuestionCount();
@@ -135,6 +159,7 @@ function readQuestions() {
       choices: [...block.querySelectorAll(".mq-q-choice")].map(input => input.value),
       correct_choice_id: correct ? Number(correct.value) : null,
       explanation: block.querySelector(".mq-q-explanation").value,
+      image: block.querySelector(".mq-q-image").value || null,
     };
   });
 }

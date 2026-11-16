@@ -73,6 +73,26 @@ class ValidateQuizTest(unittest.TestCase):
         self.assertTrue(validate_quiz({**VALID, 'tags': ['1', '2', '3', '4', '5', '6']})[1])
         self.assertTrue(validate_quiz({**VALID, 'tags': 'not-a-list'})[1])
 
+    def test_question_image_is_optional_new_jpeg_or_saved_url(self):
+        quiz, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image=_jpeg())]})
+        self.assertEqual(errors, [])
+        self.assertTrue(quiz['questions'][0]['image_data'])
+        self.assertIsNone(quiz['questions'][0]['image_url'])
+
+        quiz, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image='/api/question_images/abc-_1')]})
+        self.assertEqual(errors, [])
+        self.assertEqual(quiz['questions'][0]['image_url'], '/api/question_images/abc-_1')
+
+        quiz, errors = validate_quiz({**VALID, 'questions': [dict(QUESTION, image=None)]})
+        self.assertEqual(errors, [])
+        self.assertIsNone(quiz['questions'][0]['image_data'])
+
+    def test_invalid_question_image_is_rejected_with_question_number(self):
+        _, errors = validate_quiz({**VALID, 'questions': [QUESTION, dict(QUESTION, image=_jpeg(size=(640, 360)))]})
+        self.assertEqual(errors, ['question 2: image must be 800x450px'])
+        self.assertTrue(validate_quiz({**VALID, 'questions': [dict(QUESTION, image='https://example.com/a.jpg')]})[1])
+        self.assertTrue(validate_quiz({**VALID, 'questions': [dict(QUESTION, image='/api/question_images/a/../b')]})[1])
+
 
 class ValidateImageTest(unittest.TestCase):
     def test_exact_jpeg_800x450_is_accepted(self):

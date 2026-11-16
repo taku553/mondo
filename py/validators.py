@@ -1,6 +1,7 @@
 import base64
 import binascii
 import io
+import re
 
 from PIL import Image, UnidentifiedImageError
 
@@ -19,6 +20,7 @@ IMAGE_PREFIX = 'data:image/jpeg;base64,'
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 450
 MAX_IMAGE_BYTES = 100 * 1024
+SAVED_QUESTION_IMAGE_URL = re.compile(r'/api/question_images/[A-Za-z0-9_-]+')
 
 
 def validate_image(value):
@@ -41,6 +43,17 @@ def validate_image(value):
     except (UnidentifiedImageError, OSError):
         return None, ['image could not be read']
     return encoded, []
+
+
+def _validate_question_image(value, number, errors):
+    """問題画像を検証する。新しいJPEGなら(base64, None)、保存済みの画像URLなら(None, URL)を返す。"""
+    if not value:
+        return None, None
+    if isinstance(value, str) and SAVED_QUESTION_IMAGE_URL.fullmatch(value):
+        return None, value
+    encoded, image_errors = validate_image(value)
+    errors.extend(f'question {number}: {message}' for message in image_errors)
+    return encoded, None
 
 
 def _validate_question(raw, number, errors):
@@ -67,6 +80,7 @@ def _validate_question(raw, number, errors):
     is_int = isinstance(correct, int) and not isinstance(correct, bool)
     if not is_int or not 1 <= correct <= CHOICE_COUNT:
         errors.append(f'question {number}: correct_choice_id must be 1-{CHOICE_COUNT}')
+    image_data, image_url = _validate_question_image(raw.get('image'), number, errors)
 
     if len(errors) != error_count:
         return None
@@ -75,6 +89,8 @@ def _validate_question(raw, number, errors):
         'choices': [{'id': i + 1, 'text': t} for i, t in enumerate(cleaned)],
         'correct_choice_id': correct,
         'explanation': explanation,
+        'image_data': image_data,
+        'image_url': image_url,
     }
 
 

@@ -15,7 +15,9 @@ from py.auth.firebase import get_firestore_client
 QUIZZES = 'quizzes'
 QUESTIONS = 'questions'
 QUIZ_IMAGES = 'quiz_images'
+QUESTION_IMAGES = 'question_images'
 IMAGE_URL_PREFIX = '/api/quiz_images/'
+QUESTION_IMAGE_URL_PREFIX = '/api/question_images/'
 OFFICIAL_TAG = '公式'
 MODERATION_NONE = 'none'
 MODERATION_HIDDEN = 'hidden'
@@ -45,11 +47,37 @@ def _image_url(quiz_id):
     return f'{IMAGE_URL_PREFIX}{quiz_id}'
 
 
+def _question_image_url(image_id):
+    return f'{QUESTION_IMAGE_URL_PREFIX}{image_id}'
+
+
+def _question_image_id(url):
+    return url[len(QUESTION_IMAGE_URL_PREFIX):]
+
+
 def _question_ref(db, quiz_id, number):
     return db.collection(QUESTIONS).document(f'{quiz_id}-{number}')
 
 
-def _question_fields(quiz_id, number, question, author_uid, status, now):
+def _stage_question_images(db, batch, quiz_id, questions, saved_urls, now):
+    """問題ごとの画像URLを決め、新しい画像をbatchに追加する。
+
+    saved_urls は保存済みの問題画像URL。ここに含まれるURLだけをそのまま残し、それ以外は画像なしとする。
+    """
+    urls = []
+    for question in questions:
+        if question.get('image_data'):
+            image_ref = db.collection(QUESTION_IMAGES).document()
+            batch.set(image_ref, {'data': question['image_data'], 'quiz_id': quiz_id, 'created_at': now})
+            urls.append(_question_image_url(image_ref.id))
+        elif question.get('image_url') in saved_urls:
+            urls.append(question['image_url'])
+        else:
+            urls.append('')
+    return urls
+
+
+def _question_fields(quiz_id, number, question, author_uid, status, now, image_url):
     return {
         'quiz_id': quiz_id,
         'order': number,
@@ -60,7 +88,7 @@ def _question_fields(quiz_id, number, question, author_uid, status, now):
         'choices': question['choices'],
         'correct_choice_id': question['correct_choice_id'],
         'explanation': question['explanation'],
-        'image': '',
+        'image': image_url,
         'created_at': now,
         'updated_at': now,
     }
@@ -87,6 +115,7 @@ def _serialize(quiz_id, quiz, questions):
                 'choices': question.get('choices', []),
                 'correct_choice_id': question.get('correct_choice_id'),
                 'explanation': question.get('explanation', ''),
+                'image': question.get('image', ''),
             }
             for question in questions
         ],
@@ -137,9 +166,10 @@ def create_quiz(author_uid, quiz, admin):
         'updated_at': now,
     })
     batch.set(db.collection(QUIZ_IMAGES).document(quiz_ref.id), {'data': quiz['image'], 'created_at': now})
-    for number, question in enumerate(quiz['questions'], 1):
+    image_urls = _stage_question_images(db, batch, quiz_ref.id, quiz['questions'], set(), now)
+    for number, (question, image_url) in enumerate(zip(quiz['questions'], image_urls), 1):
         batch.set(_question_ref(db, quiz_ref.id, number),
-                  _question_fields(quiz_ref.id, number, question, author_uid, quiz['status'], now))
+                  _question_fields(quiz_ref.id, number, question, author_uid, quiz['status'], now, image_url))
     batch.commit()
     return quiz_ref.id
 
@@ -159,18 +189,35 @@ def list_all_user_quizzes():
     return _with_questions(quizzes, _group_questions(questions))
 
 
+def _is_public_user_quiz(db, quiz_id):
+    """公開中・非表示でないユーザー作成クイズかどうか。"""
+    if not quiz_id:
+        return False
+    snapshot = db.collection(QUIZZES).document(quiz_id).get()
+    if not snapshot.exists:
+        return False
+    data = snapshot.to_dict() or {}
+    return (data.get('source') == 'user' and data.get('status') == 'published'
+            and data.get('moderation') != MODERATION_HIDDEN)
+
+
 def get_public_image(quiz_id):
     """公開中・非表示でないユーザー作成クイズの画像（base64）を返す。該当しなければNone。"""
     db = _db()
-    snapshot = db.collection(QUIZZES).document(quiz_id).get()
-    if not snapshot.exists:
-        return None
-    data = snapshot.to_dict() or {}
-    if (data.get('source') != 'user' or data.get('status') != 'published'
-            or data.get('moderation') == MODERATION_HIDDEN):
+    if not _is_public_user_quiz(db, quiz_id):
         return None
     image = db.collection(QUIZ_IMAGES).document(quiz_id).get()
     return (image.to_dict() or {}).get('data') if image.exists else None
+
+
+def get_public_question_image(image_id):
+    """公開中のユーザー作成クイズに含まれる問題画像（base64）を返す。該当しなければNone。"""
+    db = _db()
+    snapshot = db.collection(QUESTION_IMAGES).document(image_id).get()
+    if not snapshot.exists:
+        return None
+    data = snapshot.to_dict() or {}
+    return data.get('data') if _is_public_user_quiz(db, data.get('quiz_id')) else None
 
 
 def _owned_quiz(db, quiz_id, author_uid):
@@ -207,13 +254,18 @@ def update_quiz(quiz_id, author_uid, quiz, admin):
     batch.update(snapshot.reference, quiz_fields)
 
     # 問題は作り直す。旧形式のID（クイズIDと同じ）も含め、新しいIDに無い古い問題を削除する
+    old_questions = list(_questions_of(db, quiz_id))
+    saved_urls = {(old.to_dict() or {}).get('image') for old in old_questions} - {'', None}
+    image_urls = _stage_question_images(db, batch, quiz_id, quiz['questions'], saved_urls, now)
+    for url in saved_urls - set(image_urls):
+        batch.delete(db.collection(QUESTION_IMAGES).document(_question_image_id(url)))
     new_ids = {f'{quiz_id}-{number}' for number in range(1, len(quiz['questions']) + 1)}
-    for old in _questions_of(db, quiz_id):
+    for old in old_questions:
         if old.id not in new_ids:
             batch.delete(old.reference)
-    for number, question in enumerate(quiz['questions'], 1):
+    for number, (question, image_url) in enumerate(zip(quiz['questions'], image_urls), 1):
         batch.set(_question_ref(db, quiz_id, number),
-                  _question_fields(quiz_id, number, question, author_uid, quiz['status'], now))
+                  _question_fields(quiz_id, number, question, author_uid, quiz['status'], now, image_url))
     batch.commit()
     return UPDATED
 
@@ -228,6 +280,9 @@ def delete_quiz(quiz_id, author_uid):
     batch.delete(db.collection(QUIZ_IMAGES).document(quiz_id))
     for question in _questions_of(db, quiz_id):
         batch.delete(question.reference)
+        url = (question.to_dict() or {}).get('image')
+        if url:
+            batch.delete(db.collection(QUESTION_IMAGES).document(_question_image_id(url)))
     batch.commit()
     return True
 
