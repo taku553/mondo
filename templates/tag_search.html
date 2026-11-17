@@ -78,14 +78,7 @@
     </main>
 
     <footer class="footer">
-        <div class="sns_icon">
-            <a href="https://x.com/taku_nuc" target="_blank" rel="noopener noreferrer">
-                <img class="x" src="{{ url_for('static', filename='sns_logo/x-logo/logo-black.png') }}" alt="x">
-            </a>
-            <a href="https://www.instagram.com/taku_8862/" target="_blank" rel="noopener noreferrer">
-                <img class="Instagram" src="{{ url_for('static', filename='sns_logo/Instagram/03 Black Glyph/Instagram_Glyph_Black.svg') }}" alt="Instagram">
-            </a>
-        </div>
+        {% include '_sns_icons.html' %}
         <div class="p-p-info">
             <a href="{{ url_for('privacy_policy') }}" target="_self">
             プライバシーポリシー
